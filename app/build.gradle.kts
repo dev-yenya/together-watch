@@ -1,6 +1,14 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
+}
+
+val properties = Properties().apply {
+    load(FileInputStream(rootProject.file("appKey.properties")))
 }
 
 android {
@@ -21,8 +29,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            manifestPlaceholders["KAKAO_API_KEY"] = properties["kakaoApikey"] as String
+        }
         release {
             isMinifyEnabled = false
+            manifestPlaceholders["KAKAO_API_KEY"] = properties["kakaoApikey"] as String
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -75,4 +87,13 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    implementation("com.kakao.sdk:v2-user:2.18.0")
+    implementation("com.kakao.sdk:v2-talk:2.18.0")
+    implementation("com.kakao.sdk:v2-share:2.18.0")
+
+    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore")
+
 }
