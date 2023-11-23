@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">together_watch</string>
+    <string name="personal_schedule">개인 일정</string>
+    <string name="schedule_name">일정 이름</string>
+    <string name="schedule_location">장소</string>
+    <string name="start_time">시작 시간</string>
+    <string name="end_time">종료 시간</string>
+    <string name="repeat">반복 여부</string>
+    <string name="repeat_interval">반복 간격(시작일 기준으로 반복)</string>
+    <string name="date">날짜</string>
+    <string name="success">확인</string>
+    <string name="cancel">취소</string>
+    <string name="update_schedule">일정 수정하기</string>
+    <string name="delete">삭제</string>
+    <string name="month">한달</string>
+    <string name="week">일주일</string>
+    <string name="finish_date">종료일</string>
 </resources>
