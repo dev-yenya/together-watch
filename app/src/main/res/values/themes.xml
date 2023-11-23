@@ -2,4 +2,5 @@
 <resources>
 
     <style name="Theme.Together_watch" parent="android:Theme.Material.Light.NoActionBar" />
+
 </resources>
