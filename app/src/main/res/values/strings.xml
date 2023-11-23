@@ -10,8 +10,6 @@
     <string name="date">날짜</string>
     <string name="success">확인</string>
     <string name="cancel">취소</string>
-    <string name="update_schedule">일정 수정하기</string>
-    <string name="delete">삭제</string>
     <string name="month">한달</string>
     <string name="week">일주일</string>
     <string name="finish_date">종료일</string>

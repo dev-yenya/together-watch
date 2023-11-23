@@ -13,7 +13,7 @@
         android:theme="@style/Theme.Together_watch"
         tools:targetApi="31">
         <activity
-            android:name=".bottomsheet.BottomSheetActivity"
+            android:name=".ui.bottomsheet.BottomSheetActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity

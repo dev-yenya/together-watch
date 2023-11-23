@@ -1,15 +1,15 @@
-package com.example.together_watch.bottomsheet
+package com.example.together_watch.ui.bottomsheet
 
-interface BottomsheetCreateContract {
+interface BottomSheetUpdateAndDeleteContract {
     interface Model {
         fun getSchedule()
     }
     interface View {
         fun showBottomSheet()
-        fun replaceRepeatBottomSheet()
         fun hideBottomSheet()
     }
     interface Presenter {
-        fun createPersonalSchedule()
+        fun updateSchedule()
+        fun deleteSchedule()
     }
 }
