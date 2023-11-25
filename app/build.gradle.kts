@@ -26,6 +26,12 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildFeatures {
+            buildConfig = true
+        }
+
+        buildConfigField("String", "KAKAO_API_KEY_STRING", properties["kakaoApikeyString"] as String)
     }
 
     buildTypes {
@@ -93,7 +99,11 @@ dependencies {
     implementation("com.kakao.sdk:v2-share:2.18.0")
 
     implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
-    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-functions")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
 }

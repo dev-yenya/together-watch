@@ -1,6 +1,8 @@
-package com.example.together_watch
+package com.example.together_watch.login
 
 import androidx.compose.runtime.Composable
+import com.google.android.gms.tasks.Task
+import com.google.firebase.functions.HttpsCallableResult
 
 interface LoginContract {
     interface View {
@@ -14,7 +16,6 @@ interface LoginContract {
     }
 
     interface Presenter {
-        fun loginButtonClick()
-        fun homeButtonClick()
+        fun callKakaoLoginFunction(accessToken: String): Task<HttpsCallableResult>
     }
 }
