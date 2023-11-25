@@ -10,9 +10,7 @@ import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.HttpsCallableResult
 import com.google.firebase.functions.functions
 
-class LoginPresenter(
-    private var activity : LoginContract.View?
-): LoginContract.Presenter {
+class LoginPresenter: LoginContract.Presenter {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var functions: FirebaseFunctions

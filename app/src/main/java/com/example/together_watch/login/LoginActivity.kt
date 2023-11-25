@@ -2,7 +2,6 @@ package com.example.together_watch.login
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -67,7 +66,7 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                     if (error != null) {
                         Log.e("kakao-sdk", "카카오 계정으로 로그인 실패", error)
                     } else if (token != null) {
-                        LoginPresenter(this).callKakaoLoginFunction(token.accessToken)
+                        LoginPresenter().callKakaoLoginFunction(token.accessToken)
                     }
                 }
 
@@ -89,7 +88,7 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                         // 로그인 성공 부분
                         else if (token != null) {
                             Log.d("kakao-login-sdk", "로그인 성공 ${token.accessToken}")
-                            LoginPresenter(this).callKakaoLoginFunction(token.accessToken)
+                            LoginPresenter().callKakaoLoginFunction(token.accessToken)
                         }
                     }
                 } else {
