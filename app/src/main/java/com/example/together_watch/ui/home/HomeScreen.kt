@@ -40,6 +40,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Device
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -56,29 +58,19 @@ import java.util.Locale
 fun HomeScreen(
     navController: NavController
 ) {
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var events by remember { mutableStateOf(listOf<String>()) }
     var showAddEvent by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column {
-            CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
-                selectedDate = newDate
-            })
-            CalendarGrid(selectedDate = selectedDate, onDateSelected = { date ->
-                selectedDate = date
-                //  날짜에 맞는 이벤트를 로드
-                events = listOf("Event 1", "Event 2") // 예시
-            })
-            EventsList(events)
-        }
+
         FloatingActionButton(
             onClick = { showAddEvent = !showAddEvent },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
         ) {
-            Icon(if (showAddEvent) Icons.Filled.Close else Icons.Filled.Add, "Toggle Buttons")
+            Icon(if (showAddEvent) Icons.Filled.Close
+                else Icons.Filled.Add, "Toggle Buttons")
         }
 
         // 추가 버튼들 표시
@@ -90,7 +82,7 @@ fun HomeScreen(
         ) {
             Column(horizontalAlignment = Alignment.End) {
                 ButtonRow("약속 일정 추가", onClick = { navController.navigate(Destinations.CreatePromiseScreen.route) })
-                ButtonRow("개인 일정 추가", onClick = { /* 개인 일정 추가 */ })
+                ButtonRow("개인 일정 추가", onClick = { /* 두 번째 버튼의 기능 */ })
             }
         }
     }
@@ -113,32 +105,7 @@ fun ButtonRow(text: String, onClick: () -> Unit) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun CalendarHeader(selectedDate: LocalDate, onDateChanged: (LocalDate) -> Unit) {
-    // 월과 년도 표시
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = {
-            // 이전 달로 이동
-            onDateChanged(selectedDate.minusMonths(1))
-        }) {
-            Icon(Icons.Filled.ArrowBack, "Previous Month")
-        }
-        Text(text = selectedDate.format(DateTimeFormatter.ofPattern("MMMM yyyy")))
-        IconButton(onClick = {
-            // 다음 달로 이동
-            onDateChanged(selectedDate.plusMonths(1))
-        }) {
-            Icon(Icons.Filled.ArrowForward, "Next Month")
-        }
-    }
-}
+
 
 @Composable
 fun EventsList(events: List<String>) {
@@ -171,95 +138,6 @@ fun EventsList(events: List<String>) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun CalendarGrid(selectedDate: LocalDate, onDateSelected: (LocalDate) -> Unit) {
-    val yearMonth = YearMonth.from(selectedDate)
-    val totalDays = yearMonth.lengthOfMonth()
-    val firstDayOfMonth = yearMonth.atDay(1)
-    val daysOffset = firstDayOfMonth.dayOfWeek.value % 7
 
-    Column {
-        // 요일 헤더
-        WeekDaysHeader()
 
-        LazyColumn {
-            items((0 until 6).toList()) { week ->
-                WeekRow(week, daysOffset, totalDays, selectedDate, yearMonth, onDateSelected)
-            }
-        }
-    }
-}
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun WeekDaysHeader() {
-    LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        items(DayOfWeek.values()) { dayOfWeek ->
-            Text(
-                text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
-                modifier = Modifier
-                    .padding(8.dp)
-                    .width(40.dp),
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun WeekRow(
-    week: Int,
-    daysOffset: Int,
-    totalDays: Int,
-    selectedDate: LocalDate,
-    yearMonth: YearMonth,
-    onDateSelected: (LocalDate) -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly // 균일한 간격으로 날짜 배치
-    ) {
-        // 주간 날짜를 표시하는 루프
-        (0 until 7).forEach { dayOfWeek ->
-            val dayOfMonth = week * 7 + dayOfWeek - daysOffset + 1
-            if (dayOfMonth in 1..totalDays) {
-                // 유효한 날짜일 경우 날짜 표시
-                DateBox(dayOfMonth, yearMonth, onDateSelected)
-            } else {
-                // 유효하지 않은 날짜일 경우 빈 공간 표시
-                EmptyBox()
-            }
-        }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun DateBox(
-    dayOfMonth: Int,
-    yearMonth: YearMonth,
-    onDateSelected: (LocalDate) -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .padding(8.dp)
-            .size(40.dp), // 박스 크기 지정
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = dayOfMonth.toString(),
-            modifier = Modifier.clickable { onDateSelected(yearMonth.atDay(dayOfMonth)) }
-        )
-    }
-}
-
-@Composable
-fun EmptyBox() {
-    Spacer(
-        modifier = Modifier
-            .padding(8.dp)
-            .size(40.dp)
-    ) // 빈 박스 크기 지정
-}
