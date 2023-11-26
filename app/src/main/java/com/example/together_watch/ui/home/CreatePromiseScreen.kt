@@ -50,27 +50,60 @@ fun CreatePromiseScreen() {
                 modifier = Modifier.weight(1f, true), // Takes up all available space except for the button
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    IconButton(
-                        onClick = { /* 뒤로가기 기능 구현 */ },
-                        modifier = Modifier.align(Alignment.CenterStart)
+                if (currentScreen.intValue < 5) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
                     ) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = null)
+                        Text(
+                            text = if (currentScreen.intValue == 1) {
+                                "약속 이름"
+                            } else if (currentScreen.intValue == 2) {
+                                "장소"
+                            } else if (currentScreen.intValue == 3) {
+                                "날짜"
+                            } else {
+                                "시간"
+                            },
+                            modifier = Modifier.align(Alignment.Center),
+                            textAlign = TextAlign.Center
+                        )
+                        IconButton(
+                            onClick = { /* 뒤로가기 기능 구현 */ },
+                            modifier = Modifier.align(Alignment.CenterStart)
+                        ) {
+                            Icon(Icons.Filled.ArrowBack, contentDescription = null)
+                        }
                     }
                 }
 
+                if (currentScreen.intValue < 5) {
+                    LinearProgressIndicator(
+                        progress = currentScreen.intValue * 0.25f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                when (currentScreen.intValue) {
+                    1 -> FirstScreen()
+                    2 -> SecondScreen()
+                    3 -> ThirdScreen()
+                    4 -> FourthScreen()
+                    5 -> CompleteScreen()
+                }
             }
 
             Button(
-                onClick ={},    //버튼 눌렀을 때 화면 바뀌도록 구현
+                onClick = if (currentScreen.intValue < 5) {
+                    { nextScreen() }
+                } else {
+                    { complete() }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RectangleShape
             ) {
-                Text( "다음")
+                Text(if (currentScreen.intValue < 5) "다음" else "친구 초대하기")
             }
         }
     }
@@ -141,6 +174,12 @@ fun ThirdScreen() {
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(10.dp))
+        CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
+            selectedDate = newDate
+        })
+        CalendarGrid(selectedDate = selectedDate, onDateSelected = { date ->
+            selectedDate = date
+        })
         Divider()
         Spacer(Modifier.height(20.dp))
         Text(
@@ -164,7 +203,45 @@ fun FourthScreen() {
         Text("언제 만날까요?", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp))
         Text("약속 시간대를 입력해 주세요.", modifier = Modifier.padding(bottom = 10.dp), style = TextStyle(fontSize = 15.sp))
         Spacer(Modifier.height(10.dp))
-        //시간 선택 기능 구현 필요
+        Row {
+            TextField(
+                value = text1,
+                onValueChange = { text1 = it },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 4.dp)
+                    .border(1.dp, Color.Gray, RoundedCornerShape(5.dp)),
+                textStyle = TextStyle(textAlign = TextAlign.Start),
+                trailingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.White,
+                    textColor = Color.Gray,
+                    cursorColor = Color.Gray,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Gray
+                ),
+                shape = RoundedCornerShape(5.dp)
+            )
+
+            TextField(
+                value = text2,
+                onValueChange = { text2 = it },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 4.dp)
+                    .border(1.dp, Color.Gray, RoundedCornerShape(5.dp)),
+                textStyle = TextStyle(textAlign = TextAlign.Start),
+                trailingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.White,
+                    textColor = Color.Gray,
+                    cursorColor = Color.Gray,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Gray
+                ),
+                shape = RoundedCornerShape(5.dp)
+            )
+        }
     }
 }
 
