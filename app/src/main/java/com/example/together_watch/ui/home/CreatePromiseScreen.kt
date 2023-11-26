@@ -50,6 +50,7 @@ fun CreatePromiseScreen() {
                 modifier = Modifier.weight(1f, true), // Takes up all available space except for the button
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+<<<<<<< HEAD
                 if (currentScreen.intValue < 5) {
                     Box(
                         modifier = Modifier
@@ -104,6 +105,29 @@ fun CreatePromiseScreen() {
                 shape = RectangleShape
             ) {
                 Text(if (currentScreen.intValue < 5) "다음" else "친구 초대하기")
+=======
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    IconButton(
+                        onClick = { /* 뒤로가기 기능 구현 */ },
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    ) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = null)
+                    }
+                }
+
+            }
+
+            Button(
+                onClick ={},    //버튼 눌렀을 때 화면 바뀌도록 구현
+                modifier = Modifier.fillMaxWidth(),
+                shape = RectangleShape
+            ) {
+                Text( "다음")
+>>>>>>> cbf7b786bcab743add0b973df15e1ecc939a074e
             }
         }
     }
@@ -174,12 +198,15 @@ fun ThirdScreen() {
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(10.dp))
+<<<<<<< HEAD
         CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
             selectedDate = newDate
         })
         CalendarGrid(selectedDate = selectedDate, onDateSelected = { date ->
             selectedDate = date
         })
+=======
+>>>>>>> cbf7b786bcab743add0b973df15e1ecc939a074e
         Divider()
         Spacer(Modifier.height(20.dp))
         Text(
@@ -203,6 +230,7 @@ fun FourthScreen() {
         Text("언제 만날까요?", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp))
         Text("약속 시간대를 입력해 주세요.", modifier = Modifier.padding(bottom = 10.dp), style = TextStyle(fontSize = 15.sp))
         Spacer(Modifier.height(10.dp))
+<<<<<<< HEAD
         Row {
             TextField(
                 value = text1,
@@ -242,6 +270,9 @@ fun FourthScreen() {
                 shape = RoundedCornerShape(5.dp)
             )
         }
+=======
+        //시간 선택 기능 구현 필요
+>>>>>>> cbf7b786bcab743add0b973df15e1ecc939a074e
     }
 }
 

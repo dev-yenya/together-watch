@@ -23,11 +23,21 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+<<<<<<< HEAD
 import com.example.together_watch.ui.home.CompleteScreen
 import com.example.together_watch.ui.home.CreatePromiseScreen
 import com.example.together_watch.ui.home.HomeScreen
 import com.example.together_watch.ui.person.PersonScreen
 import com.example.together_watch.ui.person.PromiseAcceptScreen
+=======
+import com.example.together_watch.ui.home.CreatePromiseScreen
+
+
+import com.example.together_watch.ui.home.HomeScreen
+import com.example.together_watch.ui.person.PersonScreen
+import com.example.together_watch.ui.person.PromiseAcceptScreen
+
+>>>>>>> cbf7b786bcab743add0b973df15e1ecc939a074e
 import com.example.together_watch.ui.setting.AccountManagementScreen
 import com.example.together_watch.ui.setting.SettingScreen
 
@@ -66,6 +76,10 @@ sealed class Destinations(
     object PromiseAcceptScreen : Destinations(
         route = "promise_accept_screen"
     )
+<<<<<<< HEAD
+=======
+
+>>>>>>> cbf7b786bcab743add0b973df15e1ecc939a074e
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -84,6 +98,7 @@ fun NavigationGraph(navController: NavHostController) {
         composable(Destinations.AccountManagementScreen.route) {
             AccountManagementScreen()
         }
+<<<<<<< HEAD
         composable(Destinations.CompleteScreen.route) {
             CompleteScreen()
         }
@@ -93,6 +108,17 @@ fun NavigationGraph(navController: NavHostController) {
         composable(Destinations.PromiseAcceptScreen.route) {
             PromiseAcceptScreen()
         }
+=======
+        composable(Destinations.CreatePromiseScreen.route){
+            CreatePromiseScreen()
+        }
+        composable(Destinations.PromiseAcceptScreen.route){
+            PromiseAcceptScreen()
+        }
+
+
+
+>>>>>>> cbf7b786bcab743add0b973df15e1ecc939a074e
     }
 }
 
