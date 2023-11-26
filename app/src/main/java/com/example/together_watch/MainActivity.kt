@@ -1,10 +1,8 @@
 package com.example.together_watch
-
-import android.os.Build
 import android.os.Bundle
+import android.widget.CalendarView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -36,7 +34,6 @@ class MainActivity : ComponentActivity() {
 
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
@@ -58,4 +55,3 @@ fun MainScreen() {
         }
     }
 }
-

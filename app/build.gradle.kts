@@ -9,8 +9,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.together_watch"
-        minSdk = 26
-        targetSdk = 34
+        minSdk = 24
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
 
@@ -38,7 +38,6 @@ android {
     }
     buildFeatures {
         compose = true
-        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.3"
@@ -48,15 +47,13 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    testOptions {
-        unitTests.all {
-            it.useJUnitPlatform()
-        }
+    buildFeatures{
+        viewBinding = true
     }
 }
 
 dependencies {
-    implementation("com.google.android.material:material:1.10.0")
+
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.8.0")
@@ -66,12 +63,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("com.android.identity:identity-credential-android:20231002")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.20")
-    implementation("androidx.navigation:navigation-runtime-ktx:2.7.5")
-    implementation("androidx.navigation:navigation-compose:2.5.3")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     testImplementation("junit:junit:4.13.2")
-    testImplementation("io.kotest:kotest-runner-junit5:5.7.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
