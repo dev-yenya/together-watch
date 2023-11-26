@@ -40,11 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-<<<<<<< HEAD
-=======
-import androidx.compose.ui.tooling.preview.Device
-import androidx.compose.ui.tooling.preview.Devices
->>>>>>> cbf7b786bcab743add0b973df15e1ecc939a074e
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -61,15 +56,11 @@ import java.util.Locale
 fun HomeScreen(
     navController: NavController
 ) {
-<<<<<<< HEAD
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-=======
->>>>>>> cbf7b786bcab743add0b973df15e1ecc939a074e
     var events by remember { mutableStateOf(listOf<String>()) }
     var showAddEvent by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-<<<<<<< HEAD
         Column {
             CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
                 selectedDate = newDate
@@ -81,21 +72,13 @@ fun HomeScreen(
             })
             EventsList(events)
         }
-=======
-
->>>>>>> cbf7b786bcab743add0b973df15e1ecc939a074e
         FloatingActionButton(
             onClick = { showAddEvent = !showAddEvent },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
         ) {
-<<<<<<< HEAD
             Icon(if (showAddEvent) Icons.Filled.Close else Icons.Filled.Add, "Toggle Buttons")
-=======
-            Icon(if (showAddEvent) Icons.Filled.Close
-                else Icons.Filled.Add, "Toggle Buttons")
->>>>>>> cbf7b786bcab743add0b973df15e1ecc939a074e
         }
 
         // 추가 버튼들 표시
@@ -107,11 +90,7 @@ fun HomeScreen(
         ) {
             Column(horizontalAlignment = Alignment.End) {
                 ButtonRow("약속 일정 추가", onClick = { navController.navigate(Destinations.CreatePromiseScreen.route) })
-<<<<<<< HEAD
                 ButtonRow("개인 일정 추가", onClick = { /* 개인 일정 추가 */ })
-=======
-                ButtonRow("개인 일정 추가", onClick = { /* 두 번째 버튼의 기능 */ })
->>>>>>> cbf7b786bcab743add0b973df15e1ecc939a074e
             }
         }
     }
@@ -134,7 +113,6 @@ fun ButtonRow(text: String, onClick: () -> Unit) {
     }
 }
 
-<<<<<<< HEAD
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalendarHeader(selectedDate: LocalDate, onDateChanged: (LocalDate) -> Unit) {
@@ -161,9 +139,6 @@ fun CalendarHeader(selectedDate: LocalDate, onDateChanged: (LocalDate) -> Unit) 
         }
     }
 }
-=======
-
->>>>>>> cbf7b786bcab743add0b973df15e1ecc939a074e
 
 @Composable
 fun EventsList(events: List<String>) {
@@ -196,7 +171,6 @@ fun EventsList(events: List<String>) {
     }
 }
 
-<<<<<<< HEAD
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalendarGrid(selectedDate: LocalDate, onDateSelected: (LocalDate) -> Unit) {
@@ -289,8 +263,3 @@ fun EmptyBox() {
             .size(40.dp)
     ) // 빈 박스 크기 지정
 }
-=======
-
-
-
->>>>>>> cbf7b786bcab743add0b973df15e1ecc939a074e
