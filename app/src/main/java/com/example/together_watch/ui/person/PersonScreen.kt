@@ -33,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -78,7 +77,26 @@ fun PersonScreen(
         }
         Spacer(modifier = Modifier.height(20.dp))
 
-
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { navController.navigate(Destinations.PromiseAcceptScreen.route) }
+                .padding(vertical = 4.dp), // 직접적으로 backgroundColor를 지정
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White,
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 5.dp
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(text = "Event Date and Time", style = MaterialTheme.typography.headlineMedium)
+                Text(text = "Event Title: ", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "Event Details", style = MaterialTheme.typography.bodySmall)
+            }
+        }
 
     }
 }
