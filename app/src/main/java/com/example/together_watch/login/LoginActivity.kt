@@ -1,5 +1,7 @@
 package com.example.together_watch.login
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -14,17 +16,21 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.together_watch.MainActivity
 import com.example.together_watch.ui.theme.*
 import com.example.together_watch.ui.theme.Together_watchTheme
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 
 class LoginActivity: ComponentActivity(), LoginContract.View {
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,24 +41,18 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ShowTestButton()
+                    Column {
+                        ShowLoginButton()
+                        ShowHomeButton()
+                    }
                 }
             }
         }
     }
 
-    @Preview
-    @Composable
-    fun ShowTestButton() {
-        Column(
-        ) {
-            ShowLoginButton()
-            ShowHomeButton()
-        }
-    }
-
     @Composable
     override fun ShowLoginButton() {
+        val context = LocalContext.current
         Button(
             colors = ButtonDefaults.buttonColors(
                 containerColor = KakaoYellow,
@@ -67,6 +67,7 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                         Log.e("kakao-sdk", "카카오 계정으로 로그인 실패", error)
                     } else if (token != null) {
                         LoginPresenter().callKakaoLoginFunction(token.accessToken)
+                        startMainActivity(context)
                     }
                 }
 
@@ -89,6 +90,7 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                         else if (token != null) {
                             Log.d("kakao-login-sdk", "로그인 성공 ${token.accessToken}")
                             LoginPresenter().callKakaoLoginFunction(token.accessToken)
+                            startMainActivity(context)
                         }
                     }
                 } else {
@@ -106,10 +108,9 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
 
     @Composable
     override fun ShowHomeButton() {
+        val context = LocalContext.current
         Button(
-            onClick = {
-                Log.d("jihyun", "홈 화면으로 이동")
-            }
+            onClick = { startMainActivity(context) }
         ) {
             Text(
                 text = "홈으로 바로 가기"
@@ -117,5 +118,14 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
         }
     }
 
-
+    private fun startMainActivity(context: Context) {
+        val user = Firebase.auth.currentUser
+        val intent = Intent(context, MainActivity::class.java).apply {
+            // 유저 정보
+        }
+        if (user != null) {
+            Log.d("user-info", user.uid+", "+user.displayName+", "+user.photoUrl)
+        }
+        context.startActivity(intent)
+    }
 }
