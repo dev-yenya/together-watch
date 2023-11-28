@@ -94,8 +94,7 @@ fun HomeScreen(
                 ButtonRow("약속 일정 추가", onClick = { navController.navigate(Destinations.CreatePromiseScreen.route) })
                 ButtonRow("개인 일정 추가", onClick = {
                     val context = navController.context
-                    val presenter = CreateSchedulePresenter(CreateScheduleModel())
-                    val createScheduleDialog = CreateScheduleDialog(context, presenter)
+                    val createScheduleDialog = CreateScheduleDialog(context, CreateSchedulePresenter(CreateScheduleModel()))
                     createScheduleDialog.showBottomSheet()
                 })
             }

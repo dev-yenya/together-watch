@@ -4,12 +4,17 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
+import android.widget.Toast
 import com.example.together_watch.R
 import com.example.together_watch.databinding.DialogBottomSheetCreateBinding
 import com.example.together_watch.schedule.CreateScheduleContract
+import com.example.together_watch.ui.schedule.RepeatType
 import com.example.together_watch.ui.schedule.Schedule
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
 class CreateScheduleDialog(
@@ -18,11 +23,8 @@ class CreateScheduleDialog(
 ) : BottomSheetDialog(context, R.style.DialogStyle), CreateScheduleContract.View {
 
     private val binding = DialogBottomSheetCreateBinding.inflate(LayoutInflater.from(context))
-
-    companion object {
-        const val DATE_FORMAT = "%d-%02d-%02d"
-        const val TIME_FORMAT = "%02d:%02d"
-    }
+    val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val timeFormat = DateTimeFormatter.ofPattern("HH:mm")
 
     init {
         behavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -31,38 +33,53 @@ class CreateScheduleDialog(
     }
 
     override fun setupClickListeners() {
-        binding.btnCancel.setOnClickListener { hideBottomSheet() }
-        binding.btnSuccess.setOnClickListener {
-            val schedule = getScheduleFromInput()
-            presenter.onSuccessButtonClick(schedule)
-            hideBottomSheet() }
-        binding.etDate.setOnClickListener { showDatePickerDialog(binding.etDate) }
-        binding.etStartTime.setOnClickListener { showTimePickerDialog(binding.etStartTime) }
-        binding.etEndTime.setOnClickListener { showTimePickerDialog(binding.etEndTime) }
-        binding.switchRepeat.setOnClickListener {
-            val isChecked = binding.switchRepeat.isChecked
-            if (isChecked) { binding.llRepeat.visibility = View.VISIBLE }
-            else { binding.llRepeat.visibility = View.GONE }
+        with(binding) {
+            btnCancel.setOnClickListener { hideBottomSheet() }
+            btnSuccess.setOnClickListener {
+                handleSuccessButtonClick()
+            }
+            etDate.setOnClickListener { showDatePickerDialog(etDate) }
+            etStartTime.setOnClickListener { showTimePickerDialog(etStartTime) }
+            etEndTime.setOnClickListener { showTimePickerDialog(etEndTime) }
+            switchRepeat.setOnCheckedChangeListener { _, isChecked ->
+                llRepeat.visibility = if (isChecked) View.VISIBLE else View.GONE
+            }
+            etEndDate.setOnClickListener { showDatePickerDialog(etEndDate) }
         }
-        binding.etFinishDate.setOnClickListener{ showDatePickerDialog(binding.etFinishDate)}
+    }
+
+    private fun handleSuccessButtonClick() {
+        val schedule = getScheduleFromInput()
+        val isRepeat = isRepeat()
+
+        if(isScheduleComplete(schedule, isRepeat)) {
+            if (getStartTime().isAfter(getEndTime())) {
+                showToast(R.string.msg_time_order)
+            }
+            else if (isRepeat && getStartDate().isAfter(getEndDate())) {
+                showToast(R.string.msg_date_order)
+            }
+            else {
+                presenter.onSuccessButtonClick(schedule, isRepeat, getRepeatType(), getEndDate())
+                hideBottomSheet()
+                showToast(R.string.msg_success_create_schedule)
+            }
+        } else {
+            showToast(R.string.msg_fill_schedule)
+        }
     }
 
     override fun getScheduleFromInput(): Schedule {
-        val name = binding.etScheduleName.text.toString()
-        val place = binding.etScheduleLocation.text.toString()
-        val date = binding.etDate.text.toString()
-        val startTime = binding.etStartTime.text.toString()
-        val endTime = binding.etEndTime.text.toString()
-        val isGroup = false
+        with(binding) {
+            val name = etScheduleName.text.toString()
+            val place = etScheduleLocation.text.toString()
+            val date = LocalDate.parse(etDate.text.toString(), dateFormat)
+            val startTime = LocalTime.parse(etStartTime.text.toString(), timeFormat)
+            val endTime = LocalTime.parse(etEndTime.text.toString(), timeFormat)
+            val isGroup = false
 
-        return Schedule(
-            name = name,
-            place = place,
-            date = date,
-            startTime = startTime,
-            endTime = endTime,
-            isGroup = isGroup
-        )
+            return Schedule(name, place, date, startTime, endTime, isGroup)
+        }
     }
 
     override fun showBottomSheet() {
@@ -76,9 +93,10 @@ class CreateScheduleDialog(
     override fun showDatePickerDialog(editText: EditText) {
         val cal = Calendar.getInstance()
         DatePickerDialog(
-            context, DatePickerDialog.OnDateSetListener
-            { _, y, m, d ->
-                editText.hint = String.format(DATE_FORMAT, y, m + 1, d) },
+            context,
+            DatePickerDialog.OnDateSetListener { _, y, m, d ->
+                editText.setText(dateFormat.format(LocalDate.of(y, m + 1, d)))
+            },
             cal.get(Calendar.YEAR),
             cal.get(Calendar.MONTH),
             cal.get(Calendar.DATE)
@@ -90,12 +108,54 @@ class CreateScheduleDialog(
         TimePickerDialog(
             context,
             { _, hourOfDay, minute ->
-                editText.hint = String.format(TIME_FORMAT, hourOfDay, minute) },
+                editText.setText(timeFormat.format(LocalTime.of(hourOfDay, minute)))
+            },
             cal.get(Calendar.HOUR_OF_DAY),
             cal.get(Calendar.MINUTE),
             false
         ).show()
     }
 
-}
+    private fun roundToNearest10(minute: Int): Int {
+        return (minute / 10) * 10
+    }
 
+    private fun isScheduleComplete(schedule: Schedule, isRepeat: Boolean): Boolean {
+        with(schedule) {
+            return name.isNotEmpty()
+                    && place.isNotEmpty()
+                    && date.toString().isNotEmpty()
+                    && startTime.toString().isNotEmpty()
+                    && endTime.toString().isNotEmpty()
+                    && (!isRepeat || !binding.etEndDate.text.isNullOrEmpty())
+        }
+    }
+
+    private fun isRepeat(): Boolean {
+        return binding.switchRepeat.isChecked
+    }
+
+    private fun getStartTime(): LocalTime {
+        return LocalTime.parse(binding.etStartTime.text.toString(), timeFormat)
+    }
+
+    private fun getEndTime(): LocalTime {
+        return LocalTime.parse(binding.etEndTime.text.toString(), timeFormat)
+    }
+
+    private fun getStartDate(): LocalDate {
+        return LocalDate.parse(binding.etDate.text.toString(), dateFormat)
+    }
+    private fun getEndDate(): LocalDate {
+        return LocalDate.parse(binding.etEndDate.text.toString(), dateFormat)
+    }
+
+    private fun getRepeatType(): RepeatType {
+        return if (binding.radioGroupRepeatType.checkedRadioButtonId == R.id.radio_btn_month)
+            RepeatType.MONTHLY else RepeatType.WEEKLY
+    }
+
+    private fun showToast(messageResId: Int) {
+        Toast.makeText(context, messageResId, Toast.LENGTH_SHORT).show()
+    }
+}

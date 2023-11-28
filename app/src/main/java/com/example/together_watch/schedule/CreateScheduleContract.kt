@@ -1,11 +1,18 @@
 package com.example.together_watch.schedule
 
 import android.widget.EditText
+import com.example.together_watch.ui.schedule.RepeatType
 import com.example.together_watch.ui.schedule.Schedule
+import java.time.LocalDate
 
 interface CreateScheduleContract {
     interface Model {
         fun saveSchedule(schedule: Schedule)
+        fun saveRepeatSchedule(
+            schedule: Schedule,
+            repeatType: RepeatType,
+            endDate: LocalDate
+        )
     }
     interface View {
         fun showBottomSheet()
@@ -14,8 +21,14 @@ interface CreateScheduleContract {
         fun showTimePickerDialog(editText: EditText)
         fun setupClickListeners()
         fun getScheduleFromInput(): Schedule
+
     }
     interface Presenter {
-        fun onSuccessButtonClick(schedule: Schedule)
+        fun onSuccessButtonClick(
+            schedule: Schedule,
+            isRepeat: Boolean,
+            repeatType: RepeatType,
+            endDate: LocalDate
+        )
     }
 }
