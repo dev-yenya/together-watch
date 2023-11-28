@@ -141,6 +141,7 @@
                 android:textColor="@color/black" />
 
             <RadioGroup
+                android:id="@+id/radio_group_repeat_type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="28dp"
@@ -164,14 +165,16 @@
             </RadioGroup>
 
             <EditText
-                android:id="@+id/et_finish_date"
+                android:id="@+id/et_end_date"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="15dp"
                 android:background="@drawable/edit_text"
                 android:ems="10"
                 android:hint="@string/finish_date"
-                android:inputType="date"
+                android:inputType="none"
+                android:drawableRight="@drawable/icon_calendar"
+                android:paddingRight="20dp"
                 android:paddingLeft="12dp"
                 android:focusable="false"
                 android:focusableInTouchMode="false"/>

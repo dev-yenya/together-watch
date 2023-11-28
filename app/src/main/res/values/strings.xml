@@ -13,4 +13,8 @@
     <string name="month">한달</string>
     <string name="week">일주일</string>
     <string name="finish_date">종료일</string>
+    <string name="msg_fill_schedule">일정의 모든 항목을 입력해주세요.</string>
+    <string name="msg_date_order">시작일은 종료일 이전이어야 합니다.</string>
+    <string name="msg_time_order">시작 시간은 종료 시간 이전이어야 합니다.</string>
+    <string name="msg_success_create_schedule">일정이 정상적으로 추가되었어요!</string>
 </resources>
