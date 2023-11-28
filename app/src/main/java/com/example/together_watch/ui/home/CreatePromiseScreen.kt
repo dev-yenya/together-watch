@@ -1,5 +1,6 @@
 package com.example.together_watch.ui.home
 
+import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
@@ -19,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.*
 import com.example.together_watch.R
+import com.example.together_watch.promise.shareInvitation
 import com.example.together_watch.ui.Destinations
 import java.time.LocalDate
 
@@ -37,7 +40,10 @@ import java.time.LocalDate
 fun CreatePromiseScreen() {
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
-    val complete = { /* 완료 액션 구현 */ }
+    val context = LocalContext.current
+    val complete = {
+        shareInvitation(context)
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -103,7 +109,7 @@ fun CreatePromiseScreen() {
                 modifier = Modifier.fillMaxWidth(),
                 shape = RectangleShape
             ) {
-                Text(if (currentScreen.intValue < 5) "다음" else "친구 초대하기")
+                Text(if (currentScreen.intValue < 5) "다음" else "카카오톡으로 친구 초대하기")
             }
         }
     }
