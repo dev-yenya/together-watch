@@ -6,7 +6,7 @@ import androidx.core.content.ContextCompat.startActivity
 import com.kakao.sdk.share.ShareClient
 
 fun shareInvitation(context: Context, groupId: Long) {
-    val templateId: Long = 101298;
+    val templateId: Long = 101298
     if (ShareClient.instance.isKakaoTalkSharingAvailable(context)) {
         ShareClient.instance.shareCustom(
             context = context,

@@ -43,6 +43,7 @@ fun CreatePromiseScreen() {
     val context = LocalContext.current
     val complete = {
         shareInvitation(context, groupId)
+        // TODO: 약속 생성시 아이디 전달
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
