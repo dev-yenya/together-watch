@@ -1,19 +1,21 @@
 package com.example.together_watch.ui.schedule
 
-import java.time.LocalTime
-import java.time.LocalDate
-
 data class Schedule(
-    val title: String,
-    val type: ScheduleType,
-    val date: LocalDate,
-    val startTime: LocalTime,
-    val endTime: LocalTime,
-    val location: String?,
+    val name: String,
+    val place: String,
+    val date: String,
+    val startTime: String,
+    val endTime: String,
+    val isGroup: Boolean
 )
 
-enum class ScheduleType {
-    PERSONAL, // 개인 일정
-    APPOINTMENT, // 약속 일정
-    MEETING // 미팅 일정 등
+fun Schedule.toMap(): Map<String, Any?> {
+    return mapOf(
+        "name" to name,
+        "place" to place,
+        "date" to date,
+        "startTime" to startTime,
+        "endTime" to endTime,
+        "isGroup" to isGroup
+    )
 }

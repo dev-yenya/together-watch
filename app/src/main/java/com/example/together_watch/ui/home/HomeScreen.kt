@@ -43,6 +43,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.together_watch.schedule.CreateScheduleModel
+import com.example.together_watch.schedule.CreateSchedulePresenter
 import com.example.together_watch.ui.Destinations
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -92,7 +94,8 @@ fun HomeScreen(
                 ButtonRow("약속 일정 추가", onClick = { navController.navigate(Destinations.CreatePromiseScreen.route) })
                 ButtonRow("개인 일정 추가", onClick = {
                     val context = navController.context
-                    val createScheduleDialog = CreateScheduleDialog(context)
+                    val presenter = CreateSchedulePresenter(CreateScheduleModel())
+                    val createScheduleDialog = CreateScheduleDialog(context, presenter)
                     createScheduleDialog.showBottomSheet()
                 })
             }

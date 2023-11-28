@@ -7,12 +7,14 @@ import android.widget.EditText
 import com.example.together_watch.R
 import com.example.together_watch.databinding.DialogBottomSheetCreateBinding
 import com.example.together_watch.schedule.CreateScheduleContract
+import com.example.together_watch.ui.schedule.Schedule
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.util.Calendar
 
 class CreateScheduleDialog(
-    context: Context
+    context: Context,
+    private val presenter: CreateScheduleContract.Presenter
 ) : BottomSheetDialog(context, R.style.DialogStyle), CreateScheduleContract.View {
 
     private val binding = DialogBottomSheetCreateBinding.inflate(LayoutInflater.from(context))
@@ -28,8 +30,12 @@ class CreateScheduleDialog(
         setupClickListeners()
     }
 
-    private fun setupClickListeners() {
+    override fun setupClickListeners() {
         binding.btnCancel.setOnClickListener { hideBottomSheet() }
+        binding.btnSuccess.setOnClickListener {
+            val schedule = getScheduleFromInput()
+            presenter.onSuccessButtonClick(schedule)
+            hideBottomSheet() }
         binding.etDate.setOnClickListener { showDatePickerDialog(binding.etDate) }
         binding.etStartTime.setOnClickListener { showTimePickerDialog(binding.etStartTime) }
         binding.etEndTime.setOnClickListener { showTimePickerDialog(binding.etEndTime) }
@@ -40,6 +46,25 @@ class CreateScheduleDialog(
         }
         binding.etFinishDate.setOnClickListener{ showDatePickerDialog(binding.etFinishDate)}
     }
+
+    override fun getScheduleFromInput(): Schedule {
+        val name = binding.etScheduleName.text.toString()
+        val place = binding.etScheduleLocation.text.toString()
+        val date = binding.etDate.text.toString()
+        val startTime = binding.etStartTime.text.toString()
+        val endTime = binding.etEndTime.text.toString()
+        val isGroup = false
+
+        return Schedule(
+            name = name,
+            place = place,
+            date = date,
+            startTime = startTime,
+            endTime = endTime,
+            isGroup = isGroup
+        )
+    }
+
     override fun showBottomSheet() {
         show()
     }
@@ -73,5 +98,4 @@ class CreateScheduleDialog(
     }
 
 }
-;
 

@@ -5,13 +5,15 @@ import com.example.together_watch.ui.schedule.Schedule
 
 interface CreateScheduleContract {
     interface Model {
-        fun savePersonalSchedule(schedule: Schedule)
+        fun saveSchedule(schedule: Schedule)
     }
     interface View {
         fun showBottomSheet()
         fun hideBottomSheet()
         fun showDatePickerDialog(editText: EditText)
         fun showTimePickerDialog(editText: EditText)
+        fun setupClickListeners()
+        fun getScheduleFromInput(): Schedule
     }
     interface Presenter {
         fun onSuccessButtonClick(schedule: Schedule)
