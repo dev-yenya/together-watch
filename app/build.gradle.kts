@@ -1,6 +1,14 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
+}
+
+val properties = Properties().apply {
+    load(FileInputStream(rootProject.file("appKey.properties")))
 }
 
 android {
@@ -18,11 +26,21 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildFeatures {
+            buildConfig = true
+        }
+
+        buildConfigField("String", "KAKAO_API_KEY_STRING", properties["kakaoApikeyString"] as String)
     }
 
     buildTypes {
+        debug {
+            manifestPlaceholders["KAKAO_API_KEY"] = properties["kakaoApikey"] as String
+        }
         release {
             isMinifyEnabled = false
+            manifestPlaceholders["KAKAO_API_KEY"] = properties["kakaoApikey"] as String
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -73,4 +91,17 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    implementation("com.kakao.sdk:v2-user:2.18.0")
+    implementation("com.kakao.sdk:v2-talk:2.18.0")
+    implementation("com.kakao.sdk:v2-share:2.18.0")
+
+    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-functions")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
 }
