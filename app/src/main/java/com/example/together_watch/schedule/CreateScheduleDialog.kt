@@ -6,14 +6,14 @@ import android.view.View
 import android.widget.EditText
 import com.example.together_watch.R
 import com.example.together_watch.databinding.DialogBottomSheetCreateBinding
-import com.example.together_watch.ui.bottomsheet.BottomSheetCreateContract
+import com.example.together_watch.schedule.CreateScheduleContract
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.util.Calendar
 
-class BottomSheetCreateDialog(
+class CreateScheduleDialog(
     context: Context
-) : BottomSheetDialog(context, R.style.DialogStyle), BottomSheetCreateContract.View {
+) : BottomSheetDialog(context, R.style.DialogStyle), CreateScheduleContract.View {
 
     private val binding = DialogBottomSheetCreateBinding.inflate(LayoutInflater.from(context))
 

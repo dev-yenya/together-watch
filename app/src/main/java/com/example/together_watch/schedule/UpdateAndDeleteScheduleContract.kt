@@ -1,6 +1,6 @@
-package com.example.together_watch.ui.bottomsheet
+package com.example.together_watch.schedule
 
-interface BottomSheetUpdateAndDeleteContract {
+interface UpdateAndDeleteScheduleContract {
     interface Model {
         fun getSchedule()
     }

@@ -1,8 +1,7 @@
-package com.example.together_watch.ui.bottomsheet
+package com.example.together_watch.ui.schedule
 
 import java.time.LocalTime
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 data class Schedule(
     val title: String,

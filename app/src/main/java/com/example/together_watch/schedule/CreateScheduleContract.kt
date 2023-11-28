@@ -1,8 +1,9 @@
-package com.example.together_watch.ui.bottomsheet
+package com.example.together_watch.schedule
 
 import android.widget.EditText
+import com.example.together_watch.ui.schedule.Schedule
 
-interface BottomSheetCreateContract {
+interface CreateScheduleContract {
     interface Model {
         fun savePersonalSchedule(schedule: Schedule)
     }
@@ -15,9 +16,4 @@ interface BottomSheetCreateContract {
     interface Presenter {
         fun onSuccessButtonClick(schedule: Schedule)
     }
-}
-
-enum class BottomSheetType {
-    REPEAT,
-    NON_REPEAT
 }

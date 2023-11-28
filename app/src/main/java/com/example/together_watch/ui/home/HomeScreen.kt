@@ -1,6 +1,6 @@
 package com.example.together_watch.ui.home
 
-import BottomSheetCreateDialog
+import CreateScheduleDialog
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
@@ -41,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.together_watch.ui.Destinations
@@ -93,8 +92,8 @@ fun HomeScreen(
                 ButtonRow("약속 일정 추가", onClick = { navController.navigate(Destinations.CreatePromiseScreen.route) })
                 ButtonRow("개인 일정 추가", onClick = {
                     val context = navController.context
-                    val bottomSheetCreateDialog = BottomSheetCreateDialog(context)
-                    bottomSheetCreateDialog.showBottomSheet()
+                    val createScheduleDialog = CreateScheduleDialog(context)
+                    createScheduleDialog.showBottomSheet()
                 })
             }
         }
