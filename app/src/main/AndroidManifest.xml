@@ -52,5 +52,18 @@
                    android:scheme="kakao${KAKAO_API_KEY}" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".promise.PromiseAcceptActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="kakao${KAKAO_API_KEY}"
+                    android:host="kakaolink" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

@@ -1,5 +1,6 @@
 package com.example.together_watch.promise
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -35,6 +36,9 @@ class PromiseAcceptActivity: ComponentActivity() {
                 Wrapper()
             }
         }
+
+        val action: String? = intent?.action
+        val data: Uri? = intent?.data
     }
 
     @Preview
