@@ -42,7 +42,7 @@ fun CreatePromiseScreen() {
     val nextScreen = { currentScreen.intValue++ }
     val context = LocalContext.current
     val complete = {
-        shareInvitation(context)
+        shareInvitation(context, groupId)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {

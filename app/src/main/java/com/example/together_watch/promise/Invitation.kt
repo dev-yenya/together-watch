@@ -5,10 +5,14 @@ import android.util.Log
 import androidx.core.content.ContextCompat.startActivity
 import com.kakao.sdk.share.ShareClient
 
-fun shareInvitation(context: Context) {
+fun shareInvitation(context: Context, groupId: Long) {
     val templateId: Long = 101298;
     if (ShareClient.instance.isKakaoTalkSharingAvailable(context)) {
-        ShareClient.instance.shareCustom(context, templateId) { sharingResult, error ->
+        ShareClient.instance.shareCustom(
+            context = context,
+            templateId = templateId,
+            templateArgs = mutableMapOf("group-id" to groupId.toString())
+        ) { sharingResult, error ->
             if (error != null) {
                 Log.e("kakao-share-api", "카카오톡 공유 실패", error)
             }

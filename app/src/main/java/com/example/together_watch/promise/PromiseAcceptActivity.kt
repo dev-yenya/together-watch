@@ -25,9 +25,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.together_watch.ui.Destinations
 import com.example.together_watch.ui.theme.Together_watchTheme
 
-class PromiseAcceptActivity: ComponentActivity() {
+class PromiseAcceptActivity: ComponentActivity(), PromiseAcceptContract.View {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,7 +59,7 @@ class PromiseAcceptActivity: ComponentActivity() {
     }
 
     @Composable
-    private fun PromiseAcceptScreen() {
+    override fun PromiseAcceptScreen() {
         Column(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
         ) {
@@ -88,7 +89,7 @@ class PromiseAcceptActivity: ComponentActivity() {
     }
 
     @Composable
-    fun Buttons() {
+    override fun Buttons() {
         Row {
             Button(
                 onClick = {},
