@@ -71,6 +71,7 @@ fun HomeScreen(
                 events = listOf("Event 1", "Event 2") // 예시
             })
             EventsList(events)
+
         }
         FloatingActionButton(
             onClick = { showAddEvent = !showAddEvent },
