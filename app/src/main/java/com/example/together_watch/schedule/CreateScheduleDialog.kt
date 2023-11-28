@@ -14,6 +14,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.Month
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
@@ -147,7 +148,9 @@ class CreateScheduleDialog(
         return LocalDate.parse(binding.etDate.text.toString(), dateFormat)
     }
     private fun getEndDate(): LocalDate {
-        return LocalDate.parse(binding.etEndDate.text.toString(), dateFormat)
+        val endDate = binding.etEndDate.text.toString()
+        return if (endDate.isNotEmpty())
+            LocalDate.parse(binding.etEndDate.text.toString(), dateFormat) else LocalDate.of(1970, Month.JANUARY, 1)
     }
 
     private fun getRepeatType(): RepeatType {
