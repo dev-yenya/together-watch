@@ -82,6 +82,8 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("com.android.identity:identity-credential-android:20231002")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("io.kotest:kotest-runner-junit5:5.7.2")
+
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
@@ -101,4 +103,9 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
+    implementation("com.google.android.material:material:1.10.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    implementation("androidx.navigation:navigation-runtime-ktx:2.7.5")
+    implementation("androidx.navigation:navigation-compose:2.5.3")
 }
