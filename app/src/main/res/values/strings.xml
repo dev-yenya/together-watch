@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">together_watch</string>
+    <string name="app_name">같이와치</string>
     <string name="personal_schedule">개인 일정</string>
     <string name="schedule_name">일정 이름</string>
     <string name="schedule_location">장소</string>
