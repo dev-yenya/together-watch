@@ -42,7 +42,7 @@ fun CreatePromiseScreen() {
     val nextScreen = { currentScreen.intValue++ }
     val context = LocalContext.current
     val complete = {
-        shareInvitation(context, groupId)
+        shareInvitation(context)
         // TODO: 약속 생성시 아이디 전달
     }
 
