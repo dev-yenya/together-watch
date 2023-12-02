@@ -28,19 +28,27 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.example.together_watch.R
 import com.example.together_watch.ui.Destinations
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 
 @Composable
 fun SettingScreen(
     navController: NavHostController
 ) {
+    val user = Firebase.auth.currentUser
+    val email = user?.email ?: ""
+    val photoUrl = user?.photoUrl ?: ""
+    val name = user?.displayName ?: ""
+
     Column(modifier = Modifier.padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             // 프로필 이미지
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            AsyncImage(
+                model = photoUrl,
                 contentDescription = "프로필 이미지",
                 modifier = Modifier
                     .size(40.dp)
@@ -51,8 +59,8 @@ fun SettingScreen(
 
             // 이름과 이메일
             Column {
-                Text(text = "이름", fontSize = 20.sp)
-                Text(text = "이메일@example.com", fontSize = 16.sp)
+                Text(text = name, fontSize = 20.sp)
+                Text(text = email, fontSize = 16.sp)
             }
         }
 

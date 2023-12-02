@@ -1,13 +1,17 @@
 package com.example.together_watch.schedule
 
 import android.util.Log
-import com.example.together_watch.ui.schedule.RepeatType
-import com.example.together_watch.ui.schedule.Schedule
-import com.example.together_watch.ui.schedule.toMap
+import com.example.together_watch.data.RepeatType
+import com.example.together_watch.data.Schedule
+import com.example.together_watch.data.toMap
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
+
+
 
 class CreateScheduleModel : CreateScheduleContract.Model {
     override fun saveSchedule(schedule: Schedule) {
@@ -23,7 +27,7 @@ class CreateScheduleModel : CreateScheduleContract.Model {
     }
 
     override fun saveRepeatSchedule(schedule: Schedule, repeatType: RepeatType, endDate: LocalDate) {
-        var startDate = schedule.date
+        var startDate = LocalDate.parse(schedule.date, DateTimeFormatter.ISO_LOCAL_DATE)
         val repetitionFunction: (LocalDate) -> LocalDate = when (repeatType) {
             RepeatType.WEEKLY -> { it -> it.plusDays(7) }
             RepeatType.MONTHLY -> { it -> it.plusMonths(1) }
@@ -31,7 +35,7 @@ class CreateScheduleModel : CreateScheduleContract.Model {
 
         while (!endDate.isBefore(startDate)) {
             startDate = repetitionFunction(startDate)
-            val updatedSchedule = schedule.copy(date = startDate)
+            val updatedSchedule = schedule.copy(date = startDate.toString())
             saveSchedule(updatedSchedule)
         }
     }

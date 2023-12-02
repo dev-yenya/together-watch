@@ -66,8 +66,11 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                     if (error != null) {
                         Log.e("kakao-sdk", "카카오 계정으로 로그인 실패", error)
                     } else if (token != null) {
-                        LoginPresenter().callKakaoLoginFunction(token.accessToken)
-                        startMainActivity(context)
+                        LoginPresenter().callKakaoLoginFunction(token.accessToken) {
+                            if (it) {
+                                startMainActivity(context)
+                            }
+                        }
                     }
                 }
 
@@ -89,8 +92,11 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                         // 로그인 성공 부분
                         else if (token != null) {
                             Log.d("kakao-login-sdk", "로그인 성공 ${token.accessToken}")
-                            LoginPresenter().callKakaoLoginFunction(token.accessToken)
-                            startMainActivity(context)
+                            LoginPresenter().callKakaoLoginFunction(token.accessToken) {
+                                if (it) {
+                                    startMainActivity(context)
+                                }
+                            }
                         }
                     }
                 } else {

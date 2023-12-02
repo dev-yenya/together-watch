@@ -1,17 +1,20 @@
 package com.example.together_watch.ui.home
 
-import android.content.Intent
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.content.Context
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
@@ -21,29 +24,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
-import com.example.together_watch.R
-import com.example.together_watch.promise.shareInvitation
-import com.example.together_watch.ui.Destinations
 import java.time.LocalDate
+import java.time.YearMonth
+import java.util.Calendar
 
 
 // 약속 생성
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CreatePromiseScreen() {
+fun CreatePromiseScreen(
+    navController: NavHostController
+) {
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
-    val context = LocalContext.current
-    val complete = {
-        shareInvitation(context)
-        // TODO: 약속 생성시 아이디 전달
+    val previousScreen = { currentScreen.intValue-- }
+    val complete = { /* 완료 액션 구현 */ }
+
+    val backHandler = {
+        if (currentScreen.intValue > 1) {
+            previousScreen()
+        } else {
+            navController.popBackStack()
+        }
+    }
+
+    BackHandler {
+        backHandler()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -54,7 +67,10 @@ fun CreatePromiseScreen() {
 
         ) {
             Column(
-                modifier = Modifier.weight(1f, true), // Takes up all available space except for the button
+                modifier = Modifier.weight(
+                    1f,
+                    true
+                ), // Takes up all available space except for the button
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (currentScreen.intValue < 5) {
@@ -77,7 +93,7 @@ fun CreatePromiseScreen() {
                             textAlign = TextAlign.Center
                         )
                         IconButton(
-                            onClick = { /* 뒤로가기 기능 구현 */ },
+                            onClick = { backHandler() },
                             modifier = Modifier.align(Alignment.CenterStart)
                         ) {
                             Icon(Icons.Filled.ArrowBack, contentDescription = null)
@@ -110,7 +126,7 @@ fun CreatePromiseScreen() {
                 modifier = Modifier.fillMaxWidth(),
                 shape = RectangleShape
             ) {
-                Text(if (currentScreen.intValue < 5) "다음" else "카카오톡으로 친구 초대하기")
+                Text(if (currentScreen.intValue < 5) "다음" else "친구 초대하기")
             }
         }
     }
@@ -124,8 +140,16 @@ fun FirstScreen() {
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
-        Text("약속을 잡아볼까요?", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp))
-        Text("먼저, 약속 이름이 필요해요.", modifier = Modifier.padding(bottom = 10.dp), style = TextStyle(fontSize = 15.sp))
+        Text(
+            "약속을 잡아볼까요?",
+            modifier = Modifier.padding(bottom = 5.dp),
+            style = TextStyle(fontSize = 20.sp)
+        )
+        Text(
+            "먼저, 약속 이름이 필요해요.",
+            modifier = Modifier.padding(bottom = 10.dp),
+            style = TextStyle(fontSize = 15.sp)
+        )
         OutlinedTextField(
             value = text, // 텍스트 필드의 값
             onValueChange = { newText ->
@@ -150,8 +174,16 @@ fun SecondScreen() {
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
-        Text("어디서 보나요?", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp))
-        Text("약속 장소를 잡아주세요", modifier = Modifier.padding(bottom = 10.dp), style = TextStyle(fontSize = 15.sp))
+        Text(
+            "어디서 보나요?",
+            modifier = Modifier.padding(bottom = 5.dp),
+            style = TextStyle(fontSize = 20.sp)
+        )
+        Text(
+            "약속 장소를 잡아주세요",
+            modifier = Modifier.padding(bottom = 10.dp),
+            style = TextStyle(fontSize = 15.sp)
+        )
         OutlinedTextField(
             value = text, // 텍스트 필드의 값
             onValueChange = { newText ->
@@ -171,49 +203,143 @@ fun SecondScreen() {
 @Composable
 fun ThirdScreen() {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    val selectedDates = mutableListOf<String>()
+    var dates by remember { mutableStateOf(listOf<String>()) }
 
-    Column {
-        Spacer(Modifier.height(10.dp))
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = "원하시는 날짜를 전부 선택해 주세요",
-            style = TextStyle(fontSize = 20.sp),
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(10.dp))
-        CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
-            selectedDate = newDate
-        })
-        CalendarGrid(selectedDate = selectedDate, onDateSelected = { date ->
-            selectedDate = date
-        })
-        Divider()
-        Spacer(Modifier.height(20.dp))
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = "아직 선택된 날짜가 없어요",
-            style = TextStyle(fontSize = 20.sp),
-            textAlign = TextAlign.Center
+    LazyColumn {
+        item {
+            Spacer(Modifier.height(10.dp))
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = "원하시는 날짜를 전부 선택해 주세요",
+                style = TextStyle(fontSize = 20.sp),
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(10.dp))
+            CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
+                selectedDate = newDate
+            })
+            WeekDaysHeader()
+        }
+
+        items((0 until 6).toList()) { week ->
+            val yearMonth = YearMonth.from(selectedDate)
+            val totalDays = yearMonth.lengthOfMonth()
+            val firstDayOfMonth = yearMonth.atDay(1)
+            val daysOffset = firstDayOfMonth.dayOfWeek.value % 7
+
+            WeekRow(week, daysOffset, totalDays, selectedDate, yearMonth, isSelectedEffect = true) { date ->
+                selectedDate = date
+                if (!selectedDates.contains(date.toString())) {
+                    selectedDates.add(date.toString())
+                    dates = selectedDates.toList() // 상태 업데이트
+                }
+            }
+        }
+
+        item {
+            Divider()
+            Spacer(Modifier.height(20.dp))
+        }
+
+        items(
+            items = dates,
+            itemContent = { EventsList(it) }
         )
     }
+}
+
+@Composable
+fun EventsList(date: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp), // 직접적으로 backgroundColor를 지정
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White,
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 5.dp
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(text = date, style = MaterialTheme.typography.headlineMedium)
+            }
+        }
+    }
+}
+
+fun MyDatePicker(context: Context, result: ((String) -> Unit)) {
+    val calendar = Calendar.getInstance()
+    DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            result("$year-${month + 1}-$dayOfMonth")
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    ).show()
+}
+
+fun MyTimePicker(context: Context, result: ((String) -> Unit)) {
+    val calendar = Calendar.getInstance()
+    TimePickerDialog(
+        context,
+        { _, hourOfDay, minute ->
+            // 선택된 시간을 "HH:mm" 형식으로 저장합니다.
+            result(String.format("%02d:%02d", hourOfDay, minute))
+        },
+        calendar.get(Calendar.HOUR_OF_DAY),
+        calendar.get(Calendar.MINUTE),
+        true // 24시간 형식 사용 여부
+    ).show()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FourthScreen() {
-    var text1 by remember { mutableStateOf("시작시간") }
-    var text2 by remember { mutableStateOf("종료시간") }
+    var text1 by remember { mutableStateOf("") }
+    var text2 by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
-        Text("언제 만날까요?", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp))
-        Text("약속 시간대를 입력해 주세요.", modifier = Modifier.padding(bottom = 10.dp), style = TextStyle(fontSize = 15.sp))
+        Text(
+            "언제 만날까요?",
+            modifier = Modifier.padding(bottom = 5.dp),
+            style = TextStyle(fontSize = 20.sp)
+        )
+        Text(
+            "약속 시간대를 입력해 주세요.",
+            modifier = Modifier.padding(bottom = 10.dp),
+            style = TextStyle(fontSize = 15.sp)
+        )
         Spacer(Modifier.height(10.dp))
         Row {
             TextField(
                 value = text1,
                 onValueChange = { text1 = it },
+                interactionSource = remember { MutableInteractionSource() }
+                    .also { interactionSource ->
+                        LaunchedEffect(interactionSource) {
+                            interactionSource.interactions.collect {
+                                if (it is PressInteraction.Release) {
+                                    MyTimePicker(context) {
+                                        text1 = it
+                                    }
+                                }
+                            }
+                        }
+                    },
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 4.dp)
@@ -227,12 +353,27 @@ fun FourthScreen() {
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = Color.Gray
                 ),
-                shape = RoundedCornerShape(5.dp)
+                shape = RoundedCornerShape(5.dp),
+                label = { Text("시작 시간") },
+                readOnly = true
+
             )
 
             TextField(
                 value = text2,
                 onValueChange = { text2 = it },
+                interactionSource = remember { MutableInteractionSource() }
+                    .also { interactionSource ->
+                        LaunchedEffect(interactionSource) {
+                            interactionSource.interactions.collect {
+                                if (it is PressInteraction.Release) {
+                                    MyTimePicker(context) {
+                                        text2 = it
+                                    }
+                                }
+                            }
+                        }
+                    },
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 4.dp)
@@ -246,7 +387,9 @@ fun FourthScreen() {
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = Color.Gray
                 ),
-                shape = RoundedCornerShape(5.dp)
+                shape = RoundedCornerShape(5.dp),
+                label = { Text("종료 시간") },
+                readOnly = true
             )
         }
     }
