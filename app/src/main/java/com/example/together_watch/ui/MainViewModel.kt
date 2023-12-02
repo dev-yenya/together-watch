@@ -17,7 +17,7 @@ class MainViewModel : ViewModel() {
 
     fun fetchSchedulesData() {
         viewModelScope.launch {
-            val userId = Firebase.auth.currentUser?.uid ?: ""
+            val userId = Firebase.auth.currentUser?.uid.toString()
             Firebase.firestore.collection("users")
                 .document(userId)
                 .collection("schedules")
