@@ -1,4 +1,4 @@
-package com.example.together_watch.schedule
+package com.example.together_watch.schedule.create
 
 import android.util.Log
 import com.example.together_watch.ui.schedule.RepeatType

@@ -1,3 +1,5 @@
+package com.example.together_watch.schedule.create
+
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
@@ -7,7 +9,6 @@ import android.widget.EditText
 import android.widget.Toast
 import com.example.together_watch.R
 import com.example.together_watch.databinding.DialogBottomSheetCreateBinding
-import com.example.together_watch.schedule.CreateScheduleContract
 import com.example.together_watch.ui.schedule.RepeatType
 import com.example.together_watch.ui.schedule.Schedule
 import com.google.android.material.bottomsheet.BottomSheetBehavior

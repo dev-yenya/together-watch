@@ -1,6 +1,6 @@
 package com.example.together_watch.ui.home
 
-import CreateScheduleDialog
+import com.example.together_watch.schedule.create.CreateScheduleDialog
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
@@ -43,8 +43,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.together_watch.schedule.CreateScheduleModel
-import com.example.together_watch.schedule.CreateSchedulePresenter
+import com.example.together_watch.schedule.create.CreateScheduleModel
+import com.example.together_watch.schedule.create.CreateSchedulePresenter
 import com.example.together_watch.ui.Destinations
 import java.time.DayOfWeek
 import java.time.LocalDate

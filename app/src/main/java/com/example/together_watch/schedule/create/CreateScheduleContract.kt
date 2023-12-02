@@ -1,4 +1,4 @@
-package com.example.together_watch.schedule
+package com.example.together_watch.schedule.create
 
 import android.widget.EditText
 import com.example.together_watch.ui.schedule.RepeatType

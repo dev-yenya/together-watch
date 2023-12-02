@@ -1,4 +1,4 @@
-package com.example.together_watch.schedule
+package com.example.together_watch.schedule.updateAndDelete
 
 interface UpdateAndDeleteScheduleContract {
     interface Model {
@@ -7,6 +7,8 @@ interface UpdateAndDeleteScheduleContract {
     interface View {
         fun showBottomSheet()
         fun hideBottomSheet()
+        fun showSchedule()
+        fun setupClickListeners()
     }
     interface Presenter {
         fun updateSchedule()
