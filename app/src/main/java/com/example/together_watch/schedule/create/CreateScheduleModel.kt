@@ -15,11 +15,11 @@ import java.time.format.DateTimeFormatter
 
 class CreateScheduleModel : CreateScheduleContract.Model {
     override fun saveSchedule(schedule: Schedule) {
-        val user = Firebase.auth.currentUser
+        val userId = Firebase.auth.currentUser?.uid.toString()
         val db = Firebase.firestore
         val userRef = db.collection("users")
 
-        userRef.document(user?.uid.toString())
+        userRef.document(userId)
             .collection("schedules")
             .add(schedule.toMap())
 
