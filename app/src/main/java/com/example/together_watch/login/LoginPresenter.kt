@@ -15,14 +15,14 @@ class LoginPresenter: LoginContract.Presenter {
     private lateinit var auth: FirebaseAuth
     private lateinit var functions: FirebaseFunctions
 
-    override fun callKakaoLoginFunction(accessToken: String): Task<HttpsCallableResult> {
+    override fun callKakaoLoginFunction(accessToken: String, callback: (Boolean) -> Unit) {
         functions = Firebase.functions("asia-northeast3")
 
         val data = hashMapOf(
             "token" to accessToken
         )
 
-        return functions
+        functions
             .getHttpsCallable("kakaoCustomAuth")
             .call(data)
             .addOnCompleteListener { task ->
@@ -35,16 +35,18 @@ class LoginPresenter: LoginContract.Presenter {
                     }
                     val customToken = result[mKey!!].toString()
 
-                    firebaseAuthWithKakao(customToken)
+                    firebaseAuthWithKakao(customToken, callback)
                 } catch (e: RuntimeExecutionException) {
+                    callback(false)
                     Log.e("cloud-functions", "Call Firebase Cloud functions failed.${e.message}")
                 }
             }
     }
 
-    private fun firebaseAuthWithKakao(customToken: String) {
+    private fun firebaseAuthWithKakao(customToken: String, callback: (Boolean) -> Unit) {
         auth = Firebase.auth
         auth.signInWithCustomToken(customToken).addOnCompleteListener { result ->
+            callback(result.isSuccessful)
             if (result.isSuccessful) {
                 Log.d("custom-token", "로그인 -> $customToken")
             } else {

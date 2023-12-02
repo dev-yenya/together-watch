@@ -70,10 +70,10 @@ sealed class Destinations(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NavigationGraph(navController: NavHostController) {
+fun NavigationGraph(navController: NavHostController, viewModel: MainViewModel) {
     NavHost(navController, startDestination = Destinations.HomeScreen.route) {
         composable(Destinations.HomeScreen.route) {
-            HomeScreen(navController)
+            HomeScreen(navController, viewModel)
         }
         composable(Destinations.PersonScreen.route) {
             PersonScreen(navController)
@@ -88,7 +88,7 @@ fun NavigationGraph(navController: NavHostController) {
             CompleteScreen()
         }
         composable(Destinations.CreatePromiseScreen.route) {
-            CreatePromiseScreen()
+            CreatePromiseScreen(navController)
         }
         composable(Destinations.PromiseAcceptScreen.route) {
             PromiseAcceptScreen()

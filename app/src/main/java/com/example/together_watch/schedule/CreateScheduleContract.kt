@@ -1,8 +1,8 @@
 package com.example.together_watch.schedule
 
 import android.widget.EditText
-import com.example.together_watch.ui.schedule.RepeatType
-import com.example.together_watch.ui.schedule.Schedule
+import com.example.together_watch.data.RepeatType
+import com.example.together_watch.data.Schedule
 import java.time.LocalDate
 
 interface CreateScheduleContract {

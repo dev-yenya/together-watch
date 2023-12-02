@@ -8,8 +8,8 @@ import android.widget.Toast
 import com.example.together_watch.R
 import com.example.together_watch.databinding.DialogBottomSheetCreateBinding
 import com.example.together_watch.schedule.CreateScheduleContract
-import com.example.together_watch.ui.schedule.RepeatType
-import com.example.together_watch.ui.schedule.Schedule
+import com.example.together_watch.data.RepeatType
+import com.example.together_watch.data.Schedule
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.time.LocalDate
@@ -79,7 +79,7 @@ class CreateScheduleDialog(
             val endTime = LocalTime.parse(etEndTime.text.toString(), timeFormat)
             val isGroup = false
 
-            return Schedule(name, place, date, startTime, endTime, isGroup)
+            return Schedule(name, place, date.toString(), startTime.toString(), endTime.toString(), isGroup)
         }
     }
 
@@ -125,9 +125,9 @@ class CreateScheduleDialog(
         with(schedule) {
             return name.isNotEmpty()
                     && place.isNotEmpty()
-                    && date.toString().isNotEmpty()
-                    && startTime.toString().isNotEmpty()
-                    && endTime.toString().isNotEmpty()
+                    && date.isNotEmpty()
+                    && startTime.isNotEmpty()
+                    && endTime.isNotEmpty()
                     && (!isRepeat || !binding.etEndDate.text.isNullOrEmpty())
         }
     }
