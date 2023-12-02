@@ -1,4 +1,5 @@
 package com.example.together_watch
+import LoginScreen
 import android.os.Bundle
 import android.widget.CalendarView
 import androidx.activity.ComponentActivity
@@ -16,27 +17,36 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.together_watch.ui.BottomBar
+import com.example.together_watch.ui.MainViewModel
 import com.example.together_watch.ui.NavigationGraph
 import com.example.together_watch.ui.theme.Together_watchTheme
-class MainActivity : ComponentActivity() {
 
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
+
         setContent {
             Together_watchTheme {
-                MainScreen()
+                //        val isLoggedIn by loginViewModel.isLoggedIn.observeAsState(false)
+
+                if (true) { // isLoggedIn
+                    MainScreen(mainViewModel) // 로그인 후 메인 화면
+                } else {
+                    LoginScreen() // 로그인 화면
+                }
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(viewModel: MainViewModel) {
     val navController: NavHostController = rememberNavController()
     val buttonsVisible = remember { mutableStateOf(true) }
 
@@ -51,7 +61,7 @@ fun MainScreen() {
         Box(
             modifier = Modifier.padding(paddingValues)
         ) {
-            NavigationGraph(navController = navController)
+            NavigationGraph(navController = navController, viewModel)
         }
     }
 }

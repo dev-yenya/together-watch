@@ -80,6 +80,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
     implementation("com.android.identity:identity-credential-android:20231002")
     implementation("com.google.android.material:material:1.10.0")
     implementation("androidx.navigation:navigation-runtime-ktx:2.7.5")
@@ -108,6 +109,8 @@ dependencies {
 
     implementation("com.google.android.material:material:1.10.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    implementation("io.coil-kt:coil-compose:2.5.0")
 
     implementation("androidx.navigation:navigation-runtime-ktx:2.7.5")
     implementation("androidx.navigation:navigation-compose:2.5.3")

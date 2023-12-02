@@ -16,6 +16,6 @@ interface LoginContract {
     }
 
     interface Presenter {
-        fun callKakaoLoginFunction(accessToken: String): Task<HttpsCallableResult>
+        fun callKakaoLoginFunction(accessToken: String, callback: (Boolean) -> Unit)
     }
 }

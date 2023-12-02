@@ -21,11 +21,11 @@
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Together_watch">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
         </activity>
 
         <activity
@@ -48,9 +48,23 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <!--Redirect URI: "kakao${KAKAO_API_KEY}://oauth"-->
-
-               <data android:host="oauth"
+               <data
+                   android:host="oauth"
                    android:scheme="kakao${KAKAO_API_KEY}" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".promise.PromiseAcceptActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="kakaolink"
+                    android:scheme="kakao${KAKAO_API_KEY}" />
+                <!--LINK: "kakao${KAKAO_API_KEY}://kakaolink"-->
             </intent-filter>
         </activity>
     </application>

@@ -2,8 +2,10 @@ package com.example.together_watch.ui.home
 
 import com.example.together_watch.schedule.create.CreateScheduleDialog
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -33,9 +36,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,9 +49,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.together_watch.schedule.create.CreateScheduleModel
-import com.example.together_watch.schedule.create.CreateSchedulePresenter
+import com.example.together_watch.data.Schedule
+import com.example.together_watch.schedule.CreateScheduleModel
+import com.example.together_watch.schedule.CreateSchedulePresenter
 import com.example.together_watch.ui.Destinations
+import com.example.together_watch.ui.MainViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -56,47 +64,66 @@ import java.util.Locale
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: MainViewModel
 ) {
+    val apiData by viewModel.apiData.observeAsState()
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-    var events by remember { mutableStateOf(listOf<String>()) }
+    var events by remember { mutableStateOf(listOf<Schedule>()) }
     var showAddEvent by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column {
-            CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
-                selectedDate = newDate
-            })
-            CalendarGrid(selectedDate = selectedDate, onDateSelected = { date ->
-                selectedDate = date
-                // 날짜에 맞는 이벤트를 로드
-                events = listOf("Event 1", "Event 2") // 예시
-            })
-            EventsList(events)
-        }
-        FloatingActionButton(
-            onClick = { showAddEvent = !showAddEvent },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Icon(if (showAddEvent) Icons.Filled.Close else Icons.Filled.Add, "Toggle Buttons")
-        }
+    LaunchedEffect(Unit) {
+        viewModel.fetchSchedulesData() // 화면이 처음 그려질 때 API 호출
+    }
 
-        // 추가 버튼들 표시
-        AnimatedVisibility(
-            visible = showAddEvent,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 82.dp, end = 26.dp)
-        ) {
-            Column(horizontalAlignment = Alignment.End) {
-                ButtonRow("약속 일정 추가", onClick = { navController.navigate(Destinations.CreatePromiseScreen.route) })
-                ButtonRow("개인 일정 추가", onClick = {
-                    val context = navController.context
-                    val createScheduleDialog = CreateScheduleDialog(context, CreateSchedulePresenter(CreateScheduleModel()))
-                    createScheduleDialog.showBottomSheet()
+    apiData?.let {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column {
+                CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
+                    selectedDate = newDate
                 })
+                CalendarGrid(selectedDate = selectedDate, mySchedules = viewModel.mySchedule, onDateSelected = { date ->
+                    selectedDate = date
+                    Log.e("date", date.toString())
+                    events = viewModel.mySchedule.filter {
+                        it.date == date.toString()
+                    }
+                })
+                LazyColumn {
+                    items(
+                        items = events,
+                        itemContent = { EventsList(it) }
+                    )
+                }
+            }
+            FloatingActionButton(
+                onClick = { showAddEvent = !showAddEvent },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+            ) {
+                Icon(if (showAddEvent) Icons.Filled.Close else Icons.Filled.Add, "Toggle Buttons")
+            }
+
+            // 추가 버튼들 표시
+            AnimatedVisibility(
+                visible = showAddEvent,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = 82.dp, end = 26.dp)
+            ) {
+                Column(horizontalAlignment = Alignment.End) {
+                    ButtonRow(
+                        "약속 일정 추가",
+                        onClick = { navController.navigate(Destinations.CreatePromiseScreen.route) })
+                    ButtonRow("개인 일정 추가", onClick = {
+                        val context = navController.context
+                        val createScheduleDialog = CreateScheduleDialog(context, CreateSchedulePresenter(
+                            CreateScheduleModel()
+                        ))
+                        createScheduleDialog.showBottomSheet()
+                    })
+                }
             }
         }
     }
@@ -147,31 +174,29 @@ fun CalendarHeader(selectedDate: LocalDate, onDateChanged: (LocalDate) -> Unit) 
 }
 
 @Composable
-fun EventsList(events: List<String>) {
+fun EventsList(schedule: Schedule) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        events.forEach { event ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp), // 직접적으로 backgroundColor를 지정
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White,
-                ),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 5.dp
-                )
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp), // 직접적으로 backgroundColor를 지정
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White,
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 5.dp
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(text = "Event Date and Time", style = MaterialTheme.typography.headlineMedium)
-                    Text(text = "Event Title: ", style = MaterialTheme.typography.bodyMedium)
-                    Text(text = "Event Details", style = MaterialTheme.typography.bodySmall)
-                }
+                Text(text = schedule.date + " " + schedule.startTime + " ~ " + schedule.endTime, style = MaterialTheme.typography.headlineMedium)
+                Text(text = schedule.name, style = MaterialTheme.typography.bodyMedium)
+                Text(text = schedule.place, style = MaterialTheme.typography.bodySmall)
             }
         }
     }
@@ -179,19 +204,28 @@ fun EventsList(events: List<String>) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CalendarGrid(selectedDate: LocalDate, onDateSelected: (LocalDate) -> Unit) {
+fun CalendarGrid(selectedDate: LocalDate,
+                 mySchedules: List<Schedule> = listOf(),
+                 onDateSelected: (LocalDate) -> Unit) {
     val yearMonth = YearMonth.from(selectedDate)
     val totalDays = yearMonth.lengthOfMonth()
     val firstDayOfMonth = yearMonth.atDay(1)
     val daysOffset = firstDayOfMonth.dayOfWeek.value % 7
 
+    var schedulesForDay by remember { mutableStateOf(listOf<Schedule>()) }
+//    val date = yearMonth.atDay(dayOfMonth)
+
+//    LaunchedEffect(key1 = date) {
+//        schedulesForDay = fetchDataForDate(date)
+//    }
+
     Column {
         // 요일 헤더
         WeekDaysHeader()
-
+//dd
         LazyColumn {
             items((0 until 6).toList()) { week ->
-                WeekRow(week, daysOffset, totalDays, selectedDate, yearMonth, onDateSelected)
+                WeekRow(week, daysOffset, totalDays, selectedDate, yearMonth, mySchedules, false, onDateSelected)
             }
         }
     }
@@ -221,6 +255,8 @@ fun WeekRow(
     totalDays: Int,
     selectedDate: LocalDate,
     yearMonth: YearMonth,
+    mySchedules: List<Schedule> = listOf(),
+    isSelectedEffect: Boolean = false,
     onDateSelected: (LocalDate) -> Unit
 ) {
     Row(
@@ -232,7 +268,7 @@ fun WeekRow(
             val dayOfMonth = week * 7 + dayOfWeek - daysOffset + 1
             if (dayOfMonth in 1..totalDays) {
                 // 유효한 날짜일 경우 날짜 표시
-                DateBox(dayOfMonth, yearMonth, onDateSelected)
+                DateBox(dayOfMonth, yearMonth, mySchedules, isSelectedEffect, onDateSelected)
             } else {
                 // 유효하지 않은 날짜일 경우 빈 공간 표시
                 EmptyBox()
@@ -246,18 +282,59 @@ fun WeekRow(
 fun DateBox(
     dayOfMonth: Int,
     yearMonth: YearMonth,
+    mySchedules: List<Schedule> = listOf(),
+    isSelectedEffect: Boolean = false,
     onDateSelected: (LocalDate) -> Unit
 ) {
+    val date = yearMonth.atDay(dayOfMonth)
+    val selectedDates = mutableListOf<String>()
+    var dates by rememberSaveable { mutableStateOf(listOf<String>()) }
+    val mySchedules = mySchedules.filter { it.date == date.toString() }
     Box(
         modifier = Modifier
             .padding(8.dp)
-            .size(40.dp), // 박스 크기 지정
+            .size(40.dp)
+            .background(if (dates.any { it == date.toString() } && isSelectedEffect) Color.Blue.copy(
+                alpha = 0.5f
+            ) else Color.Transparent, shape = CircleShape)
+            .clickable {
+                if (!selectedDates.contains(date.toString())) {
+                    selectedDates.add(date.toString())
+                    dates = selectedDates.toList() // 상태 업데이트
+                }
+                onDateSelected(date)
+            }, // 박스 크기 지정
+
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = dayOfMonth.toString(),
-            modifier = Modifier.clickable { onDateSelected(yearMonth.atDay(dayOfMonth)) }
-        )
+        Column {
+            Text(
+                text = dayOfMonth.toString(),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                if (mySchedules.any { it.isGroup }) {
+                    Box(
+                        modifier = Modifier
+                            .size(4.dp) // 점의 크기 지정
+                            .background(Color.Blue, shape = CircleShape) // 점의 색상 및 모양 설정
+                    )
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+                if (mySchedules.any { !it.isGroup }) {
+                    Box(
+                        modifier = Modifier
+                            .size(4.dp) // 점의 크기 지정
+                            .background(Color.Black, shape = CircleShape) // 점의 색상 및 모양 설정
+                    )
+                }
+            }
+        }
     }
 }
 
