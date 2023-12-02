@@ -50,8 +50,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.together_watch.data.Schedule
-import com.example.together_watch.schedule.CreateScheduleModel
-import com.example.together_watch.schedule.CreateSchedulePresenter
+import com.example.together_watch.schedule.create.CreateScheduleModel
+import com.example.together_watch.schedule.create.CreateSchedulePresenter
 import com.example.together_watch.ui.Destinations
 import com.example.together_watch.ui.MainViewModel
 import java.time.DayOfWeek
@@ -120,7 +120,8 @@ fun HomeScreen(
                         val context = navController.context
                         val createScheduleDialog = CreateScheduleDialog(context, CreateSchedulePresenter(
                             CreateScheduleModel()
-                        ))
+                        )
+                        )
                         createScheduleDialog.showBottomSheet()
                     })
                 }
