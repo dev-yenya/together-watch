@@ -13,7 +13,9 @@ import java.time.format.DateTimeFormatter
 
 
 
-class CreateScheduleModel : CreateScheduleContract.Model {
+class CreateScheduleModel(
+    private val forceRefresh: () -> Unit
+) : CreateScheduleContract.Model {
     override fun saveSchedule(schedule: Schedule) {
         val userId = Firebase.auth.currentUser?.uid.toString()
         val db = Firebase.firestore
@@ -22,8 +24,11 @@ class CreateScheduleModel : CreateScheduleContract.Model {
         userRef.document(userId)
             .collection("schedules")
             .add(schedule.toMap())
-
-        Log.d("personal schedule", "스케줄 업로드 성공 : ${schedule.name}")
+            .addOnSuccessListener {
+                Log.d("personal schedule", "스케줄 업로드 성공 : ${schedule.name}" )
+                forceRefresh()
+            }
+            .addOnFailureListener { Log.e("personal schedule", "스케줄 업로드 실패") }
     }
 
     override fun saveRepeatSchedule(schedule: Schedule, repeatType: RepeatType, endDate: LocalDate) {

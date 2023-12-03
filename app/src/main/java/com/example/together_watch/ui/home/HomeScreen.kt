@@ -49,9 +49,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.together_watch.data.FetchedSchedule
 import com.example.together_watch.data.Schedule
 import com.example.together_watch.schedule.create.CreateScheduleModel
 import com.example.together_watch.schedule.create.CreateSchedulePresenter
+import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteModel
+import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteScheduleDialog
+import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteSchedulePresenter
 import com.example.together_watch.ui.Destinations
 import com.example.together_watch.ui.MainViewModel
 import java.time.DayOfWeek
@@ -69,11 +73,23 @@ fun HomeScreen(
 ) {
     val apiData by viewModel.apiData.observeAsState()
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-    var events by remember { mutableStateOf(listOf<Schedule>()) }
+    var events by remember { mutableStateOf(listOf<FetchedSchedule>()) }
     var showAddEvent by remember { mutableStateOf(false) }
+    var forceRefresh by remember { mutableStateOf(false)}
 
-    LaunchedEffect(Unit) {
+    fun triggerForceRefresh() {
+        forceRefresh = !forceRefresh
+    }
+
+    fun updateEventsList() {
+        events = viewModel.mySchedules.filter {
+            it.schedule.date == selectedDate.toString()
+        }
+    }
+
+    LaunchedEffect(Unit, forceRefresh) {
         viewModel.fetchSchedulesData() // 화면이 처음 그려질 때 API 호출
+        updateEventsList()
     }
 
     apiData?.let {
@@ -82,17 +98,17 @@ fun HomeScreen(
                 CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
                     selectedDate = newDate
                 })
-                CalendarGrid(selectedDate = selectedDate, mySchedules = viewModel.mySchedule, onDateSelected = { date ->
+                CalendarGrid(selectedDate = selectedDate, mySchedules = viewModel.mySchedules, onDateSelected = { date ->
                     selectedDate = date
                     Log.e("date", date.toString())
-                    events = viewModel.mySchedule.filter {
-                        it.date == date.toString()
+                    events = viewModel.mySchedules.filter {
+                        it.schedule.date == date.toString()
                     }
                 })
                 LazyColumn {
                     items(
                         items = events,
-                        itemContent = { EventsList(it) }
+                        itemContent = { EventsList(it, navController, ::triggerForceRefresh) }
                     )
                 }
             }
@@ -118,9 +134,8 @@ fun HomeScreen(
                         onClick = { navController.navigate(Destinations.CreatePromiseScreen.route) })
                     ButtonRow("개인 일정 추가", onClick = {
                         val context = navController.context
-                        val createScheduleDialog = CreateScheduleDialog(context, CreateSchedulePresenter(
-                            CreateScheduleModel()
-                        )
+                        val createScheduleDialog = CreateScheduleDialog(context,
+                            CreateSchedulePresenter(CreateScheduleModel(::triggerForceRefresh))
                         )
                         createScheduleDialog.showBottomSheet()
                     })
@@ -175,7 +190,11 @@ fun CalendarHeader(selectedDate: LocalDate, onDateChanged: (LocalDate) -> Unit) 
 }
 
 @Composable
-fun EventsList(schedule: Schedule) {
+fun EventsList(
+    fetchedSchedule: FetchedSchedule,
+    navController: NavController,
+    triggerForceRefresh: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -184,7 +203,17 @@ fun EventsList(schedule: Schedule) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp), // 직접적으로 backgroundColor를 지정
+                .padding(vertical = 4.dp)
+                .clickable{
+                    val context = navController.context
+                    val updateAndDeleteModel = UpdateAndDeleteModel(fetchedSchedule, triggerForceRefresh)
+                    val updateAndDeleteDialog = UpdateAndDeleteScheduleDialog(
+                        context,
+                        UpdateAndDeleteSchedulePresenter(updateAndDeleteModel)
+                    )
+                    updateAndDeleteDialog.show()
+
+                }, // 직접적으로 backgroundColor를 지정
             colors = CardDefaults.cardColors(
                 containerColor = Color.White,
             ),
@@ -195,9 +224,9 @@ fun EventsList(schedule: Schedule) {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                Text(text = schedule.date + " " + schedule.startTime + " ~ " + schedule.endTime, style = MaterialTheme.typography.headlineMedium)
-                Text(text = schedule.name, style = MaterialTheme.typography.bodyMedium)
-                Text(text = schedule.place, style = MaterialTheme.typography.bodySmall)
+                Text(text = fetchedSchedule.schedule.date + " " + fetchedSchedule.schedule.startTime + " ~ " + fetchedSchedule.schedule.endTime, style = MaterialTheme.typography.headlineMedium)
+                Text(text = fetchedSchedule.schedule.name, style = MaterialTheme.typography.bodyMedium)
+                Text(text = fetchedSchedule.schedule.place, style = MaterialTheme.typography.bodySmall)
             }
         }
     }
@@ -206,14 +235,14 @@ fun EventsList(schedule: Schedule) {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalendarGrid(selectedDate: LocalDate,
-                 mySchedules: List<Schedule> = listOf(),
+                 mySchedules: List<FetchedSchedule> = listOf(),
                  onDateSelected: (LocalDate) -> Unit) {
     val yearMonth = YearMonth.from(selectedDate)
     val totalDays = yearMonth.lengthOfMonth()
     val firstDayOfMonth = yearMonth.atDay(1)
     val daysOffset = firstDayOfMonth.dayOfWeek.value % 7
 
-    var schedulesForDay by remember { mutableStateOf(listOf<Schedule>()) }
+    var schedulesForDay by remember { mutableStateOf(listOf<FetchedSchedule>()) }
 //    val date = yearMonth.atDay(dayOfMonth)
 
 //    LaunchedEffect(key1 = date) {
@@ -256,7 +285,7 @@ fun WeekRow(
     totalDays: Int,
     selectedDate: LocalDate,
     yearMonth: YearMonth,
-    mySchedules: List<Schedule> = listOf(),
+    mySchedules: List<FetchedSchedule> = listOf(),
     isSelectedEffect: Boolean = false,
     onDateSelected: (LocalDate) -> Unit
 ) {
@@ -283,14 +312,14 @@ fun WeekRow(
 fun DateBox(
     dayOfMonth: Int,
     yearMonth: YearMonth,
-    mySchedules: List<Schedule> = listOf(),
+    mySchedules: List<FetchedSchedule> = listOf(),
     isSelectedEffect: Boolean = false,
     onDateSelected: (LocalDate) -> Unit
 ) {
     val date = yearMonth.atDay(dayOfMonth)
     val selectedDates = mutableListOf<String>()
     var dates by rememberSaveable { mutableStateOf(listOf<String>()) }
-    val mySchedules = mySchedules.filter { it.date == date.toString() }
+    val mySchedules = mySchedules.filter { it.schedule.date == date.toString() }
     Box(
         modifier = Modifier
             .padding(8.dp)
@@ -319,7 +348,7 @@ fun DateBox(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
-                if (mySchedules.any { it.isGroup }) {
+                if (mySchedules.any { it.schedule.isGroup }) {
                     Box(
                         modifier = Modifier
                             .size(4.dp) // 점의 크기 지정
@@ -327,7 +356,7 @@ fun DateBox(
                     )
                 }
                 Spacer(modifier = Modifier.width(4.dp))
-                if (mySchedules.any { !it.isGroup }) {
+                if (mySchedules.any { !it.schedule.isGroup }) {
                     Box(
                         modifier = Modifier
                             .size(4.dp) // 점의 크기 지정
@@ -345,5 +374,5 @@ fun EmptyBox() {
         modifier = Modifier
             .padding(8.dp)
             .size(40.dp)
-    ) // 빈 박스 크기 지정
-}
+    )
+}// 빈 박스 크기 지정

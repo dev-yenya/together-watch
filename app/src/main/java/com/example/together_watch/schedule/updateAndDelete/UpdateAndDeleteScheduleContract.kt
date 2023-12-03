@@ -1,17 +1,24 @@
 package com.example.together_watch.schedule.updateAndDelete
 
+import com.example.together_watch.data.FetchedSchedule
+import com.example.together_watch.data.Schedule
+
 interface UpdateAndDeleteScheduleContract {
     interface Model {
-        fun getSchedule()
+        fun getSchedule() : Schedule
+        fun getFetchedSchedule() : FetchedSchedule
+        fun deleteAndReturnIsDeleted() : Boolean
     }
     interface View {
-        fun showBottomSheet()
         fun hideBottomSheet()
         fun showSchedule()
         fun setupClickListeners()
     }
     interface Presenter {
-        fun updateSchedule()
-        fun deleteSchedule()
+        fun initialize()
+        fun onEditButtonClicked()
+        fun onDeleteButtonClickedAndCheckedDeleted() : Boolean
+        fun loadScheduleData()
+
     }
 }
