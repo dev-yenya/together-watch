@@ -1,3 +1,5 @@
+package com.example.together_watch.schedule.create
+
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
@@ -6,10 +8,9 @@ import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import com.example.together_watch.R
-import com.example.together_watch.databinding.DialogBottomSheetCreateBinding
-import com.example.together_watch.schedule.CreateScheduleContract
 import com.example.together_watch.data.RepeatType
 import com.example.together_watch.data.Schedule
+import com.example.together_watch.databinding.DialogBottomSheetCreateBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.time.LocalDate
@@ -18,7 +19,7 @@ import java.time.Month
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
-class CreateScheduleDialog(
+open class CreateScheduleDialog(
     context: Context,
     private val presenter: CreateScheduleContract.Presenter
 ) : BottomSheetDialog(context, R.style.DialogStyle), CreateScheduleContract.View {
@@ -125,9 +126,9 @@ class CreateScheduleDialog(
         with(schedule) {
             return name.isNotEmpty()
                     && place.isNotEmpty()
-                    && date.isNotEmpty()
-                    && startTime.isNotEmpty()
-                    && endTime.isNotEmpty()
+                    && date.toString().isNotEmpty()
+                    && startTime.toString().isNotEmpty()
+                    && endTime.toString().isNotEmpty()
                     && (!isRepeat || !binding.etEndDate.text.isNullOrEmpty())
         }
     }

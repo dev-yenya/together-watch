@@ -12,6 +12,11 @@ data class Schedule(
     val isGroup: Boolean
 )
 
+data class FetchedSchedule(
+    val id: String,
+    val schedule: Schedule
+)
+
 fun Schedule.toMap(): Map<String, Any?> {
     return mapOf(
         "name" to name,
