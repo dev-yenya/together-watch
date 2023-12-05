@@ -18,8 +18,7 @@ class CreateScheduleModel(
 ) : CreateScheduleContract.Model {
     override fun saveSchedule(schedule: Schedule) {
         val userId = Firebase.auth.currentUser?.uid.toString()
-        val db = Firebase.firestore
-        val userRef = db.collection("users")
+        val userRef = Firebase.firestore.collection("users")
 
         userRef.document(userId)
             .collection("schedules")

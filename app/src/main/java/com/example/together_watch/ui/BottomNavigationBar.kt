@@ -88,7 +88,7 @@ fun NavigationGraph(navController: NavHostController, viewModel: MainViewModel) 
             CompleteScreen()
         }
         composable(Destinations.CreatePromiseScreen.route) {
-            CreatePromiseScreen(navController)
+            CreatePromiseScreen(navController, viewModel)
         }
         composable(Destinations.PromiseAcceptScreen.route) {
             PromiseAcceptScreen()
