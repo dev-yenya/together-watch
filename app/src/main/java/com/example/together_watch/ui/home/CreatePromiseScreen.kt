@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
+import com.example.together_watch.ui.MainViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -42,12 +43,14 @@ import java.util.Locale
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CreatePromiseScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: MainViewModel
 ) {
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
     val previousScreen = { currentScreen.intValue-- }
-    val complete = { /* 완료 액션 구현 */ }
+    val savePromise = { viewModel.savePromise() }
+    val complete = { /*complete 이벤트*/ }
 
     val backHandler = {
         if (currentScreen.intValue > 1) {
@@ -111,18 +114,30 @@ fun CreatePromiseScreen(
                 }
 
                 when (currentScreen.intValue) {
-                    1 -> FirstScreen()
-                    2 -> SecondScreen()
-                    3 -> ThirdScreen()
-                    4 -> FourthScreen()
+                    1 -> FirstScreen(viewModel) { text ->
+                        viewModel.promiseName = text
+                    }
+                    2 -> SecondScreen(viewModel) { text ->
+                        viewModel.promisePlace = text
+                    }
+                    3 -> ThirdScreen(viewModel) { dates ->
+                        viewModel.selectedDates = dates
+                    }
+                    4 -> FourthScreen(viewModel) {text1, text2 ->
+                        viewModel.startTime = text1
+                        viewModel.endTime = text2
+                    }
                     5 -> CompleteScreen()
                 }
             }
 
             Button(
-                onClick = if (currentScreen.intValue < 5) {
+                onClick = if (currentScreen.intValue < 4) {
                     { nextScreen() }
-                } else {
+                } else if (currentScreen.intValue < 5) { {
+                    savePromise()
+                    nextScreen()
+                } } else {
                     { complete() }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -136,7 +151,7 @@ fun CreatePromiseScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FirstScreen() {
+fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
     var text by remember { mutableStateOf("") } // 사용자 입력을 저장하기 위한 상태
 
     Column(
@@ -156,6 +171,7 @@ fun FirstScreen() {
             value = text, // 텍스트 필드의 값
             onValueChange = { newText ->
                 text = newText // 사용자가 입력한 새로운 텍스트로 업데이트
+                onNameChanged(newText) // viewModel에 값 저장
             },
             placeholder = { Text("12자 내의 이름을 입력해주세요") },
             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -170,7 +186,7 @@ fun FirstScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SecondScreen() {
+fun SecondScreen(viewModel: MainViewModel, onPlaceChanged: (String) -> Unit) {
     var text by remember { mutableStateOf("") } // 사용자 입력을 저장하기 위한 상태
 
     Column(
@@ -190,6 +206,7 @@ fun SecondScreen() {
             value = text, // 텍스트 필드의 값
             onValueChange = { newText ->
                 text = newText // 사용자가 입력한 새로운 텍스트로 업데이트
+                onPlaceChanged(newText)
             },
             placeholder = { Text("12자 내의 약속 장소를 입력해주세요") },
             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -203,7 +220,7 @@ fun SecondScreen() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ThirdScreen() {
+fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     val selectedDates = mutableListOf<String>()
     var dates by remember { mutableStateOf(listOf<String>()) }
@@ -234,6 +251,7 @@ fun ThirdScreen() {
             WeekRow(week, daysOffset, totalDays, selectedDate, yearMonth, isSelectedEffect=isSelectedEffect) { date ->
                 selectedDate = date
                 selectedDate = date
+
                 val isDateSelectable = date.isAfter(LocalDate.now()) || date.isEqual(LocalDate.now())
                 if (isDateSelectable) {
                     isSelectedEffect=true
@@ -241,8 +259,10 @@ fun ThirdScreen() {
                     if (!selectedDates.contains(date.toString())) {
                         selectedDates.add(date.toString())
                         dates = selectedDates.toList() // 상태 업데이트
+                        onDateSelected(dates) // 선택된 날짜를 viewModel으로 전달
                     }
-                }
+
+               
                 else isSelectedEffect=false
 
 
@@ -317,7 +337,7 @@ fun MyTimePicker(context: Context, result: ((String) -> Unit)) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FourthScreen() {
+fun FourthScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String) -> Unit) {
     var text1 by remember { mutableStateOf("") }
     var text2 by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -331,7 +351,7 @@ fun FourthScreen() {
             style = TextStyle(fontSize = 20.sp)
         )
         Text(
-            "약속 시간대를 입력해 주세요.",
+            "가능한 약속 시간 범위를 입력해 주세요.(예: 9:00~22:00)",
             modifier = Modifier.padding(bottom = 10.dp),
             style = TextStyle(fontSize = 15.sp)
         )
@@ -347,6 +367,7 @@ fun FourthScreen() {
                                 if (it is PressInteraction.Release) {
                                     MyTimePicker(context) {
                                         text1 = it
+                                        onTimeRangeSelected(text1, text2)
                                     }
                                 }
                             }
@@ -381,6 +402,7 @@ fun FourthScreen() {
                                 if (it is PressInteraction.Release) {
                                     MyTimePicker(context) {
                                         text2 = it
+                                        onTimeRangeSelected(text1, text2)
                                     }
                                 }
                             }
