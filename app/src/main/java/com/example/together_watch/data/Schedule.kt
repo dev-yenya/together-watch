@@ -1,8 +1,5 @@
 package com.example.together_watch.data
 
-import java.time.LocalDate
-import java.time.LocalTime
-
 data class Schedule(
     val name: String,
     val place: String,
