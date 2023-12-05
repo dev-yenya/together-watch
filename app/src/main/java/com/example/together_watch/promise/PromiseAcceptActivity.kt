@@ -38,16 +38,20 @@ import com.example.together_watch.ui.theme.Together_watchTheme
 
 class PromiseAcceptActivity : ComponentActivity(), PromiseAcceptContract.View {
 
+    val action: String? = intent?.action
+    val data: Uri? = intent?.data
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        PromiseAcceptModel().getGroupPromiseInfo(
+            data?.getQueryParameter("owner-id") as String,
+            data.getQueryParameter("group-id") as String
+        )
         setContent {
             Together_watchTheme {
                 Wrapper(this)
             }
         }
-
-        val action: String? = intent?.action
-        val data: Uri? = intent?.data
     }
 
     @Composable

@@ -10,6 +10,7 @@ import com.example.together_watch.data.Promise
 import com.example.together_watch.data.Schedule
 import com.example.together_watch.data.Status
 import com.example.together_watch.data.toMap
+import com.example.together_watch.promise.PromiseInfo
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
@@ -42,7 +43,7 @@ class MainViewModel : ViewModel() {
                                 place = it.get("place").toString(),
                                 date = it.get("date").toString(),
                                 startTime = it.get("startTime").toString(),
-                                endTime = it.get("enfdTime").toString(),
+                                endTime = it.get("endTime").toString(),
                                 isGroup = it.get("isGroup").toString() == "true",
                             )
                         )
@@ -52,9 +53,11 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun savePromise() {
+    fun savePromise(): PromiseInfo {
         val userId = Firebase.auth.currentUser?.uid.toString()
         val userRef = Firebase.firestore.collection("users")
+        var promiseId = ""
+        var ownerId = ""
 
         userRef.document(userId)
             .collection("promises")
@@ -70,8 +73,12 @@ class MainViewModel : ViewModel() {
                     place = promisePlace
                 ).toMap()
             )
-            .addOnSuccessListener {
+            .addOnSuccessListener { promiseDocumentReference ->
                 Log.d("promise", "약속 업로드 성공" )
+                promiseId =  promiseDocumentReference.id
+                ownerId = userId
             }
+
+        return PromiseInfo(ownerId, promiseId)
     }
 }

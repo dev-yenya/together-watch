@@ -2,7 +2,7 @@ package com.example.together_watch.promise
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import com.example.together_watch.ui.Destinations
+import com.example.together_watch.data.Promise
 
 interface PromiseAcceptContract {
 
@@ -14,6 +14,6 @@ interface PromiseAcceptContract {
     }
 
     interface Model {
-        fun getGroupPromiseInfo(groupPromiseId: Long)
+        fun getGroupPromiseInfo(ownerId: String, groupId: String): Promise
     }
 }

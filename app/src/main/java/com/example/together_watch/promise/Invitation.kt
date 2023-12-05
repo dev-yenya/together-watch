@@ -8,14 +8,18 @@ import com.kakao.sdk.common.util.KakaoCustomTabsClient
 import com.kakao.sdk.share.ShareClient
 import com.kakao.sdk.share.WebSharerClient
 
-fun shareInvitation(context: Context) {
+data class PromiseInfo(
+    val ownerId: String,
+    val docId: String
+)
+
+fun shareInvitation(context: Context, group: PromiseInfo) {
     val templateId: Long = 101298
     if (ShareClient.instance.isKakaoTalkSharingAvailable(context)) {
         ShareClient.instance.shareCustom(
             context = context,
             templateId = templateId,
-            // TODO: group-id 전달
-            // templateArgs = mutableMapOf("group-id" to groupId.toString())
+            templateArgs = mutableMapOf("owner-id" to group.ownerId, "group-id" to group.docId)
         ) { sharingResult, error ->
             if (error != null) {
                 Log.e("kakao-share-api", "카카오톡 공유 실패", error)
