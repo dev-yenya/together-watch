@@ -33,7 +33,9 @@ import androidx.navigation.compose.*
 import com.example.together_watch.ui.MainViewModel
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
+import java.util.Locale
 
 
 // 약속 생성
@@ -73,7 +75,7 @@ fun CreatePromiseScreen(
                 modifier = Modifier.weight(
                     1f,
                     true
-                ), // Takes up all available space except for the button
+                ),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (currentScreen.intValue < 5) {
@@ -244,14 +246,26 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
             val totalDays = yearMonth.lengthOfMonth()
             val firstDayOfMonth = yearMonth.atDay(1)
             val daysOffset = firstDayOfMonth.dayOfWeek.value % 7
+            var isSelectedEffect by remember { mutableStateOf(false) }
 
-            WeekRow(week, daysOffset, totalDays, selectedDate, yearMonth, isSelectedEffect = true) { date ->
+            WeekRow(week, daysOffset, totalDays, selectedDate, yearMonth, isSelectedEffect=isSelectedEffect) { date ->
                 selectedDate = date
-                if (!selectedDates.contains(date.toString())) {
-                    selectedDates.add(date.toString())
-                    dates = selectedDates.toList() // 상태 업데이트
-                    onDateSelected(dates) // 선택된 날짜를 viewModel으로 전달
-                }
+                selectedDate = date
+
+                val isDateSelectable = date.isAfter(LocalDate.now()) || date.isEqual(LocalDate.now())
+                if (isDateSelectable) {
+                    isSelectedEffect=true
+                    selectedDate = date
+                    if (!selectedDates.contains(date.toString())) {
+                        selectedDates.add(date.toString())
+                        dates = selectedDates.toList() // 상태 업데이트
+                        onDateSelected(dates) // 선택된 날짜를 viewModel으로 전달
+                    }
+
+               
+                else isSelectedEffect=false
+
+
             }
         }
 
@@ -269,10 +283,20 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
 
 @Composable
 fun EventsList(date: String) {
+    val date = LocalDate.parse(date)
+
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd (E)", Locale.KOREAN)
+    val formattedDate = date.format(formatter)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(
+                start = 16.dp,
+                top = 4.dp,
+                end = 16.dp,
+                bottom = 4.dp
+            )
     ) {
         Card(
             modifier = Modifier
@@ -288,23 +312,13 @@ fun EventsList(date: String) {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                Text(text = date, style = MaterialTheme.typography.headlineMedium)
+                Text(text = formattedDate,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.LightGray
+                )
             }
         }
     }
-}
-
-fun MyDatePicker(context: Context, result: ((String) -> Unit)) {
-    val calendar = Calendar.getInstance()
-    DatePickerDialog(
-        context,
-        { _, year, month, dayOfMonth ->
-            result("$year-${month + 1}-$dayOfMonth")
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    ).show()
 }
 
 fun MyTimePicker(context: Context, result: ((String) -> Unit)) {
