@@ -42,7 +42,7 @@ class MainViewModel : ViewModel() {
                                 place = it.get("place").toString(),
                                 date = it.get("date").toString(),
                                 startTime = it.get("startTime").toString(),
-                                endTime = it.get("endTime").toString(),
+                                endTime = it.get("enfdTime").toString(),
                                 isGroup = it.get("isGroup").toString() == "true",
                             )
                         )
