@@ -31,7 +31,7 @@ fun Promise.toMap(): Map<String, Any> {
 }
 
 enum class Status {
-    ONPROGRESS,
-    COMPLETED,
-    TIMEPASSED
+    ONPROGRESS,  //약속 잡고 있는 중
+    COMPLETED, //약속확정
+    TIMEPASSED  //약속 날짜 지남
 }

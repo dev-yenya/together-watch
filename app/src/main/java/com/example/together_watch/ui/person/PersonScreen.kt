@@ -43,7 +43,7 @@ import com.example.together_watch.ui.Destinations
 fun PersonScreen(
     navController: NavController
 ) {
-    var selectedButton by remember { mutableStateOf(0) } // 선택된 버튼 상태 관리
+    var selectedButton by remember { mutableStateOf(1) } // 선택된 버튼 상태 관리
 
     // 전체 패딩 설정
     Column(modifier = Modifier.padding(30.dp)) {
@@ -65,14 +65,14 @@ fun PersonScreen(
             CustomButton(
                 text = "확정",
                 isSelected = selectedButton == 1,
-                onSelected = { selectedButton = if (selectedButton != 1) 1 else 0 }
+                onSelected = { selectedButton = 1 }
             )
 
             // 두 번째 버튼
             CustomButton(
                 text = "초대 진행 중",
                 isSelected = selectedButton == 2,
-                onSelected = { selectedButton = if (selectedButton != 2) 2 else 0 }
+                onSelected = { selectedButton = 2 }
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -80,7 +80,10 @@ fun PersonScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { navController.navigate(Destinations.PromiseAcceptScreen.route) }
+                .clickable {
+
+                    if(selectedButton==2) navController.navigate(Destinations.PromiseAcceptScreen.route)
+                }
                 .padding(vertical = 4.dp), // 직접적으로 backgroundColor를 지정
             colors = CardDefaults.cardColors(
                 containerColor = Color.White,

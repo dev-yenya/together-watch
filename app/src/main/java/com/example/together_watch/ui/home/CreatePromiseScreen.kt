@@ -50,14 +50,14 @@ import java.util.Locale
 fun CreatePromiseScreen(
     navController: NavHostController,
 
-    viewModel: MainViewModel
+    viewModel:MainViewModel
 
 ) {
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
     val previousScreen = { currentScreen.intValue-- }
-    val savePromise = { viewModel.savePromise() }
-    val complete = { /*complete 이벤트*/ }
+    val savePromise={viewModel.savePromise()}
+    val complete = { /* 완료 액션 구현 */ }
 
     val backHandler = {
         if (currentScreen.intValue > 1) {
@@ -135,12 +135,12 @@ fun CreatePromiseScreen(
                         viewModel.endTime = text2
                     }
                     5 -> CompleteScreen()
+
                 }
             }
 
             Button(
-
-                onClick = if (currentScreen.intValue < 4) {
+                onClick = if (currentScreen.intValue < 4 ) {
                     { nextScreen() }
                 } else if (currentScreen.intValue < 5) { {
                     savePromise()
@@ -160,9 +160,8 @@ fun CreatePromiseScreen(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-
 fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
-
+    var isInputValid by remember { mutableStateOf(true) }
     var text by remember { mutableStateOf("") } // 사용자 입력을 저장하기 위한 상태
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(
@@ -183,9 +182,7 @@ fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
             value = text, // 텍스트 필드의 값
             onValueChange = { newText ->
                 text = newText // 사용자가 입력한 새로운 텍스트로 업데이트
-
                 isInputValid=newText.isNotBlank()
-
                 onNameChanged(newText) // viewModel에 값 저장
 
             },
@@ -230,9 +227,7 @@ fun SecondScreen(viewModel: MainViewModel, onPlaceChanged: (String) -> Unit) {
             value = text, // 텍스트 필드의 값
             onValueChange = { newText ->
                 text = newText // 사용자가 입력한 새로운 텍스트로 업데이트
-
                 isInputValid=newText.isNotBlank()
-
                 onPlaceChanged(newText)
 
             },
@@ -258,6 +253,7 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     val selectedDates = mutableListOf<String>()
     var dates by remember { mutableStateOf(listOf<String>()) }
+
 
     LazyColumn {
         item {
@@ -285,7 +281,6 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
             WeekRow(week, daysOffset, totalDays, selectedDate, yearMonth, isSelectedEffect=isSelectedEffect) { date ->
                 selectedDate = date
                 selectedDate = date
-
                 val isDateSelectable = date.isAfter(LocalDate.now()) || date.isEqual(LocalDate.now())
                 if (isDateSelectable) {
                     isSelectedEffect=true
@@ -295,8 +290,7 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
                         dates = selectedDates.toList() // 상태 업데이트
                         onDateSelected(dates) // 선택된 날짜를 viewModel으로 전달
                     }
-
-               
+                }
                 else isSelectedEffect=false
 
 
@@ -371,7 +365,8 @@ fun MyTimePicker(context: Context, result: ((String) -> Unit)) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FourthScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String) -> Unit) {
+    fun FourthScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String) -> Unit) {
+
     var text1 by remember { mutableStateOf("") }
     var text2 by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -385,7 +380,7 @@ fun FourthScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String)
             style = TextStyle(fontSize = 20.sp)
         )
         Text(
-            "가능한 약속 시간 범위를 입력해 주세요.(예: 9:00~22:00)",
+            "약속 시간대를 입력해 주세요.",
             modifier = Modifier.padding(bottom = 10.dp),
             style = TextStyle(fontSize = 15.sp)
         )
@@ -437,6 +432,7 @@ fun FourthScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String)
                                     MyTimePicker(context) {
                                         text2 = it
                                         onTimeRangeSelected(text1, text2)
+
                                     }
                                 }
                             }

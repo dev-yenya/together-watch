@@ -1,6 +1,7 @@
 package com.example.together_watch.ui.person
 
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -45,19 +46,34 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.together_watch.R
+import com.example.together_watch.ui.MainViewModel
 
 
 // 약속 수락
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun PromiseAcceptScreen() {
+fun PromiseAcceptScreen(navController: NavHostController,viewModel: MainViewModel) {
+
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
-
+    val previousScreen = { currentScreen.intValue-- }
     val complete = { /* 완료 액션 구현 */ }
     var showDialog by remember { mutableStateOf(false) }
     var flag = 0
+    val backHandler = {
+        if (currentScreen.intValue > 1) {
+            previousScreen()
+        } else {
+            navController.popBackStack()
+        }
+    }
+
+    BackHandler {
+        backHandler()
+    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -88,7 +104,7 @@ fun PromiseAcceptScreen() {
                             textAlign = TextAlign.Center
                         )
                         IconButton(
-                            onClick = { /* 뒤로가기 기능 구현 */ },
+                            onClick = { backHandler() },
                             modifier = Modifier.align(Alignment.CenterStart)
                         ) {
                             Icon(Icons.Filled.ArrowBack, contentDescription = null)

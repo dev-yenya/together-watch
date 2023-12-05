@@ -91,7 +91,7 @@ fun NavigationGraph(navController: NavHostController, viewModel: MainViewModel) 
             CreatePromiseScreen(navController, viewModel)
         }
         composable(Destinations.PromiseAcceptScreen.route) {
-            PromiseAcceptScreen()
+            PromiseAcceptScreen(navController ,viewModel)
         }
     }
 }
@@ -124,7 +124,7 @@ fun BottomBar(
                 onClick = {
                     navController.navigate(screen.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+                            saveState = false
                         }
                         launchSingleTop = true
                         restoreState = true
