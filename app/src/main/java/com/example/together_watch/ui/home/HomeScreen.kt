@@ -224,9 +224,10 @@ fun EventsList(
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                Text(text = fetchedSchedule.schedule.date + " " + fetchedSchedule.schedule.startTime + " ~ " + fetchedSchedule.schedule.endTime, style = MaterialTheme.typography.headlineMedium)
-                Text(text = fetchedSchedule.schedule.name, style = MaterialTheme.typography.bodyMedium)
-                Text(text = fetchedSchedule.schedule.place, style = MaterialTheme.typography.bodySmall)
+                Text(text = fetchedSchedule.schedule.date + " " + fetchedSchedule.schedule.startTime + " ~ " + fetchedSchedule.schedule.endTime, style = MaterialTheme.typography.bodyMedium,
+                    color=Color.LightGray)
+                Text(text = fetchedSchedule.schedule.name, style = MaterialTheme.typography.headlineSmall)
+                Text(text = fetchedSchedule.schedule.place, style = MaterialTheme.typography.bodyLarge)
             }
         }
     }
@@ -289,6 +290,7 @@ fun WeekRow(
     isSelectedEffect: Boolean = false,
     onDateSelected: (LocalDate) -> Unit
 ) {
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly // 균일한 간격으로 날짜 배치
@@ -298,7 +300,15 @@ fun WeekRow(
             val dayOfMonth = week * 7 + dayOfWeek - daysOffset + 1
             if (dayOfMonth in 1..totalDays) {
                 // 유효한 날짜일 경우 날짜 표시
-                DateBox(dayOfMonth, yearMonth, mySchedules, isSelectedEffect, onDateSelected)
+                val date = yearMonth.atDay(dayOfMonth)
+                val isToday = LocalDate.now() == date
+                DateBox(
+                    dayOfMonth,
+                    yearMonth,
+                    mySchedules,
+                    isSelectedEffect || (isToday && isSelectedEffect), // isSelectedEffect가 true이거나 오늘 날짜인 경우
+                    onDateSelected
+                )
             } else {
                 // 유효하지 않은 날짜일 경우 빈 공간 표시
                 EmptyBox()
@@ -367,6 +377,7 @@ fun DateBox(
         }
     }
 }
+
 
 @Composable
 fun EmptyBox() {
