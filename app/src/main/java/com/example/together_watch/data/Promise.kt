@@ -19,10 +19,11 @@ data class FetchedPromise(
 
 fun Promise.toMap(): Map<String, Any> {
     return mapOf(
+        "name" to name,
         "ownerId" to ownerId,
         "users" to users,
         "status" to status.toString(),
-        "date" to dates,
+        "dates" to dates,
         "startTime" to startTime,
         "endTime" to endTime,
         "place" to place

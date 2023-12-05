@@ -62,7 +62,7 @@ class MainViewModel : ViewModel() {
                 Promise(
                     name = promiseName,
                     ownerId = userId,
-                    users = mutableListOf(userId),
+                    users = listOf(userId),
                     status = Status.ONPROGRESS,
                     dates = selectedDates,
                     startTime = startTime,
