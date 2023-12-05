@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.together_watch.data.FetchedSchedule
 import com.example.together_watch.data.Schedule
@@ -95,6 +96,7 @@ fun HomeScreen(
     apiData?.let {
         Box(modifier = Modifier.fillMaxSize()) {
             Column {
+                
                 CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
                     selectedDate = newDate
                 })
@@ -105,11 +107,33 @@ fun HomeScreen(
                         it.schedule.date == date.toString()
                     }
                 })
-                LazyColumn {
-                    items(
-                        items = events,
-                        itemContent = { EventsList(it, navController, ::triggerForceRefresh) }
+
+                if(events.isEmpty()){
+                    Text(
+                        text = "새로운 일정을\n\n 만들어 볼까요?",
+                        modifier = Modifier.padding(
+                            start=16.dp,top=10.dp,bottom=18.dp,end=10.dp),
+                        fontSize = 27.sp,
+
                     )
+
+
+                }
+                else{
+                    LazyColumn {
+                        item{
+                            Text(
+                                text="오늘의 일정은\n\n이런 것들이 있어요",
+                                modifier = Modifier.padding(
+                                    start=16.dp,top=10.dp,bottom=18.dp,end=10.dp),
+                                fontSize = 27.sp)
+                        }
+                        items(
+                            items = events,
+                            itemContent = { EventsList(it, navController, ::triggerForceRefresh) }
+                        )
+                }
+
                 }
             }
             FloatingActionButton(
@@ -204,9 +228,10 @@ fun EventsList(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
-                .clickable{
+                .clickable {
                     val context = navController.context
-                    val updateAndDeleteModel = UpdateAndDeleteModel(fetchedSchedule, triggerForceRefresh)
+                    val updateAndDeleteModel =
+                        UpdateAndDeleteModel(fetchedSchedule, triggerForceRefresh)
                     val updateAndDeleteDialog = UpdateAndDeleteScheduleDialog(
                         context,
                         UpdateAndDeleteSchedulePresenter(updateAndDeleteModel)
@@ -303,10 +328,11 @@ fun WeekRow(
                 val date = yearMonth.atDay(dayOfMonth)
                 val isToday = LocalDate.now() == date
                 DateBox(
+                    isToday,
                     dayOfMonth,
                     yearMonth,
                     mySchedules,
-                    isSelectedEffect || (isToday && isSelectedEffect), // isSelectedEffect가 true이거나 오늘 날짜인 경우
+                    isSelectedEffect ,
                     onDateSelected
                 )
             } else {
@@ -320,6 +346,7 @@ fun WeekRow(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DateBox(
+    isToday: Boolean,
     dayOfMonth: Int,
     yearMonth: YearMonth,
     mySchedules: List<FetchedSchedule> = listOf(),
@@ -334,13 +361,17 @@ fun DateBox(
         modifier = Modifier
             .padding(8.dp)
             .size(40.dp)
-            .background(if (dates.any { it == date.toString() } && isSelectedEffect) Color.Blue.copy(
+            .background(if (dates.any { it == date.toString() } && isSelectedEffect || isToday) Color.Blue.copy(
                 alpha = 0.5f
             ) else Color.Transparent, shape = CircleShape)
+
             .clickable {
+
+
                 if (!selectedDates.contains(date.toString())) {
                     selectedDates.add(date.toString())
                     dates = selectedDates.toList() // 상태 업데이트
+
                 }
                 onDateSelected(date)
             }, // 박스 크기 지정
