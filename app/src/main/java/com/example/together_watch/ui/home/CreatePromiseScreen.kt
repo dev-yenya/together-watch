@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
+import com.example.together_watch.promise.shareInvitation
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Calendar
@@ -45,7 +46,11 @@ fun CreatePromiseScreen(
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
     val previousScreen = { currentScreen.intValue-- }
-    val complete = { /* 완료 액션 구현 */ }
+    val context = LocalContext.current
+    val complete = {
+        shareInvitation(context)
+        // TODO: 약속 생성시 아이디 전달
+    }
 
     val backHandler = {
         if (currentScreen.intValue > 1) {
