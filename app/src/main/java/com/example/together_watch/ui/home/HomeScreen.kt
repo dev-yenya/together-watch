@@ -29,8 +29,10 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,8 +49,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.together_watch.data.FetchedSchedule
 import com.example.together_watch.data.Schedule
@@ -59,6 +63,10 @@ import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteSchedu
 import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteSchedulePresenter
 import com.example.together_watch.ui.Destinations
 import com.example.together_watch.ui.MainViewModel
+import com.example.together_watch.ui.theme.Blue
+import com.example.together_watch.ui.theme.Gray
+import com.example.together_watch.ui.theme.Green
+import com.example.together_watch.ui.theme.White
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -108,25 +116,30 @@ fun HomeScreen(
                     }
                 })
 
+                Spacer(modifier = Modifier.height(20.dp))
+                Divider(color = Gray, modifier = Modifier.fillMaxWidth().height(2.dp))
+                Spacer(modifier = Modifier.height(20.dp))
+
                 if(events.isEmpty()){
                     Text(
-                        text = "새로운 일정을\n\n 만들어 볼까요?",
+                        text="새로운 일정을\n만들어 볼까요?",
                         modifier = Modifier.padding(
-                            start=16.dp,top=10.dp,bottom=18.dp,end=10.dp),
-                        fontSize = 27.sp,
-
+                            start=20.dp,top=10.dp,bottom=10.dp,end=10.dp),
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold
                     )
-
 
                 }
                 else{
                     LazyColumn {
                         item{
                             Text(
-                                text="오늘의 일정은\n\n이런 것들이 있어요",
+                                text="오늘의 일정은\n이런 것들이 있어요",
                                 modifier = Modifier.padding(
-                                    start=16.dp,top=10.dp,bottom=18.dp,end=10.dp),
-                                fontSize = 27.sp)
+                                    start= 20.dp,top=10.dp,bottom=10.dp,end=10.dp),
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                         items(
                             items = events,
@@ -186,7 +199,7 @@ fun ButtonRow(text: String, onClick: () -> Unit) {
             modifier = Modifier.padding(end = 8.dp)
         )
         Button(
-            onClick = onClick,
+            onClick = onClick, colors = ButtonDefaults.buttonColors(Blue),
             modifier = Modifier.size(36.dp)
         ) {
             Icon(Icons.Filled.ArrowForward, contentDescription = text)
@@ -230,7 +243,7 @@ fun EventsList(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Card(
             modifier = Modifier
@@ -283,7 +296,9 @@ fun CalendarGrid(selectedDate: LocalDate,
 //        schedulesForDay = fetchDataForDate(date)
 //    }
 
-    Column {
+    Column(
+        modifier = Modifier.padding(horizontal = 10.dp)
+    ) {
         // 요일 헤더
         WeekDaysHeader()
 //dd
@@ -368,7 +383,7 @@ fun DateBox(
     Box(
         modifier = Modifier
             .padding(8.dp)
-            .size(40.dp)
+            .size(35.dp)
             .background(if (dates.any { it == date.toString() } && isSelectedEffect || isToday) Color.Blue.copy(
                 alpha = 0.5f
             ) else Color.Transparent, shape = CircleShape)

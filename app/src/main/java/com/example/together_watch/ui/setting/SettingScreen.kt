@@ -34,6 +34,7 @@ import coil.compose.AsyncImage
 import com.example.together_watch.R
 import com.example.together_watch.ui.Destinations
 import com.example.together_watch.ui.theme.DarkGray
+import com.example.together_watch.ui.theme.Gray
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -56,7 +57,7 @@ fun SettingScreen(
                 contentDescription = "프로필 이미지",
                 modifier = Modifier
                     .size(50.dp)
-                    .border(2.dp, DarkGray, shape = CircleShape)
+                    .border(2.dp, Gray, shape = CircleShape)
                     .clip(CircleShape),
             )
             Spacer(modifier = Modifier.width(15.dp))
@@ -68,7 +69,7 @@ fun SettingScreen(
         }
 
         Spacer(modifier = Modifier.height(20.dp))
-        Divider(color = DarkGray, modifier = Modifier.fillMaxWidth().width(2.dp))
+        Divider(color = Gray, modifier = Modifier.fillMaxWidth().height(2.dp))
 
         Spacer(modifier = Modifier.height(30.dp))
         Text(text = "서비스 설정", fontSize = 20.sp, fontWeight = FontWeight.Bold)
