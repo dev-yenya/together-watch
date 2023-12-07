@@ -47,8 +47,8 @@ fun SettingScreen(
     val photoUrl = user?.photoUrl ?: ""
     val name = user?.displayName ?: ""
 
-    Column(modifier = Modifier.padding(24.dp)) {
-        Spacer(modifier = Modifier.height(20.dp))
+    Column(modifier = Modifier.padding(25.dp)) {
+        Spacer(modifier = Modifier.height(5.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             // 프로필 이미지

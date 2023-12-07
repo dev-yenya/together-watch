@@ -38,7 +38,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.together_watch.ui.MainViewModel
+import com.example.together_watch.ui.theme.Black
 import com.example.together_watch.ui.theme.Blue
+import com.example.together_watch.ui.theme.DarkGray
+import com.example.together_watch.ui.theme.Gray
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -159,7 +162,7 @@ fun CreatePromiseScreen(
                     .height(50.dp),
                 shape = RectangleShape
             ) {
-                Text(if (currentScreen.intValue < 5) "다음" else "친구 초대하기")
+                Text(if (currentScreen.intValue < 5) "다음" else "친구 초대하기", color = Black, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -264,7 +267,7 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
     var dates by remember { mutableStateOf(listOf<String>()) }
 
 
-    LazyColumn {
+    LazyColumn(modifier = Modifier.padding(10.dp)) {
         item {
             Spacer(Modifier.height(10.dp))
             Text(
@@ -351,7 +354,7 @@ fun EventsList(date: String) {
             ) {
                 Text(text = formattedDate,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.LightGray
+                    color = DarkGray
                 )
             }
         }
