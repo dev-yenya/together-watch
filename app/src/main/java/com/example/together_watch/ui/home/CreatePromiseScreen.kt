@@ -1,10 +1,13 @@
 package com.example.together_watch.ui.home
 
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.border
@@ -21,11 +24,15 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.SemanticsProperties.ImeAction
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,10 +41,12 @@ import androidx.navigation.compose.*
 import com.example.together_watch.promise.PromiseInfo
 import com.example.together_watch.promise.shareInvitation
 import com.example.together_watch.ui.MainViewModel
+import com.example.together_watch.ui.theme.Blue
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
-
+import java.util.Locale
 
 // 약속 생성
 
@@ -45,7 +54,9 @@ import java.util.Calendar
 @Composable
 fun CreatePromiseScreen(
     navController: NavHostController,
-    viewModel: MainViewModel
+
+    viewModel:MainViewModel
+
 ) {
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
@@ -60,6 +71,7 @@ fun CreatePromiseScreen(
     val complete = {
         shareInvitation(context, promises[0])
     }
+
     val backHandler = {
         if (currentScreen.intValue > 1) {
             previousScreen()
@@ -83,7 +95,7 @@ fun CreatePromiseScreen(
                 modifier = Modifier.weight(
                     1f,
                     true
-                ), // Takes up all available space except for the button
+                ),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (currentScreen.intValue < 5) {
@@ -103,7 +115,8 @@ fun CreatePromiseScreen(
                                 "시간"
                             },
                             modifier = Modifier.align(Alignment.Center),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold
                         )
                         IconButton(
                             onClick = { backHandler() },
@@ -117,7 +130,8 @@ fun CreatePromiseScreen(
                 if (currentScreen.intValue < 5) {
                     LinearProgressIndicator(
                         progress = currentScreen.intValue * 0.25f,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Blue
                     )
                 }
 
@@ -136,19 +150,24 @@ fun CreatePromiseScreen(
                         viewModel.endTime = text2
                     }
                     5 -> CompleteScreen()
+
                 }
             }
 
             Button(
-                onClick = if (currentScreen.intValue < 4) {
+                onClick = if (currentScreen.intValue < 4 ) {
                     { nextScreen() }
                 } else if (currentScreen.intValue < 5) { {
                     savePromise()
                     nextScreen()
                 } } else {
+
                     { complete() }
                 },
-                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(Blue),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
                 shape = RectangleShape
             ) {
                 Text(if (currentScreen.intValue < 5) "다음" else "친구 초대하기")
@@ -157,18 +176,20 @@ fun CreatePromiseScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
+    var isInputValid by remember { mutableStateOf(true) }
     var text by remember { mutableStateOf("") } // 사용자 입력을 저장하기 위한 상태
-
+    val keyboardController = LocalSoftwareKeyboardController.current
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
         Text(
             "약속을 잡아볼까요?",
             modifier = Modifier.padding(bottom = 5.dp),
-            style = TextStyle(fontSize = 20.sp)
+            style = TextStyle(fontSize = 20.sp),
+            fontWeight = FontWeight.Bold
         )
         Text(
             "먼저, 약속 이름이 필요해요.",
@@ -176,17 +197,25 @@ fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
             style = TextStyle(fontSize = 15.sp)
         )
         OutlinedTextField(
+
             value = text, // 텍스트 필드의 값
             onValueChange = { newText ->
                 text = newText // 사용자가 입력한 새로운 텍스트로 업데이트
+                isInputValid=newText.isNotBlank()
                 onNameChanged(newText) // viewModel에 값 저장
+
             },
+            singleLine = true,
             placeholder = { Text("12자 내의 이름을 입력해주세요") },
+
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = Color.Transparent,
+            ),
+
+
+
             )
-        )
         Divider()
     }
 }
@@ -196,14 +225,17 @@ fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
 @Composable
 fun SecondScreen(viewModel: MainViewModel, onPlaceChanged: (String) -> Unit) {
     var text by remember { mutableStateOf("") } // 사용자 입력을 저장하기 위한 상태
-
+    var isInputValid by remember { mutableStateOf(true) }
+    val context = LocalContext.current
     Column(
+
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
         Text(
             "어디서 보나요?",
             modifier = Modifier.padding(bottom = 5.dp),
-            style = TextStyle(fontSize = 20.sp)
+            style = TextStyle(fontSize = 20.sp),
+            fontWeight = FontWeight.Bold
         )
         Text(
             "약속 장소를 잡아주세요",
@@ -211,17 +243,26 @@ fun SecondScreen(viewModel: MainViewModel, onPlaceChanged: (String) -> Unit) {
             style = TextStyle(fontSize = 15.sp)
         )
         OutlinedTextField(
+
             value = text, // 텍스트 필드의 값
             onValueChange = { newText ->
                 text = newText // 사용자가 입력한 새로운 텍스트로 업데이트
+                isInputValid=newText.isNotBlank()
                 onPlaceChanged(newText)
+
             },
+            singleLine = true,
             placeholder = { Text("12자 내의 약속 장소를 입력해주세요") },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = Color.Transparent,
             )
         )
+        if (!isInputValid) {
+            // 입력값이 비어 있을 때 토스트 메시지 표시
+            Toast.makeText(context, "약속 장소를 입력해주세요", Toast.LENGTH_SHORT).show()
+        }
+
         Divider()
     }
 }
@@ -232,6 +273,7 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     val selectedDates = mutableListOf<String>()
     var dates by remember { mutableStateOf(listOf<String>()) }
+
 
     LazyColumn {
         item {
@@ -254,14 +296,24 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
             val totalDays = yearMonth.lengthOfMonth()
             val firstDayOfMonth = yearMonth.atDay(1)
             val daysOffset = firstDayOfMonth.dayOfWeek.value % 7
+            var isSelectedEffect by remember { mutableStateOf(false) }
 
-            WeekRow(week, daysOffset, totalDays, selectedDate, yearMonth, isSelectedEffect = true) { date ->
+            WeekRow(week, daysOffset, totalDays, selectedDate, yearMonth, isSelectedEffect=isSelectedEffect) { date ->
                 selectedDate = date
-                if (!selectedDates.contains(date.toString())) {
-                    selectedDates.add(date.toString())
-                    dates = selectedDates.toList() // 상태 업데이트
-                    onDateSelected(dates) // 선택된 날짜를 viewModel으로 전달
+                selectedDate = date
+                val isDateSelectable = date.isAfter(LocalDate.now()) || date.isEqual(LocalDate.now())
+                if (isDateSelectable) {
+                    isSelectedEffect=true
+                    selectedDate = date
+                    if (!selectedDates.contains(date.toString())) {
+                        selectedDates.add(date.toString())
+                        dates = selectedDates.toList() // 상태 업데이트
+                        onDateSelected(dates) // 선택된 날짜를 viewModel으로 전달
+                    }
                 }
+                else isSelectedEffect=false
+
+
             }
         }
 
@@ -279,10 +331,20 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
 
 @Composable
 fun EventsList(date: String) {
+    val date = LocalDate.parse(date)
+
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd (E)", Locale.KOREAN)
+    val formattedDate = date.format(formatter)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(
+                start = 16.dp,
+                top = 4.dp,
+                end = 16.dp,
+                bottom = 4.dp
+            )
     ) {
         Card(
             modifier = Modifier
@@ -298,23 +360,13 @@ fun EventsList(date: String) {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                Text(text = date, style = MaterialTheme.typography.headlineMedium)
+                Text(text = formattedDate,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.LightGray
+                )
             }
         }
     }
-}
-
-fun MyDatePicker(context: Context, result: ((String) -> Unit)) {
-    val calendar = Calendar.getInstance()
-    DatePickerDialog(
-        context,
-        { _, year, month, dayOfMonth ->
-            result("$year-${month + 1}-$dayOfMonth")
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    ).show()
 }
 
 fun MyTimePicker(context: Context, result: ((String) -> Unit)) {
@@ -334,6 +386,7 @@ fun MyTimePicker(context: Context, result: ((String) -> Unit)) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FourthScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String) -> Unit) {
+
     var text1 by remember { mutableStateOf("") }
     var text2 by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -344,10 +397,11 @@ fun FourthScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String)
         Text(
             "언제 만날까요?",
             modifier = Modifier.padding(bottom = 5.dp),
-            style = TextStyle(fontSize = 20.sp)
+            style = TextStyle(fontSize = 20.sp),
+            fontWeight = FontWeight.Bold
         )
         Text(
-            "가능한 약속 시간 범위를 입력해 주세요.(예: 9:00~22:00)",
+            "약속 시간대를 입력해 주세요.",
             modifier = Modifier.padding(bottom = 10.dp),
             style = TextStyle(fontSize = 15.sp)
         )
@@ -399,6 +453,7 @@ fun FourthScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String)
                                     MyTimePicker(context) {
                                         text2 = it
                                         onTimeRangeSelected(text1, text2)
+
                                     }
                                 }
                             }

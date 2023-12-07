@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,8 +29,10 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,8 +49,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.together_watch.data.FetchedSchedule
 import com.example.together_watch.data.Schedule
@@ -58,6 +63,10 @@ import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteSchedu
 import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteSchedulePresenter
 import com.example.together_watch.ui.Destinations
 import com.example.together_watch.ui.MainViewModel
+import com.example.together_watch.ui.theme.Blue
+import com.example.together_watch.ui.theme.Gray
+import com.example.together_watch.ui.theme.Green
+import com.example.together_watch.ui.theme.White
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -95,6 +104,7 @@ fun HomeScreen(
     apiData?.let {
         Box(modifier = Modifier.fillMaxSize()) {
             Column {
+
                 CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
                     selectedDate = newDate
                 })
@@ -105,20 +115,54 @@ fun HomeScreen(
                         it.schedule.date == date.toString()
                     }
                 })
-                LazyColumn {
-                    items(
-                        items = events,
-                        itemContent = { EventsList(it, navController, ::triggerForceRefresh) }
+
+                Spacer(modifier = Modifier.height(20.dp))
+                Divider(color = Gray, modifier = Modifier.fillMaxWidth().height(2.dp))
+                Spacer(modifier = Modifier.height(20.dp))
+
+                if(events.isEmpty()){
+                    Text(
+                        text="새로운 일정을\n만들어 볼까요?",
+                        modifier = Modifier.padding(
+                            start=20.dp,top=10.dp,bottom=10.dp,end=10.dp),
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold
                     )
+
+                }
+                else{
+                    LazyColumn {
+                        item{
+                            Text(
+                                text="오늘의 일정은\n이런 것들이 있어요",
+                                modifier = Modifier.padding(
+                                    start= 20.dp,top=10.dp,bottom=10.dp,end=10.dp),
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        items(
+                            items = events,
+                            itemContent = { EventsList(it, navController, ::triggerForceRefresh) }
+                        )
+                }
+
                 }
             }
             FloatingActionButton(
                 onClick = { showAddEvent = !showAddEvent },
+                shape = CircleShape,
+                containerColor = Blue,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp)
             ) {
-                Icon(if (showAddEvent) Icons.Filled.Close else Icons.Filled.Add, "Toggle Buttons")
+                Icon(
+                    if (showAddEvent) Icons.Filled.Close
+                    else Icons.Filled.Add,
+                    contentDescription = "Toggle Buttons",
+                    tint = White
+                )
             }
 
             // 추가 버튼들 표시
@@ -131,7 +175,8 @@ fun HomeScreen(
                 Column(horizontalAlignment = Alignment.End) {
                     ButtonRow(
                         "약속 일정 추가",
-                        onClick = { navController.navigate(Destinations.CreatePromiseScreen.route) })
+                        onClick = { navController.navigate(Destinations.CreatePromiseScreen.route) }
+                    )
                     ButtonRow("개인 일정 추가", onClick = {
                         val context = navController.context
                         val createScheduleDialog = CreateScheduleDialog(context,
@@ -154,7 +199,7 @@ fun ButtonRow(text: String, onClick: () -> Unit) {
             modifier = Modifier.padding(end = 8.dp)
         )
         Button(
-            onClick = onClick,
+            onClick = onClick, colors = ButtonDefaults.buttonColors(Blue),
             modifier = Modifier.size(36.dp)
         ) {
             Icon(Icons.Filled.ArrowForward, contentDescription = text)
@@ -169,7 +214,7 @@ fun CalendarHeader(selectedDate: LocalDate, onDateChanged: (LocalDate) -> Unit) 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(PaddingValues(20.dp, 16.dp, 16.dp, 16.dp)),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -198,15 +243,16 @@ fun EventsList(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
-                .clickable{
+                .clickable {
                     val context = navController.context
-                    val updateAndDeleteModel = UpdateAndDeleteModel(fetchedSchedule, triggerForceRefresh)
+                    val updateAndDeleteModel =
+                        UpdateAndDeleteModel(fetchedSchedule, triggerForceRefresh)
                     val updateAndDeleteDialog = UpdateAndDeleteScheduleDialog(
                         context,
                         UpdateAndDeleteSchedulePresenter(updateAndDeleteModel)
@@ -224,9 +270,10 @@ fun EventsList(
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                Text(text = fetchedSchedule.schedule.date + " " + fetchedSchedule.schedule.startTime + " ~ " + fetchedSchedule.schedule.endTime, style = MaterialTheme.typography.headlineMedium)
-                Text(text = fetchedSchedule.schedule.name, style = MaterialTheme.typography.bodyMedium)
-                Text(text = fetchedSchedule.schedule.place, style = MaterialTheme.typography.bodySmall)
+                Text(text = fetchedSchedule.schedule.date + " " + fetchedSchedule.schedule.startTime + " ~ " + fetchedSchedule.schedule.endTime, style = MaterialTheme.typography.bodyMedium,
+                    color=Color.LightGray)
+                Text(text = fetchedSchedule.schedule.name, style = MaterialTheme.typography.headlineSmall)
+                Text(text = fetchedSchedule.schedule.place, style = MaterialTheme.typography.bodyLarge)
             }
         }
     }
@@ -249,7 +296,9 @@ fun CalendarGrid(selectedDate: LocalDate,
 //        schedulesForDay = fetchDataForDate(date)
 //    }
 
-    Column {
+    Column(
+        modifier = Modifier.padding(horizontal = 10.dp)
+    ) {
         // 요일 헤더
         WeekDaysHeader()
 //dd
@@ -269,7 +318,7 @@ fun WeekDaysHeader() {
             Text(
                 text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .width(40.dp),
                 textAlign = TextAlign.Center
             )
@@ -289,6 +338,7 @@ fun WeekRow(
     isSelectedEffect: Boolean = false,
     onDateSelected: (LocalDate) -> Unit
 ) {
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly // 균일한 간격으로 날짜 배치
@@ -298,7 +348,16 @@ fun WeekRow(
             val dayOfMonth = week * 7 + dayOfWeek - daysOffset + 1
             if (dayOfMonth in 1..totalDays) {
                 // 유효한 날짜일 경우 날짜 표시
-                DateBox(dayOfMonth, yearMonth, mySchedules, isSelectedEffect, onDateSelected)
+                val date = yearMonth.atDay(dayOfMonth)
+                val isToday = LocalDate.now() == date
+                DateBox(
+                    isToday,
+                    dayOfMonth,
+                    yearMonth,
+                    mySchedules,
+                    isSelectedEffect ,
+                    onDateSelected
+                )
             } else {
                 // 유효하지 않은 날짜일 경우 빈 공간 표시
                 EmptyBox()
@@ -310,6 +369,7 @@ fun WeekRow(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DateBox(
+    isToday: Boolean,
     dayOfMonth: Int,
     yearMonth: YearMonth,
     mySchedules: List<FetchedSchedule> = listOf(),
@@ -323,14 +383,18 @@ fun DateBox(
     Box(
         modifier = Modifier
             .padding(8.dp)
-            .size(40.dp)
-            .background(if (dates.any { it == date.toString() } && isSelectedEffect) Color.Blue.copy(
+            .size(35.dp)
+            .background(if (dates.any { it == date.toString() } && isSelectedEffect || isToday) Color.Blue.copy(
                 alpha = 0.5f
             ) else Color.Transparent, shape = CircleShape)
+
             .clickable {
+
+
                 if (!selectedDates.contains(date.toString())) {
                     selectedDates.add(date.toString())
                     dates = selectedDates.toList() // 상태 업데이트
+
                 }
                 onDateSelected(date)
             }, // 박스 크기 지정
@@ -367,6 +431,7 @@ fun DateBox(
         }
     }
 }
+
 
 @Composable
 fun EmptyBox() {
