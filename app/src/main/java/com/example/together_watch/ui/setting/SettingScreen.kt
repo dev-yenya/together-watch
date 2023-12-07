@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -25,12 +26,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.together_watch.R
 import com.example.together_watch.ui.Destinations
+import com.example.together_watch.ui.theme.DarkGray
+import com.example.together_watch.ui.theme.Gray
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -40,37 +44,37 @@ fun SettingScreen(
     navController: NavHostController
 ) {
     val user = Firebase.auth.currentUser
-    val email = user?.email ?: ""
     val photoUrl = user?.photoUrl ?: ""
     val name = user?.displayName ?: ""
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.padding(24.dp)) {
+        Spacer(modifier = Modifier.height(20.dp))
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             // 프로필 이미지
             AsyncImage(
                 model = photoUrl,
                 contentDescription = "프로필 이미지",
                 modifier = Modifier
-                    .size(40.dp)
-                    .border(2.dp, Color.Black, shape = CircleShape)
-                    .clip(CircleShape)
+                    .size(50.dp)
+                    .border(2.dp, Gray, shape = CircleShape)
+                    .clip(CircleShape),
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(15.dp))
 
             // 이름과 이메일
             Column {
-                Text(text = name, fontSize = 20.sp)
-                Text(text = email, fontSize = 16.sp)
+                Text(text = name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Divider(color = Color.Black)
+        Spacer(modifier = Modifier.height(20.dp))
+        Divider(color = Gray, modifier = Modifier.fillMaxWidth().height(2.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "서비스 설정", fontSize = 24.sp)
+        Spacer(modifier = Modifier.height(30.dp))
+        Text(text = "서비스 설정", fontSize = 20.sp, fontWeight = FontWeight.Bold)
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,

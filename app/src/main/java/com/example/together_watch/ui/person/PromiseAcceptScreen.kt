@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -42,10 +43,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.together_watch.R
+import com.example.together_watch.ui.theme.Black
+import com.example.together_watch.ui.theme.Blue
+import com.example.together_watch.ui.theme.DarkGray
+import com.example.together_watch.ui.theme.Gray
 
 
 // 약속 수락
@@ -85,7 +91,8 @@ fun PromiseAcceptScreen() {
                                 "약속 시간"
                             },
                             modifier = Modifier.align(Alignment.Center),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold
                         )
                         IconButton(
                             onClick = { /* 뒤로가기 기능 구현 */ },
@@ -99,7 +106,8 @@ fun PromiseAcceptScreen() {
                 if (currentScreen.intValue < 4) {
                     LinearProgressIndicator(
                         progress = currentScreen.intValue * 0.33f,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Blue
                     )
                 }
 
@@ -118,24 +126,37 @@ fun PromiseAcceptScreen() {
                             flag = 1
                             showDialog = true
                         },
+                        colors = ButtonDefaults.buttonColors(Gray),
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        shape = RectangleShape
+                            .height(50.dp)
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        shape = RectangleShape,
                     ) {
-                        Text("취소")
+                        Text(
+                            text = "취소",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = DarkGray)
                     }
                     Button(
                         onClick = {
                             flag = 2
                             showDialog = true
                         },
+                        colors = ButtonDefaults.buttonColors(Blue),
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
+                            .height(50.dp)
+                            .weight(1f)
+                            .fillMaxWidth(),
                         shape = RectangleShape
                     ) {
-                        Text("확인")
+                        Text(
+                            text = "확인",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Black
+                            )
                     }
                 }
             } else {
@@ -145,10 +166,16 @@ fun PromiseAcceptScreen() {
                     } else {
                         { complete() }
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RectangleShape
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    colors = ButtonDefaults.buttonColors(Blue),
+                    shape = RectangleShape,
                 ) {
-                    Text(if (currentScreen.intValue < 4) "다음" else "캘린더에서 일정 확인하기")
+                    Text(
+                        text = if (currentScreen.intValue < 4) "다음" else "캘린더에서 일정 확인하기",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Black
+                    )
                 }
             }
         }
@@ -165,14 +192,16 @@ fun PromiseAcceptScreen() {
                     if (flag != 1) {
                         nextScreen()
                     }
-                }) {
-                    Text("확인")
+                },
+                    colors = ButtonDefaults.buttonColors(Blue)
+                ) {
+                    Text(text = "확인", color = Black)
                 }
             },
             dismissButton = {
                 if (flag == 1) {
-                    Button(onClick = { showDialog = false }) {
-                        Text("취소")
+                    Button(onClick = { showDialog = false }, colors = ButtonDefaults.buttonColors(Blue)) {
+                        Text("취소", color = DarkGray)
                     }
                 }
             }
@@ -186,7 +215,7 @@ fun PromiseFirstScreen() {
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
-        Text("새로운 약속이 도착했어요!", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp))
+        Text("새로운 약속이 도착했어요!", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp), fontWeight = FontWeight.Bold)
         Text("약속에 참가하려면, 확인 버튼을 눌러주세요.", modifier = Modifier.padding(bottom = 10.dp), style = TextStyle(fontSize = 15.sp))
         Spacer(modifier = Modifier.height(20.dp))
         Card(
@@ -224,7 +253,7 @@ fun PromiseSecondScreen() {
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
-        Text("약속을 확정해 볼까요?", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp))
+        Text("약속을 확정해 볼까요?", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp), fontWeight = FontWeight.Bold)
         Text("모든 멤버들이 약속에 참여했나요?", modifier = Modifier.padding(bottom = 10.dp), style = TextStyle(fontSize = 15.sp))
         Spacer(modifier = Modifier.height(20.dp))
         Card(
@@ -246,8 +275,8 @@ fun PromiseSecondScreen() {
                 Text(text = "Event Details", style = MaterialTheme.typography.bodySmall)
             }
         }
-        Spacer(modifier = Modifier.height(10.dp))
-        Text("약속에 참여한 멤버들", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp))
+        Spacer(modifier = Modifier.height(20.dp))
+        Text("약속에 참여한 멤버들", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp), fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(10.dp))
         LazyColumn {
             items(profiles) { (name, imageRes) ->
@@ -294,7 +323,7 @@ fun PromiseThirdScreen() {
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
-        Text("언제 만날까요?", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp))
+        Text("언제 만날까요?", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp), fontWeight = FontWeight.Bold)
         Text("약속 시간대를 입력해 주세요.", modifier = Modifier.padding(bottom = 10.dp), style = TextStyle(fontSize = 15.sp))
         Spacer(Modifier.height(10.dp))
 
@@ -333,27 +362,29 @@ fun PromiseCompleteScreen() {
         modifier = Modifier
             .padding(horizontal = 20.dp, vertical = 30.dp)
             .fillMaxWidth(), // Column을 가로로 채우도록 설정
-        horizontalAlignment = Alignment.CenterHorizontally // 내용을 가로 중앙에 배치
+        horizontalAlignment = Alignment.CenterHorizontally // 내용을 가로 중앙에 배치설정
     ) {
+        Spacer(Modifier.height(25.dp))
         Text(
             "약속 확정이 완료되었어요!",
-            modifier = Modifier.padding(bottom = 5.dp),
+            modifier = Modifier.padding(bottom = 5.dp)
+                .align(Alignment.Start),
             style = TextStyle(fontSize = 20.sp),
-            textAlign = TextAlign.Start // 텍스트 중앙 정렬
+            fontWeight = FontWeight.Bold
         )
         Text(
             "이제 모두의 캘린더에 약속이 추가되었어요",
-            modifier = Modifier.padding(bottom = 10.dp),
+            modifier = Modifier.padding(bottom = 10.dp)
+                .align(Alignment.Start),
             style = TextStyle(fontSize = 15.sp),
-            textAlign = TextAlign.Center // 텍스트 중앙 정렬
         )
-        Spacer(Modifier.height(50.dp))
+        Spacer(Modifier.height(100.dp))
         Icon(
             Icons.Default.DateRange,
             contentDescription = null,
-            modifier = Modifier.size(200.dp) // 아이콘 크기 조정
+            modifier = Modifier.size(150.dp) // 아이콘 크기 조정
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(30.dp))
         Text(
             "약속 시간에 맞춰 미리\n톡캘린더로 리마인드 해드릴게요!",
             textAlign = TextAlign.Center // 텍스트 중앙 정렬
