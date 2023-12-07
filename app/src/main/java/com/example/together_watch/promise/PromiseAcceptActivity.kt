@@ -2,7 +2,6 @@ package com.example.together_watch.promise
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -24,29 +23,37 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.together_watch.MainActivity
-import com.example.together_watch.ui.Destinations
+import com.example.together_watch.data.Promise
+import com.example.together_watch.data.Status
 import com.example.together_watch.ui.theme.Together_watchTheme
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 class PromiseAcceptActivity : ComponentActivity(), PromiseAcceptContract.View {
-
-    val action: String? = intent?.action
-    val data: Uri? = intent?.data
+    private lateinit var path: Uri
+    private lateinit var ownerId: String
+    private lateinit var groupId: String
+    private val model = PromiseAcceptModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        PromiseAcceptModel().getGroupPromiseInfo(
-            data?.getQueryParameter("owner-id") as String,
-            data.getQueryParameter("group-id") as String
-        )
+        val data = intent?.data
+        path = Uri.parse(data.toString())
+        Log.d("kakao-share-api", "초대장 수락자 intent.data: ${path.getQueryParameter("ownerId")}")
+        ownerId = path.getQueryParameter("ownerId") as String
+        groupId = path.getQueryParameter("groupId") as String
         setContent {
             Together_watchTheme {
                 Wrapper(this)
@@ -56,21 +63,29 @@ class PromiseAcceptActivity : ComponentActivity(), PromiseAcceptContract.View {
 
     @Composable
     @OptIn(ExperimentalMaterial3Api::class)
-    fun Wrapper(context: Context) {
+     fun Wrapper(context: Context) {
+        var data: Promise by remember { mutableStateOf(
+            Promise("", "", listOf(),Status.ONPROGRESS, listOf(), "", "", "")
+        ) }
+
+        LaunchedEffect(Unit) {
+            data = model.getGroupPromise(ownerId, groupId)
+        }
+
         Scaffold(
             bottomBar = { Buttons(context) }
         ) {
             Column(
                 modifier = Modifier.padding(it)
             ) {
-                PromiseAcceptScreen()
+                PromiseAcceptScreen(data)
             }
         }
 
     }
 
     @Composable
-    override fun PromiseAcceptScreen() {
+    override fun PromiseAcceptScreen(promise: Promise) {
         Column(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
         ) {
@@ -100,11 +115,11 @@ class PromiseAcceptActivity : ComponentActivity(), PromiseAcceptContract.View {
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "Event Date and Time",
-                        style = MaterialTheme.typography.headlineMedium
+                        text = "약속시간은 모두가 괜찮은 시간대로 정해볼게요.",
+                        style = MaterialTheme.typography.bodySmall
                     )
-                    Text(text = "Event Title: ", style = MaterialTheme.typography.bodyMedium)
-                    Text(text = "Event Details", style = MaterialTheme.typography.bodySmall)
+                    Text(text = promise.name, style = MaterialTheme.typography.headlineMedium)
+                    Text(text = promise.place, style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }
@@ -135,7 +150,8 @@ class PromiseAcceptActivity : ComponentActivity(), PromiseAcceptContract.View {
     }
 
     private fun acceptAction(context: Context) {
-        // TODO: 데이터베이스 참가자 추가 함수 호출
+        val loginUser = Firebase.auth.currentUser
+        model.addPromiseMember(loginUser?.uid, ownerId)
         AlertDialog.Builder(context)
             .setTitle("약속 참가 성공!")
             .setMessage("약속 일정이 확정되면 캘린더에 추가됩니다.")

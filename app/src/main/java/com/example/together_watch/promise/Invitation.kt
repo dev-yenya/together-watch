@@ -2,8 +2,11 @@ package com.example.together_watch.promise
 
 import android.content.ActivityNotFoundException
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.core.content.ContextCompat.startActivity
+import com.example.together_watch.BuildConfig
+import com.kakao.sdk.common.KakaoSdk
 import com.kakao.sdk.common.util.KakaoCustomTabsClient
 import com.kakao.sdk.share.ShareClient
 import com.kakao.sdk.share.WebSharerClient
@@ -15,20 +18,22 @@ data class PromiseInfo(
 
 fun shareInvitation(context: Context, group: PromiseInfo) {
     val templateId: Long = 101298
+    val argumentsMap = mapOf("ownerId" to group.ownerId, "groupId" to group.docId)
     if (ShareClient.instance.isKakaoTalkSharingAvailable(context)) {
         ShareClient.instance.shareCustom(
             context = context,
             templateId = templateId,
-            templateArgs = mutableMapOf("owner-id" to group.ownerId, "group-id" to group.docId)
+            templateArgs = argumentsMap
         ) { sharingResult, error ->
             if (error != null) {
                 Log.e("kakao-share-api", "카카오톡 공유 실패", error)
             }
             else if (sharingResult != null) {
-                Log.d("kakao-share-api", "카카오톡 공유 성공 ${sharingResult.intent}")
+                Log.d("kakao-share-api", "카카오톡 공유 성공 ${sharingResult.intent.data?.query}")
+                Log.d("kakao-share-api", argumentsMap.toString())
                 startActivity(context, sharingResult.intent, null)
 
-                Log.w("kakao-share-api", "Warning Msg: ${sharingResult.warningMsg}")
+                Log.w("kakao-share-api", "Warninag Msg: ${sharingResult.warningMsg}")
                 Log.w("kakao-share-api", "Argument Msg: ${sharingResult.argumentMsg}")
             }
         }

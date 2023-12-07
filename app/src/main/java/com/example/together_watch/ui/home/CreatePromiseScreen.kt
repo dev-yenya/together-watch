@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.border
@@ -49,12 +50,16 @@ fun CreatePromiseScreen(
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
     val previousScreen = { currentScreen.intValue-- }
-    var promiseInfo = PromiseInfo("", "")
+    val promises = remember { mutableListOf<PromiseInfo>() }
+    val savePromise = {
+        viewModel.savePromise().whenComplete { result, _ ->
+            promises.add(PromiseInfo(result.ownerId, result.docId))
+        }
+    }
     val context = LocalContext.current
     val complete = {
-        shareInvitation(context, promiseInfo)
+        shareInvitation(context, promises[0])
     }
-    val savePromise = { promiseInfo = viewModel.savePromise() }
     val backHandler = {
         if (currentScreen.intValue > 1) {
             previousScreen()

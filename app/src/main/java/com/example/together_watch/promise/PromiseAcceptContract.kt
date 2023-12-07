@@ -8,12 +8,12 @@ interface PromiseAcceptContract {
 
     interface View {
         @Composable
-        fun PromiseAcceptScreen()
-        @Composable
         fun Buttons(context: Context)
+        @Composable
+        fun PromiseAcceptScreen(promise: Promise)
     }
 
     interface Model {
-        fun getGroupPromiseInfo(ownerId: String, groupId: String): Promise
+        suspend fun getGroupPromise(ownerId: String, groupId: String): Promise
     }
 }
