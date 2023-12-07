@@ -16,6 +16,7 @@ class UpdateAndDeleteScheduleDialog(
     init {
         behavior.state = BottomSheetBehavior.STATE_EXPANDED
         setContentView(binding.root)
+        showSchedule()
         setupClickListeners()
     }
 
@@ -25,16 +26,18 @@ class UpdateAndDeleteScheduleDialog(
             btnDelete.setOnClickListener {
                 presenter.onDeleteButtonClickedAndCheckedDeleted()
                 showToast(R.string.msg_success_delete_schedule)
-                hideBottomSheet()
+                hide()
             }
         }
     }
 
-    override fun hideBottomSheet() {
-        hide()
-    }
-
     override fun showSchedule() {
+        val selectedSchedule = presenter.loadScheduleData()
+        with(binding) {
+            tvTitle.text = selectedSchedule.name
+            tvTime.text = selectedSchedule.startTime + "~" + selectedSchedule.endTime
+            tvPlace.text = selectedSchedule.place
+        }
     }
 
     private fun showToast(messageResId: Int) {

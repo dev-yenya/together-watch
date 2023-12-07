@@ -1,5 +1,7 @@
 package com.example.together_watch.schedule.updateAndDelete
 
+import com.example.together_watch.data.Schedule
+
 class UpdateAndDeleteSchedulePresenter(
     private val model : UpdateAndDeleteScheduleContract.Model
 ) : UpdateAndDeleteScheduleContract.Presenter {
@@ -16,7 +18,7 @@ class UpdateAndDeleteSchedulePresenter(
         return isDeleted
     }
 
-    override fun loadScheduleData() {
-        TODO("Not yet implemented")
+    override fun loadScheduleData(): Schedule {
+        return model.getSchedule()
     }
 }

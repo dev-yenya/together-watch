@@ -10,15 +10,15 @@ interface UpdateAndDeleteScheduleContract {
         fun deleteAndReturnIsDeleted() : Boolean
     }
     interface View {
-        fun hideBottomSheet()
         fun showSchedule()
         fun setupClickListeners()
+
     }
     interface Presenter {
         fun initialize()
         fun onEditButtonClicked()
         fun onDeleteButtonClickedAndCheckedDeleted() : Boolean
-        fun loadScheduleData()
+        fun loadScheduleData() : Schedule
 
     }
 }
