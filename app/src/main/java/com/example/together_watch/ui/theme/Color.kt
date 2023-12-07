@@ -12,11 +12,12 @@ val Pink40 = Color(0xFF7D5260)
 
 
 val KakaoYellow = Color(0xFFFEE500)
-val Black = Color(0xFF000000)
 
-val Blue_81e7f2 = Color(0xff81e7f2)
-val black_101010 = Color(0xff101010)
-val darkgray_aaaaaa = Color(0xffaaaaaa)
-val gray_f8f6f4 = Color(0xfff8f6f4)
-val green_00b383 = Color(0xff00b383)
+val Blue = Color(0xff81e7f2)
+val Black = Color(0xff101010)
+val DarkGray = Color(0xffaaaaaa)
+val Gray = Color(0xfff8f6f4)
+val White = Color(0xffffffff)
+val Green = Color(0xff00b383)
+val LightGreen = Color(0xffedf7f5)
 

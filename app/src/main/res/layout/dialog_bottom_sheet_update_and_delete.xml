@@ -37,7 +37,7 @@
         <LinearLayout
             android:id="@+id/btn_delete"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="20dp"
             android:orientation="horizontal"
             android:gravity="center">
             <ImageView

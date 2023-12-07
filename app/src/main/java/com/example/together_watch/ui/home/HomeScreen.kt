@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -46,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -58,6 +61,9 @@ import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteSchedu
 import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteSchedulePresenter
 import com.example.together_watch.ui.Destinations
 import com.example.together_watch.ui.MainViewModel
+import com.example.together_watch.ui.theme.Black
+import com.example.together_watch.ui.theme.Blue
+import com.example.together_watch.ui.theme.White
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -114,11 +120,18 @@ fun HomeScreen(
             }
             FloatingActionButton(
                 onClick = { showAddEvent = !showAddEvent },
+                shape = CircleShape,
+                containerColor = Blue,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp)
             ) {
-                Icon(if (showAddEvent) Icons.Filled.Close else Icons.Filled.Add, "Toggle Buttons")
+                Icon(
+                    if (showAddEvent) Icons.Filled.Close
+                    else Icons.Filled.Add,
+                    contentDescription = "Toggle Buttons",
+                    tint = White
+                )
             }
 
             // 추가 버튼들 표시
@@ -131,7 +144,8 @@ fun HomeScreen(
                 Column(horizontalAlignment = Alignment.End) {
                     ButtonRow(
                         "약속 일정 추가",
-                        onClick = { navController.navigate(Destinations.CreatePromiseScreen.route) })
+                        onClick = { navController.navigate(Destinations.CreatePromiseScreen.route) }
+                    )
                     ButtonRow("개인 일정 추가", onClick = {
                         val context = navController.context
                         val createScheduleDialog = CreateScheduleDialog(context,
@@ -155,7 +169,8 @@ fun ButtonRow(text: String, onClick: () -> Unit) {
         )
         Button(
             onClick = onClick,
-            modifier = Modifier.size(36.dp)
+            modifier = Modifier.size(36.dp),
+            colors = ButtonDefaults.buttonColors(Blue)
         ) {
             Icon(Icons.Filled.ArrowForward, contentDescription = text)
         }
@@ -169,7 +184,7 @@ fun CalendarHeader(selectedDate: LocalDate, onDateChanged: (LocalDate) -> Unit) 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(PaddingValues(20.dp, 16.dp, 16.dp, 16.dp)),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -203,7 +218,7 @@ fun EventsList(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp)
+                .padding(vertical = 2.dp)
                 .clickable{
                     val context = navController.context
                     val updateAndDeleteModel = UpdateAndDeleteModel(fetchedSchedule, triggerForceRefresh)
@@ -269,7 +284,7 @@ fun WeekDaysHeader() {
             Text(
                 text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .width(40.dp),
                 textAlign = TextAlign.Center
             )

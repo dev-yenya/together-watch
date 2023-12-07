@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.together_watch.data.FetchedPromise
 import com.example.together_watch.data.FetchedSchedule
 import com.example.together_watch.data.Promise
 import com.example.together_watch.data.Schedule
@@ -19,6 +20,10 @@ class MainViewModel : ViewModel() {
     var mySchedules = listOf<FetchedSchedule>()
     private val _apiData = MutableLiveData<List<FetchedSchedule>>()
     val apiData: LiveData<List<FetchedSchedule>> = _apiData
+
+    var myPromises = listOf<FetchedPromise>()
+    private val _apiPromiseData = MutableLiveData<List<FetchedPromise>>()
+    val apiPromiseData: LiveData<List<FetchedPromise>> = _apiPromiseData
 
     var promiseName: String = ""
     var promisePlace: String = ""
@@ -42,12 +47,40 @@ class MainViewModel : ViewModel() {
                                 place = it.get("place").toString(),
                                 date = it.get("date").toString(),
                                 startTime = it.get("startTime").toString(),
-                                endTime = it.get("enfdTime").toString(),
+                                endTime = it.get("endTime").toString(),
                                 isGroup = it.get("isGroup").toString() == "true",
                             )
                         )
                     }
                     _apiData.value = mySchedules
+                }
+        }
+    }
+
+    fun fetchOnProgressPromisesData() {
+        viewModelScope.launch {
+            val userId = Firebase.auth.currentUser?.uid.toString()
+            Firebase.firestore.collection("users")
+                .document(userId)
+                .collection("promises")
+                .get()
+                .addOnSuccessListener { documents ->
+                    myPromises = documents.map {
+                        FetchedPromise(
+                            id = it.id,
+                            promise = Promise(
+                                name = it.get("name").toString(),
+                                ownerId = it.get("ownerId").toString(),
+                                users = it.get("users") as? List<String> ?: emptyList(),
+                                status = it.get("status") as Status,
+                                dates = it.get("dates") as? List<String> ?: emptyList(),
+                                startTime = it.get("startTime").toString(),
+                                endTime = it.get("enfTime").toString(),
+                                place = it.get("place").toString()
+                            )
+                        )
+                    }
+                    _apiPromiseData.value = myPromises
                 }
         }
     }
@@ -71,7 +104,7 @@ class MainViewModel : ViewModel() {
                 ).toMap()
             )
             .addOnSuccessListener {
-                Log.d("promise", "약속 업로드 성공" )
+                Log.d("promise", "약속 업로드 성공")
             }
     }
 }

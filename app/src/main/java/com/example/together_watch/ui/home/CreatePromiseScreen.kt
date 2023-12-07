@@ -25,12 +25,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.together_watch.ui.MainViewModel
+import com.example.together_watch.ui.theme.Black
+import com.example.together_watch.ui.theme.Blue
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Calendar
@@ -93,7 +96,8 @@ fun CreatePromiseScreen(
                                 "시간"
                             },
                             modifier = Modifier.align(Alignment.Center),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold
                         )
                         IconButton(
                             onClick = { backHandler() },
@@ -107,7 +111,8 @@ fun CreatePromiseScreen(
                 if (currentScreen.intValue < 5) {
                     LinearProgressIndicator(
                         progress = currentScreen.intValue * 0.25f,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Blue
                     )
                 }
 
@@ -138,10 +143,11 @@ fun CreatePromiseScreen(
                 } } else {
                     { complete() }
                 },
-                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(Blue),
+                modifier = Modifier.fillMaxWidth().height(50.dp),
                 shape = RectangleShape
             ) {
-                Text(if (currentScreen.intValue < 5) "다음" else "친구 초대하기")
+                Text(if (currentScreen.intValue < 5) "다음" else "친구 초대하기", color = Black, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -158,7 +164,8 @@ fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
         Text(
             "약속을 잡아볼까요?",
             modifier = Modifier.padding(bottom = 5.dp),
-            style = TextStyle(fontSize = 20.sp)
+            style = TextStyle(fontSize = 20.sp),
+            fontWeight = FontWeight.Bold
         )
         Text(
             "먼저, 약속 이름이 필요해요.",
@@ -193,7 +200,8 @@ fun SecondScreen(viewModel: MainViewModel, onPlaceChanged: (String) -> Unit) {
         Text(
             "어디서 보나요?",
             modifier = Modifier.padding(bottom = 5.dp),
-            style = TextStyle(fontSize = 20.sp)
+            style = TextStyle(fontSize = 20.sp),
+            fontWeight = FontWeight.Bold
         )
         Text(
             "약속 장소를 잡아주세요",
@@ -227,10 +235,11 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
         item {
             Spacer(Modifier.height(10.dp))
             Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = "원하시는 날짜를 전부 선택해 주세요",
+                modifier = Modifier.padding(start = 20.dp),
+                text = "원하시는 날짜를 전부 선택해 주세요.",
                 style = TextStyle(fontSize = 20.sp),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Start,
+                fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(10.dp))
             CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
@@ -332,9 +341,10 @@ fun FourthScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String)
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
         Text(
-            "언제 만날까요?",
+            "언제쯤 만날까요?",
             modifier = Modifier.padding(bottom = 5.dp),
-            style = TextStyle(fontSize = 20.sp)
+            style = TextStyle(fontSize = 20.sp),
+            fontWeight = FontWeight.Bold
         )
         Text(
             "가능한 약속 시간 범위를 입력해 주세요.(예: 9:00~22:00)",
@@ -425,23 +435,25 @@ fun CompleteScreen() {
     ) {
         Text(
             "함께할 친구들을 초대해 볼까요?",
-            modifier = Modifier.padding(bottom = 5.dp),
+            modifier = Modifier.padding(bottom = 5.dp)
+                .align(Alignment.Start),
             style = TextStyle(fontSize = 20.sp),
             textAlign = TextAlign.Start // 텍스트 중앙 정렬
         )
         Text(
             "초대장이 만들어졌어요",
-            modifier = Modifier.padding(bottom = 10.dp),
+            modifier = Modifier.padding(bottom = 10.dp)
+                .align(Alignment.Start),
             style = TextStyle(fontSize = 15.sp),
             textAlign = TextAlign.Center // 텍스트 중앙 정렬
         )
-        Spacer(Modifier.height(30.dp))
+        Spacer(Modifier.height(100.dp))
         Icon(
             Icons.Default.Send,
             contentDescription = null,
-            modifier = Modifier.size(200.dp) // 아이콘 크기 조정
+            modifier = Modifier.size(150.dp) // 아이콘 크기 조정
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(30.dp))
         Text(
             "친구들이 참여하면\n모두가 참여할 수 있는 시간을 골라드려요.",
             textAlign = TextAlign.Center // 텍스트 중앙 정렬

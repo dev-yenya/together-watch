@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,11 +33,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.LightGray
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.together_watch.ui.Destinations
+import com.example.together_watch.ui.theme.Black
+import com.example.together_watch.ui.theme.Green
+import com.example.together_watch.ui.theme.LightGreen
 
 
 @Composable
@@ -50,7 +55,7 @@ fun PersonScreen(
         // 상단 텍스트
         Text(
             text = "내가 만든 약속들은\n이런 것들이 있어요.",
-            fontSize = 30.sp,
+            fontSize = 20.sp,
             lineHeight = 30.sp,
             fontWeight = FontWeight.Bold
         )
@@ -75,7 +80,7 @@ fun PersonScreen(
                 onSelected = { selectedButton = if (selectedButton != 2) 2 else 0 }
             )
         }
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(25.dp))
 
         Card(
             modifier = Modifier
@@ -92,7 +97,7 @@ fun PersonScreen(
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                Text(text = "Event Date and Time", style = MaterialTheme.typography.headlineMedium)
+                Text(text = "Event Date and Time", style = MaterialTheme.typography.headlineSmall)
                 Text(text = "Event Title: ", style = MaterialTheme.typography.bodyMedium)
                 Text(text = "Event Details", style = MaterialTheme.typography.bodySmall)
             }
@@ -106,12 +111,12 @@ fun CustomButton(text: String, isSelected: Boolean, onSelected: () -> Unit) {
     Button(
         onClick = onSelected,
         shape = RoundedCornerShape(30),
-        colors = ButtonDefaults.buttonColors(containerColor = if (isSelected) Color.Gray else Color.LightGray),
-        border = if (isSelected) BorderStroke(1.dp, Color.Green) else null,
-        modifier = Modifier.padding(5.dp)
+        colors = ButtonDefaults.buttonColors(containerColor = if (isSelected) Green else LightGray),
+        border = if (isSelected) BorderStroke(2.dp, Green) else BorderStroke(1.dp, LightGray),
+        modifier = Modifier.padding(horizontal = 1.dp, vertical = 2.dp)
     ) {
         Icon(Icons.Filled.CheckCircle, contentDescription = null)
         Spacer(Modifier.width(5.dp))
-        Text(text)
+        Text(text = text)
     }
 }

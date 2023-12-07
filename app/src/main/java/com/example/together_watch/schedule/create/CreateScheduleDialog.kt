@@ -37,9 +37,7 @@ open class CreateScheduleDialog(
     override fun setupClickListeners() {
         with(binding) {
             btnCancel.setOnClickListener { hideBottomSheet() }
-            btnSuccess.setOnClickListener {
-                handleSuccessButtonClick()
-            }
+            btnSuccess.setOnClickListener { handleSuccessButtonClick() }
             etDate.setOnClickListener { showDatePickerDialog(etDate) }
             etStartTime.setOnClickListener { showTimePickerDialog(etStartTime) }
             etEndTime.setOnClickListener { showTimePickerDialog(etEndTime) }
@@ -75,9 +73,15 @@ open class CreateScheduleDialog(
         with(binding) {
             val name = etScheduleName.text.toString()
             val place = etScheduleLocation.text.toString()
-            val date = LocalDate.parse(etDate.text.toString(), dateFormat)
-            val startTime = LocalTime.parse(etStartTime.text.toString(), timeFormat)
-            val endTime = LocalTime.parse(etEndTime.text.toString(), timeFormat)
+            val date = runCatching {
+                LocalDate.parse(etDate.text.toString(), dateFormat)
+            }.getOrNull()
+            val startTime = runCatching {
+                LocalTime.parse(etStartTime.text.toString(), timeFormat)
+            }.getOrNull()
+            val endTime = runCatching {
+                LocalTime.parse(etEndTime.text.toString(), timeFormat)
+            }.getOrNull()
             val isGroup = false
 
             return Schedule(name, place, date.toString(), startTime.toString(), endTime.toString(), isGroup)
@@ -124,11 +128,11 @@ open class CreateScheduleDialog(
 
     private fun isScheduleComplete(schedule: Schedule, isRepeat: Boolean): Boolean {
         with(schedule) {
-            return name.isNotEmpty()
-                    && place.isNotEmpty()
-                    && date.toString().isNotEmpty()
-                    && startTime.toString().isNotEmpty()
-                    && endTime.toString().isNotEmpty()
+            return !name.isNullOrEmpty()
+                    && !place.isNullOrEmpty()
+                    && !date.isNullOrEmpty()
+                    && !startTime.isNullOrEmpty()
+                    && !endTime.isNullOrEmpty()
                     && (!isRepeat || !binding.etEndDate.text.isNullOrEmpty())
         }
     }
