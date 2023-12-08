@@ -38,7 +38,7 @@ fun shareInvitation(context: Context, group: PromiseInfo) {
             }
         }
     } else {
-        val sharerUrl = WebSharerClient.instance.makeCustomUrl(templateId)
+        val sharerUrl = WebSharerClient.instance.makeCustomUrl(templateId = templateId, templateArgs = argumentsMap)
 
         try {
             KakaoCustomTabsClient.openWithDefault(context, sharerUrl)
