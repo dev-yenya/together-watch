@@ -26,15 +26,15 @@ fun shareInvitation(context: Context, group: PromiseInfo) {
             templateArgs = argumentsMap
         ) { sharingResult, error ->
             if (error != null) {
-                Log.e("kakao-share-api", "카카오톡 공유 실패", error)
+                Log.e("invitation", "카카오톡 공유 실패", error)
             }
             else if (sharingResult != null) {
-                Log.d("kakao-share-api", "카카오톡 공유 성공 ${sharingResult.intent.data?.query}")
-                Log.d("kakao-share-api", argumentsMap.toString())
+                Log.d("invitation", "카카오톡 공유 성공 ${sharingResult.intent.data?.query}")
+                Log.d("invitation", argumentsMap.toString())
                 startActivity(context, sharingResult.intent, null)
 
-                Log.w("kakao-share-api", "Warninag Msg: ${sharingResult.warningMsg}")
-                Log.w("kakao-share-api", "Argument Msg: ${sharingResult.argumentMsg}")
+                Log.w("invitation", "Warninag Msg: ${sharingResult.warningMsg}")
+                Log.w("invitation", "Argument Msg: ${sharingResult.argumentMsg}")
             }
         }
     } else {
@@ -43,13 +43,13 @@ fun shareInvitation(context: Context, group: PromiseInfo) {
         try {
             KakaoCustomTabsClient.openWithDefault(context, sharerUrl)
         } catch(e: UnsupportedOperationException) {
-            Log.d("kakao-share-api", "CustomTabsServiceConnection 지원 브라우저가 설치되어 있지 않습니다. 미지원 브라우저를 탐색합니다.")
+            Log.d("invitation", "CustomTabsServiceConnection 지원 브라우저가 설치되어 있지 않습니다. 미지원 브라우저를 탐색합니다.")
         }
 
         try {
             KakaoCustomTabsClient.open(context, sharerUrl)
         } catch (e: ActivityNotFoundException) {
-            Log.d("kakao-share-api", "지원브라우저가 없습니다.")
+            Log.d("invitation", "지원 브라우저가 없습니다.")
         }
     }
 }

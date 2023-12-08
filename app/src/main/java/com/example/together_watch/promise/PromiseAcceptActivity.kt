@@ -63,10 +63,12 @@ class PromiseAcceptActivity : ComponentActivity(), PromiseAcceptContract.View {
 
     @Composable
     @OptIn(ExperimentalMaterial3Api::class)
-     fun Wrapper(context: Context) {
-        var data: Promise by remember { mutableStateOf(
-            Promise("", "", listOf(),Status.ONPROGRESS, listOf(), "", "", "")
-        ) }
+    fun Wrapper(context: Context) {
+        var data: Promise by remember {
+            mutableStateOf(
+                Promise("", "", listOf(), Status.ONPROGRESS, listOf(), "", "", "")
+            )
+        }
 
         LaunchedEffect(Unit) {
             data = model.getGroupPromise(ownerId, groupId)
@@ -151,22 +153,34 @@ class PromiseAcceptActivity : ComponentActivity(), PromiseAcceptContract.View {
 
     private fun acceptAction(context: Context) {
         val loginUser = Firebase.auth.currentUser
-        model.addPromiseMember(loginUser?.uid, ownerId)
-        AlertDialog.Builder(context)
-            .setTitle("약속 참가 성공!")
-            .setMessage("약속 일정이 확정되면 캘린더에 추가됩니다.")
-            .setPositiveButton("확인") { _, _ ->
-                startActivity(Intent(context, MainActivity::class.java))
+        when (model.addPromiseMember(loginUser?.uid)) {
+            true -> AlertDialog.Builder(context)
+                .setTitle("약속 참가 성공!")
+                .setMessage("약속 일정이 확정되면 캘린더에 추가됩니다.")
+                .setPositiveButton("확인") { _, _ ->
+                    startActivity(Intent(context, MainActivity::class.java))
+                }
+                .create()
+                .show()
+
+            false -> {
+                AlertDialog.Builder(context)
+                    .setTitle("약속 참가 실패!")
+                    .setMessage("이미 초대를 수락했습니다.")
+                    .setPositiveButton("확인") { _, _ ->
+                        startActivity(Intent(context, MainActivity::class.java))
+                    }
+                    .create()
+                    .show()
             }
-            .create()
-            .show()
+        }
     }
 
     private fun refuseAction(context: Context) {
         AlertDialog.Builder(context)
             .setMessage("정말 취소하시겠습니까?")
             .setPositiveButton("확인") { _, _ ->
-                Toast.makeText(context, "초대를 거절했습니다.", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "초대를 거절했습니다.", Toast.LENGTH_SHORT).show()
                 startActivity(Intent(context, MainActivity::class.java))
             }
             .setNegativeButton("취소") { _, _ -> }
