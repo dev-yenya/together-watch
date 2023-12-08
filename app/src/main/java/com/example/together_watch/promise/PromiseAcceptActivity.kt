@@ -129,9 +129,24 @@ class PromiseAcceptActivity : ComponentActivity(), PromiseAcceptContract.View {
 
     @Composable
     override fun Buttons(context: Context) {
+        var acceptClicked by remember { mutableStateOf(false) }
+        var refuseClicked by remember { mutableStateOf(false) }
+
+        LaunchedEffect(acceptClicked) {
+            if (acceptClicked)
+                acceptAction(context)
+            acceptClicked = false
+        }
+
+        LaunchedEffect(refuseClicked) {
+            if (refuseClicked)
+                refuseAction(context)
+            refuseClicked = false
+        }
+
         Row {
             Button(
-                onClick = { refuseAction(context) },
+                onClick = { refuseClicked = true },
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
@@ -140,7 +155,7 @@ class PromiseAcceptActivity : ComponentActivity(), PromiseAcceptContract.View {
                 Text("취소")
             }
             Button(
-                onClick = { acceptAction(context) },
+                onClick = { acceptClicked = true },
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
@@ -151,7 +166,7 @@ class PromiseAcceptActivity : ComponentActivity(), PromiseAcceptContract.View {
         }
     }
 
-    private fun acceptAction(context: Context) {
+    private suspend fun acceptAction(context: Context) {
         val loginUser = Firebase.auth.currentUser
         when (model.addPromiseMember(loginUser?.uid)) {
             true -> AlertDialog.Builder(context)
@@ -176,15 +191,26 @@ class PromiseAcceptActivity : ComponentActivity(), PromiseAcceptContract.View {
         }
     }
 
-    private fun refuseAction(context: Context) {
-        AlertDialog.Builder(context)
-            .setMessage("정말 취소하시겠습니까?")
-            .setPositiveButton("확인") { _, _ ->
-                Toast.makeText(context, "초대를 거절했습니다.", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(context, MainActivity::class.java))
-            }
-            .setNegativeButton("취소") { _, _ -> }
-            .create()
-            .show()
+    private suspend fun refuseAction(context: Context) {
+        val loginUser = Firebase.auth.currentUser
+        when (model.refusePromise(loginUser?.uid)) {
+            true ->
+                AlertDialog.Builder(context)
+                    .setMessage("정말 취소하시겠습니까?")
+                    .setPositiveButton("확인") { _, _ ->
+                        Toast.makeText(context, "초대를 거절했습니다.", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(context, MainActivity::class.java))
+                    }
+                    .setNegativeButton("취소") { _, _ -> }
+                    .create()
+                    .show()
+            false -> AlertDialog.Builder(context)
+                .setMessage("이미 초대를 수락했습니다.")
+                .setPositiveButton("확인") { _, _ ->
+                    startActivity(Intent(context, MainActivity::class.java))
+                }
+                .create()
+                .show()
+        }
     }
 }

@@ -54,7 +54,7 @@ class PromiseAcceptModel : PromiseAcceptContract.Model {
             )
         }
 
-    fun addPromiseMember(memberId: String?): Boolean {
+    suspend fun addPromiseMember(memberId: String?): Boolean {
         var value = false
         promiseRef.get().addOnCompleteListener { task ->
             if (task.isSuccessful) {
@@ -64,11 +64,28 @@ class PromiseAcceptModel : PromiseAcceptContract.Model {
                     promiseRef.update("users", FieldValue.arrayUnion(memberId))
                     value = true
                 }
+            } else {
+                Log.d("invitation", "그룹 정보 가져오기 실패")
             }
-        }.addOnFailureListener {
-            Log.d("invitation", "그룹정보 가져오기 실패")
-        }
+        }.await()
 
-        return value;
+        return value
+    }
+
+    suspend fun refusePromise(memberId: String?): Boolean {
+        var value = false
+        promiseRef.get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Log.d("invitation", "그룹 정보 가져오기 성공")
+                val users = task.result.data?.get("users") as List<String>
+                if (! users.contains(memberId)) {
+                    value = true
+                }
+            } else {
+                Log.d("invitation", "그룹 정보 가져오기 실패")
+            }
+        }.await()
+
+        return value
     }
 }
