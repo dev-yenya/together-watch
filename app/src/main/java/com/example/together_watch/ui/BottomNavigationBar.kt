@@ -30,28 +30,28 @@ import com.example.together_watch.ui.person.PersonScreen
 import com.example.together_watch.ui.person.PromiseAcceptScreen
 import com.example.together_watch.ui.setting.AccountManagementScreen
 import com.example.together_watch.ui.setting.SettingScreen
+import com.example.together_watch.ui.theme.Black
+import com.example.together_watch.ui.theme.Blue
+import com.example.together_watch.ui.theme.DarkGray
+import com.example.together_watch.ui.theme.Gray
 
 
 sealed class Destinations(
     val route: String,
-    val title: String? = null,
     val icon: ImageVector? = null
 ) {
     object HomeScreen : Destinations(
         route = "home_screen",
-        title = "Home",
         icon = Icons.Outlined.Home
     )
 
     object PersonScreen : Destinations(
         route = "person_screen",
-        title = "Person",
         icon = Icons.Outlined.Person
     )
 
     object SettingScreen : Destinations(
         route = "setting_screen",
-        title = "Setting",
         icon = Icons.Outlined.Settings
     )
     object AccountManagementScreen : Destinations(
@@ -114,9 +114,6 @@ fun BottomBar(
         screens.forEach { screen ->
 
             NavigationBarItem(
-                label = {
-                    Text(text = screen.title!!)
-                },
                 icon = {
                     Icon(imageVector = screen.icon!!, contentDescription = "")
                 },
@@ -131,7 +128,9 @@ fun BottomBar(
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    unselectedTextColor = Color.Gray, selectedTextColor = Color.Black
+                    unselectedIconColor = DarkGray,
+                    selectedIconColor = Black,
+                    indicatorColor = Gray
                 ),
             )
         }

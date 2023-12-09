@@ -6,6 +6,7 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
@@ -58,6 +59,7 @@ fun CreatePromiseScreen(
     val previousScreen = { currentScreen.intValue-- }
     val savePromise={viewModel.savePromise()}
     val complete = { /* 완료 액션 구현 */ }
+    var currentName by remember { mutableStateOf("") }
 
     val backHandler = {
         if (currentScreen.intValue > 1) {
@@ -123,9 +125,12 @@ fun CreatePromiseScreen(
                 when (currentScreen.intValue) {
                     1 -> FirstScreen(viewModel) { text ->
                         viewModel.promiseName = text
+                        currentName=viewModel.promiseName
+
                     }
                     2 -> SecondScreen(viewModel) { text ->
                         viewModel.promisePlace = text
+                        currentName=viewModel.promisePlace
                     }
                     3 -> ThirdScreen(viewModel) { dates ->
                         viewModel.selectedDates = dates
@@ -140,9 +145,10 @@ fun CreatePromiseScreen(
             }
 
             Button(
-                onClick = if (currentScreen.intValue < 4 ) {
+                onClick =if(currentName==""){{complete()}}
+                else if (currentScreen.intValue < 4 ) {
                     { nextScreen() }
-                } else if (currentScreen.intValue < 5) { {
+                } else if (currentScreen.intValue < 5 ) { {
                     savePromise()
                     nextScreen()
                 } } else {
