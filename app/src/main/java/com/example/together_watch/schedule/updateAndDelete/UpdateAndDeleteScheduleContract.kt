@@ -15,10 +15,11 @@ interface UpdateAndDeleteScheduleContract {
 
     }
     interface Presenter {
-        fun initialize()
         fun onEditButtonClicked()
         fun onDeleteButtonClickedAndCheckedDeleted() : Boolean
         fun loadScheduleData() : Schedule
+
+        fun loadFetchedScheduleData() : FetchedSchedule
 
     }
 }

@@ -5,6 +5,9 @@ import android.view.LayoutInflater
 import android.widget.Toast
 import com.example.together_watch.R
 import com.example.together_watch.databinding.DialogBottomSheetUpdateAndDeleteBinding
+import com.example.together_watch.schedule.create.CreateScheduleModel
+import com.example.together_watch.schedule.create.CreateSchedulePresenter
+import com.example.together_watch.schedule.update.UpdateScheduleDialog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
@@ -21,8 +24,13 @@ class UpdateAndDeleteScheduleDialog(
     }
 
     override fun setupClickListeners() {
+
         with(binding) {
-            btnUpdate.setOnClickListener {/* 수정 */}
+            btnUpdate.setOnClickListener {
+                hide()
+                val selectedSchedule = presenter.loadFetchedScheduleData()
+                UpdateScheduleDialog(context, selectedSchedule).show()
+            }
             btnDelete.setOnClickListener {
                 presenter.onDeleteButtonClickedAndCheckedDeleted()
                 showToast(R.string.msg_success_delete_schedule)
