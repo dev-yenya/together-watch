@@ -22,7 +22,8 @@ import java.util.Calendar
 
 class UpdateScheduleDialog(
     context: Context,
-    private val scheduleToUpdate: FetchedSchedule
+    private val scheduleToUpdate: FetchedSchedule,
+    private val presenter: UpdateSchedulePresenter
 ) : BottomSheetDialog(context, R.style.DialogStyle), UpdateScheduleContract.View {
     private val binding = DialogBottomSheetCreateBinding.inflate(LayoutInflater.from(context))
     val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -32,6 +33,7 @@ class UpdateScheduleDialog(
         behavior.state = BottomSheetBehavior.STATE_EXPANDED
         setContentView(binding.root)
         setView()
+        setScheduleData()
         setupClickListeners()
     }
 
@@ -53,12 +55,22 @@ class UpdateScheduleDialog(
         with(binding) {
             tvPersonalSchedule.text = context.getString(R.string.update_schedule)
             llSwitch.visibility = View.GONE
-//            etScheduleName.setText(scheduleToUpdate.schedule
+        }
+    }
+
+    private fun setScheduleData() {
+        with(binding) {
+            etScheduleName.setText(scheduleToUpdate.schedule.name)
+            etDate.setText(scheduleToUpdate.schedule.date)
+            etStartTime.setText(scheduleToUpdate.schedule.startTime)
+            etEndTime.setText(scheduleToUpdate.schedule.endTime)
+            etScheduleLocation.setText(scheduleToUpdate.schedule.place)
         }
     }
 
     private fun handleSuccessButtonClick() {
         val schedule = getScheduleFromInput()
+        val fetchedSchedule = FetchedSchedule(scheduleToUpdate.id, schedule)
         val isRepeat = isRepeat()
 
         if(isScheduleComplete(schedule, isRepeat)) {
@@ -66,9 +78,9 @@ class UpdateScheduleDialog(
                 showToast(R.string.msg_time_order)
             }
             else {
-//                presenter.onSuccessButtonClick(schedule, isRepeat, getRepeatType(), getEndDate())
+                presenter.onSuccessButtonClick(fetchedSchedule)
                 hideBottomSheet()
-                showToast(R.string.msg_success_create_schedule)
+                showToast(R.string.msg_success_update_schedule)
             }
         } else {
             showToast(R.string.msg_fill_schedule)
@@ -89,7 +101,6 @@ class UpdateScheduleDialog(
                 LocalTime.parse(etEndTime.text.toString(), timeFormat)
             }.getOrNull()
             val isGroup = false
-
             return Schedule(name, place, date.toString(), startTime.toString(), endTime.toString(), isGroup)
         }
     }
@@ -154,9 +165,6 @@ class UpdateScheduleDialog(
         return LocalTime.parse(binding.etEndTime.text.toString(), timeFormat)
     }
 
-    private fun getStartDate(): LocalDate {
-        return LocalDate.parse(binding.etDate.text.toString(), dateFormat)
-    }
 
     private fun showToast(messageResId: Int) {
         Toast.makeText(context, messageResId, Toast.LENGTH_SHORT).show()

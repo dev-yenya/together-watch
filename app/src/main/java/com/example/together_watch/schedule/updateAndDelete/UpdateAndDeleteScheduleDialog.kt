@@ -8,12 +8,15 @@ import com.example.together_watch.databinding.DialogBottomSheetUpdateAndDeleteBi
 import com.example.together_watch.schedule.create.CreateScheduleModel
 import com.example.together_watch.schedule.create.CreateSchedulePresenter
 import com.example.together_watch.schedule.update.UpdateScheduleDialog
+import com.example.together_watch.schedule.update.UpdateScheduleModel
+import com.example.together_watch.schedule.update.UpdateSchedulePresenter
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class UpdateAndDeleteScheduleDialog(
     context: Context,
-    private val presenter: UpdateAndDeleteScheduleContract.Presenter
+    private val presenter: UpdateAndDeleteScheduleContract.Presenter,
+    private val forceRefresh: () -> Unit
 ) : BottomSheetDialog(context, R.style.DialogStyle), UpdateAndDeleteScheduleContract.View  {
     private val binding = DialogBottomSheetUpdateAndDeleteBinding.inflate(LayoutInflater.from(context))
     init {
@@ -24,12 +27,12 @@ class UpdateAndDeleteScheduleDialog(
     }
 
     override fun setupClickListeners() {
-
         with(binding) {
             btnUpdate.setOnClickListener {
                 hide()
                 val selectedSchedule = presenter.loadFetchedScheduleData()
-                UpdateScheduleDialog(context, selectedSchedule).show()
+                val updateSchedulePresenter = UpdateSchedulePresenter(UpdateScheduleModel(forceRefresh))
+                UpdateScheduleDialog(context, selectedSchedule, updateSchedulePresenter).show()
             }
             btnDelete.setOnClickListener {
                 presenter.onDeleteButtonClickedAndCheckedDeleted()
