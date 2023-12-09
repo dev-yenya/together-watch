@@ -11,10 +11,13 @@ import com.example.together_watch.data.Promise
 import com.example.together_watch.data.Schedule
 import com.example.together_watch.data.Status
 import com.example.together_watch.data.toMap
+import com.example.together_watch.promise.PromiseInfo
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import java.util.concurrent.CompletableFuture
 
 class MainViewModel : ViewModel() {
     var mySchedules = listOf<FetchedSchedule>()
@@ -57,6 +60,31 @@ class MainViewModel : ViewModel() {
         }
     }
 
+     fun savePromise(): CompletableFuture<PromiseInfo> {
+         val userId = Firebase.auth.currentUser?.uid.toString()
+         val userRef = Firebase.firestore.collection("users")
+         val result = CompletableFuture<PromiseInfo>()
+
+         userRef.document(userId)
+             .collection("promises")
+             .add(
+                 Promise(
+                     name = promiseName,
+                     ownerId = userId,
+                     users = listOf(userId),
+                     status = Status.ONPROGRESS,
+                     dates = selectedDates,
+                     startTime = startTime,
+                     endTime = endTime,
+                     place = promisePlace
+                 ).toMap()
+             ).addOnSuccessListener { promiseDocumentReference ->
+                 Log.d("promise", "약속 업로드 성공 ${promiseDocumentReference.id}")
+                 result.complete(PromiseInfo(userId, promiseDocumentReference.id))
+             }
+         return result
+     }
+
     fun fetchOnProgressPromisesData() {
         viewModelScope.launch {
             val userId = Firebase.auth.currentUser?.uid.toString()
@@ -83,28 +111,5 @@ class MainViewModel : ViewModel() {
                     _apiPromiseData.value = myPromises
                 }
         }
-    }
-
-    fun savePromise() {
-        val userId = Firebase.auth.currentUser?.uid.toString()
-        val userRef = Firebase.firestore.collection("users")
-
-        userRef.document(userId)
-            .collection("promises")
-            .add(
-                Promise(
-                    name = promiseName,
-                    ownerId = userId,
-                    users = listOf(userId),
-                    status = Status.ONPROGRESS,
-                    dates = selectedDates,
-                    startTime = startTime,
-                    endTime = endTime,
-                    place = promisePlace
-                ).toMap()
-            )
-            .addOnSuccessListener {
-                Log.d("promise", "약속 업로드 성공")
-            }
     }
 }

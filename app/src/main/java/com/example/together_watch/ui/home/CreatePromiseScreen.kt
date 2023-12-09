@@ -6,6 +6,7 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
@@ -37,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
+import com.example.together_watch.promise.PromiseInfo
+import com.example.together_watch.promise.shareInvitation
 import com.example.together_watch.ui.MainViewModel
 import com.example.together_watch.ui.theme.Black
 import com.example.together_watch.ui.theme.Blue
@@ -61,8 +64,16 @@ fun CreatePromiseScreen(
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
     val previousScreen = { currentScreen.intValue-- }
-    val savePromise={viewModel.savePromise()}
-    val complete = { /* 완료 액션 구현 */ }
+    val promises = remember { mutableListOf<PromiseInfo>() }
+    val savePromise = {
+        viewModel.savePromise().whenComplete { result, _ ->
+            promises.add(PromiseInfo(result.ownerId, result.docId))
+        }
+    }
+    val context = LocalContext.current
+    val complete = {
+        shareInvitation(context, promises[0])
+    }
 
     val backHandler = {
         if (currentScreen.intValue > 1) {
