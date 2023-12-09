@@ -32,12 +32,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.SemanticsProperties.ImeAction
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
+import com.example.together_watch.promise.PromiseInfo
+import com.example.together_watch.promise.shareInvitation
 import com.example.together_watch.ui.MainViewModel
+import com.example.together_watch.ui.theme.Black
+import com.example.together_watch.ui.theme.Blue
+import com.example.together_watch.ui.theme.DarkGray
+import com.example.together_watch.ui.theme.Gray
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -57,9 +64,16 @@ fun CreatePromiseScreen(
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
     val previousScreen = { currentScreen.intValue-- }
-    val savePromise={viewModel.savePromise()}
-    val complete = { /* 완료 액션 구현 */ }
-    var currentName by remember { mutableStateOf("") }
+    val promises = remember { mutableListOf<PromiseInfo>() }
+    val savePromise = {
+        viewModel.savePromise().whenComplete { result, _ ->
+            promises.add(PromiseInfo(result.ownerId, result.docId))
+        }
+    }
+    val context = LocalContext.current
+    val complete = {
+        shareInvitation(context, promises[0])
+    }
 
     val backHandler = {
         if (currentScreen.intValue > 1) {
@@ -104,7 +118,8 @@ fun CreatePromiseScreen(
                                 "시간"
                             },
                             modifier = Modifier.align(Alignment.Center),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold
                         )
                         IconButton(
                             onClick = { backHandler() },
@@ -118,19 +133,17 @@ fun CreatePromiseScreen(
                 if (currentScreen.intValue < 5) {
                     LinearProgressIndicator(
                         progress = currentScreen.intValue * 0.25f,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Blue
                     )
                 }
 
                 when (currentScreen.intValue) {
                     1 -> FirstScreen(viewModel) { text ->
                         viewModel.promiseName = text
-                        currentName=viewModel.promiseName
-
                     }
                     2 -> SecondScreen(viewModel) { text ->
                         viewModel.promisePlace = text
-                        currentName=viewModel.promisePlace
                     }
                     3 -> ThirdScreen(viewModel) { dates ->
                         viewModel.selectedDates = dates
@@ -145,20 +158,22 @@ fun CreatePromiseScreen(
             }
 
             Button(
-                onClick =if(currentName==""){{complete()}}
-                else if (currentScreen.intValue < 4 ) {
+                onClick = if (currentScreen.intValue < 4 ) {
                     { nextScreen() }
-                } else if (currentScreen.intValue < 5 ) { {
+                } else if (currentScreen.intValue < 5) { {
                     savePromise()
                     nextScreen()
                 } } else {
 
                     { complete() }
                 },
-                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(Blue),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
                 shape = RectangleShape
             ) {
-                Text(if (currentScreen.intValue < 5) "다음" else "친구 초대하기")
+                Text(if (currentScreen.intValue < 5) "다음" else "친구 초대하기", color = Black, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -176,7 +191,8 @@ fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
         Text(
             "약속을 잡아볼까요?",
             modifier = Modifier.padding(bottom = 5.dp),
-            style = TextStyle(fontSize = 20.sp)
+            style = TextStyle(fontSize = 20.sp),
+            fontWeight = FontWeight.Bold
         )
         Text(
             "먼저, 약속 이름이 필요해요.",
@@ -202,7 +218,7 @@ fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
 
 
 
-        )
+            )
         Divider()
     }
 }
@@ -221,7 +237,8 @@ fun SecondScreen(viewModel: MainViewModel, onPlaceChanged: (String) -> Unit) {
         Text(
             "어디서 보나요?",
             modifier = Modifier.padding(bottom = 5.dp),
-            style = TextStyle(fontSize = 20.sp)
+            style = TextStyle(fontSize = 20.sp),
+            fontWeight = FontWeight.Bold
         )
         Text(
             "약속 장소를 잡아주세요",
@@ -261,7 +278,7 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
     var dates by remember { mutableStateOf(listOf<String>()) }
 
 
-    LazyColumn {
+    LazyColumn(modifier = Modifier.padding(10.dp)) {
         item {
             Spacer(Modifier.height(10.dp))
             Text(
@@ -348,7 +365,7 @@ fun EventsList(date: String) {
             ) {
                 Text(text = formattedDate,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.LightGray
+                    color = DarkGray
                 )
             }
         }
@@ -371,7 +388,7 @@ fun MyTimePicker(context: Context, result: ((String) -> Unit)) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-    fun FourthScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String) -> Unit) {
+fun FourthScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String) -> Unit) {
 
     var text1 by remember { mutableStateOf("") }
     var text2 by remember { mutableStateOf("") }
@@ -383,7 +400,8 @@ fun MyTimePicker(context: Context, result: ((String) -> Unit)) {
         Text(
             "언제 만날까요?",
             modifier = Modifier.padding(bottom = 5.dp),
-            style = TextStyle(fontSize = 20.sp)
+            style = TextStyle(fontSize = 20.sp),
+            fontWeight = FontWeight.Bold
         )
         Text(
             "약속 시간대를 입력해 주세요.",

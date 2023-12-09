@@ -51,7 +51,7 @@ fun PersonScreen(
     var selectedButton by remember { mutableStateOf(1) } // 선택된 버튼 상태 관리
 
     // 전체 패딩 설정
-    Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)) {
+    Column(modifier = Modifier.padding(horizontal = 25.dp, vertical = 30.dp)) {
         // 상단 텍스트
         Text(
             text = "내가 만든 약속들은\n이런 것들이 있어요.",
