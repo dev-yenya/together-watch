@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -90,21 +91,13 @@ fun HomeScreen(
         forceRefresh = !forceRefresh
     }
 
-    fun updateEventsList() {
-        events = viewModel.mySchedules.filter {
-            it.schedule.date == selectedDate.toString()
-        }
-    }
-
     LaunchedEffect(Unit, forceRefresh) {
         viewModel.fetchSchedulesData() // 화면이 처음 그려질 때 API 호출
-        updateEventsList()
     }
 
     apiData?.let {
         Box(modifier = Modifier.fillMaxSize()) {
             Column {
-
                 CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
                     selectedDate = newDate
                 })
@@ -122,9 +115,9 @@ fun HomeScreen(
 
                 if(events.isEmpty()){
                     Text(
-                        text="새로운 일정을\n만들어 볼까요?",
+                        text="아직 일정이 없어요. \n일정을 만들어 볼까요?",
                         modifier = Modifier.padding(
-                            start=20.dp,top=10.dp,bottom=10.dp,end=10.dp),
+                            start=20.dp,top=10.dp,bottom=5.dp,end=10.dp),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -136,7 +129,7 @@ fun HomeScreen(
                             Text(
                                 text="오늘의 일정은\n이런 것들이 있어요",
                                 modifier = Modifier.padding(
-                                    start= 20.dp,top=10.dp,bottom=10.dp,end=10.dp),
+                                    start= 20.dp,top=10.dp,bottom=5.dp,end=10.dp),
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -145,7 +138,7 @@ fun HomeScreen(
                             items = events,
                             itemContent = { EventsList(it, navController, ::triggerForceRefresh) }
                         )
-                }
+                    }
 
                 }
             }
@@ -255,10 +248,10 @@ fun EventsList(
                         UpdateAndDeleteModel(fetchedSchedule, triggerForceRefresh)
                     val updateAndDeleteDialog = UpdateAndDeleteScheduleDialog(
                         context,
-                        UpdateAndDeleteSchedulePresenter(updateAndDeleteModel)
+                        UpdateAndDeleteSchedulePresenter(updateAndDeleteModel),
+                        triggerForceRefresh
                     )
                     updateAndDeleteDialog.show()
-
                 }, // 직접적으로 backgroundColor를 지정
             colors = CardDefaults.cardColors(
                 containerColor = Color.White,
@@ -281,9 +274,11 @@ fun EventsList(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CalendarGrid(selectedDate: LocalDate,
-                 mySchedules: List<FetchedSchedule> = listOf(),
-                 onDateSelected: (LocalDate) -> Unit) {
+fun CalendarGrid(
+    selectedDate: LocalDate,
+    mySchedules: List<FetchedSchedule> = listOf(),
+    onDateSelected: (LocalDate) -> Unit
+) {
     val yearMonth = YearMonth.from(selectedDate)
     val totalDays = yearMonth.lengthOfMonth()
     val firstDayOfMonth = yearMonth.atDay(1)
@@ -304,7 +299,15 @@ fun CalendarGrid(selectedDate: LocalDate,
 //dd
         LazyColumn {
             items((0 until 6).toList()) { week ->
-                WeekRow(week, daysOffset, totalDays, selectedDate, yearMonth, mySchedules, false, onDateSelected)
+                WeekRow(
+                    week,
+                    daysOffset,
+                    totalDays,
+                    selectedDate,
+                    yearMonth,
+                    mySchedules,
+                    false,
+                    onDateSelected)
             }
         }
     }
@@ -335,7 +338,7 @@ fun WeekRow(
     selectedDate: LocalDate,
     yearMonth: YearMonth,
     mySchedules: List<FetchedSchedule> = listOf(),
-    isSelectedEffect: Boolean = false,
+    isSelectedEffect: Boolean,
     onDateSelected: (LocalDate) -> Unit
 ) {
 
@@ -379,22 +382,28 @@ fun DateBox(
     val date = yearMonth.atDay(dayOfMonth)
     val selectedDates = mutableListOf<String>()
     var dates by rememberSaveable { mutableStateOf(listOf<String>()) }
+
     val mySchedules = mySchedules.filter { it.schedule.date == date.toString() }
     Box(
         modifier = Modifier
             .padding(8.dp)
             .size(35.dp)
-            .background(if (dates.any { it == date.toString() } && isSelectedEffect || isToday) Color.Blue.copy(
-                alpha = 0.5f
-            ) else Color.Transparent, shape = CircleShape)
-
+            .background(
+                if (dates.any { it == date.toString() } && isSelectedEffect )
+                    Blue.copy(alpha = 0.7f)
+                else Color.Transparent, shape = CircleShape)
+            .border(
+                width = 2.dp, // 오늘 날짜 테두리 설정
+                color = if (isToday)
+                    Blue
+                else
+                    Color.Transparent,
+                shape = CircleShape
+            )
             .clickable {
-
-
                 if (!selectedDates.contains(date.toString())) {
                     selectedDates.add(date.toString())
                     dates = selectedDates.toList() // 상태 업데이트
-
                 }
                 onDateSelected(date)
             }, // 박스 크기 지정
