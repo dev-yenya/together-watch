@@ -7,9 +7,10 @@ import com.google.firebase.functions.HttpsCallableResult
 interface LoginContract {
     interface View {
         @Composable
-        fun ShowLoginButton()
+        fun LoginButton()
+
         @Composable
-        fun ShowHomeButton()
+        fun LoginScreen()
     }
 
     interface Model {

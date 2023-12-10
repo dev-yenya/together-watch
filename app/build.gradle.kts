@@ -87,6 +87,7 @@ dependencies {
     implementation("com.google.android.material:material:1.10.0")
     implementation("androidx.navigation:navigation-runtime-ktx:2.7.5")
     implementation ("androidx.navigation:navigation-compose:2.7.5")
+    implementation("androidx.appcompat:appcompat:1.6.1")
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.kotest:kotest-runner-junit5:5.7.2")
 
