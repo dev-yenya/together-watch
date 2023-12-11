@@ -9,7 +9,8 @@ import com.google.firebase.firestore.firestore
 
 class UpdateAndDeleteModel(
     private val selectedFetchedSchedule: FetchedSchedule,
-    private val forceRefresh: () -> Unit
+    private val forceRefresh: () -> Unit,
+    private val getClickedSchedule: () -> Unit
 ) : UpdateAndDeleteScheduleContract.Model {
     override fun getSchedule(): Schedule {
         return selectedFetchedSchedule.schedule
@@ -34,6 +35,7 @@ class UpdateAndDeleteModel(
                 Log.d("schedule", "스케줄 삭제 성공 : ${scheduleId}" )
                 isDeleted = true
                 forceRefresh() // HomeScreen 함수 내의 triggerForceRefresh 호출
+                getClickedSchedule() // EventsList 업데이트
             }
             .addOnFailureListener{
                 Log.e("schedule", "스케줄 삭제 실패" )

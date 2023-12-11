@@ -83,12 +83,19 @@ fun HomeScreen(
 ) {
     val apiData by viewModel.apiData.observeAsState()
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var clickedDate by remember { mutableStateOf(selectedDate) }
     var events by remember { mutableStateOf(listOf<FetchedSchedule>()) }
     var showAddEvent by remember { mutableStateOf(false) }
     var forceRefresh by remember { mutableStateOf(false)}
 
     fun triggerForceRefresh() {
         forceRefresh = !forceRefresh
+    }
+
+    fun getClickedSchedules() {
+        events = viewModel.mySchedules.filter {
+            it.schedule.date == clickedDate.toString()
+        }
     }
 
     LaunchedEffect(Unit, forceRefresh) {
@@ -101,17 +108,18 @@ fun HomeScreen(
                 CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
                     selectedDate = newDate
                 })
-                CalendarGrid(selectedDate = selectedDate, mySchedules = viewModel.mySchedules, onDateSelected = { date ->
+                CalendarGrid(selectedDate = selectedDate, clickedDate = clickedDate, mySchedules = viewModel.mySchedules, onDateSelected = { date ->
                     selectedDate = date
+                    clickedDate = date
                     Log.e("date", date.toString())
-                    events = viewModel.mySchedules.filter {
-                        it.schedule.date == date.toString()
-                    }
+                    getClickedSchedules()
                 })
 
                 Spacer(modifier = Modifier.height(20.dp))
                 Divider(color = Gray, modifier = Modifier.fillMaxWidth().height(2.dp))
                 Spacer(modifier = Modifier.height(20.dp))
+
+                getClickedSchedules() // 오늘 날짜에 일정이 있을 시 불러오기
 
                 if(events.isEmpty()){
                     Text(
@@ -121,7 +129,6 @@ fun HomeScreen(
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
                     )
-
                 }
                 else{
                     LazyColumn {
@@ -136,7 +143,7 @@ fun HomeScreen(
                         }
                         items(
                             items = events,
-                            itemContent = { EventsList(it, navController, ::triggerForceRefresh) }
+                            itemContent = { EventsList(it, navController, ::triggerForceRefresh, ::getClickedSchedules) }
                         )
                     }
 
@@ -172,10 +179,12 @@ fun HomeScreen(
                     )
                     ButtonRow("개인 일정 추가", onClick = {
                         val context = navController.context
-                        val createScheduleDialog = CreateScheduleDialog(context,
+                        val createScheduleDialog = CreateScheduleDialog(
+                            context,
                             CreateSchedulePresenter(CreateScheduleModel(::triggerForceRefresh))
                         )
                         createScheduleDialog.showBottomSheet()
+                        getClickedSchedules()
                     })
                 }
             }
@@ -231,12 +240,13 @@ fun CalendarHeader(selectedDate: LocalDate, onDateChanged: (LocalDate) -> Unit) 
 fun EventsList(
     fetchedSchedule: FetchedSchedule,
     navController: NavController,
-    triggerForceRefresh: () -> Unit
+    triggerForceRefresh: () -> Unit,
+    getClickedSchedule: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(horizontal = 20.dp, vertical = 8.dp)
     ) {
         Card(
             modifier = Modifier
@@ -245,11 +255,12 @@ fun EventsList(
                 .clickable {
                     val context = navController.context
                     val updateAndDeleteModel =
-                        UpdateAndDeleteModel(fetchedSchedule, triggerForceRefresh)
+                        UpdateAndDeleteModel(fetchedSchedule, triggerForceRefresh, getClickedSchedule)
                     val updateAndDeleteDialog = UpdateAndDeleteScheduleDialog(
                         context,
                         UpdateAndDeleteSchedulePresenter(updateAndDeleteModel),
-                        triggerForceRefresh
+                        triggerForceRefresh,
+                        getClickedSchedule
                     )
                     updateAndDeleteDialog.show()
                 }, // 직접적으로 backgroundColor를 지정
@@ -276,6 +287,7 @@ fun EventsList(
 @Composable
 fun CalendarGrid(
     selectedDate: LocalDate,
+    clickedDate: LocalDate?,
     mySchedules: List<FetchedSchedule> = listOf(),
     onDateSelected: (LocalDate) -> Unit
 ) {
@@ -296,14 +308,18 @@ fun CalendarGrid(
     ) {
         // 요일 헤더
         WeekDaysHeader()
-//dd
+
+        LaunchedEffect(selectedDate) {
+            onDateSelected(selectedDate)
+        }
+
         LazyColumn {
             items((0 until 6).toList()) { week ->
                 WeekRow(
                     week,
                     daysOffset,
                     totalDays,
-                    selectedDate,
+                    clickedDate,
                     yearMonth,
                     mySchedules,
                     false,
@@ -335,7 +351,7 @@ fun WeekRow(
     week: Int,
     daysOffset: Int,
     totalDays: Int,
-    selectedDate: LocalDate,
+    clickedDate: LocalDate?,
     yearMonth: YearMonth,
     mySchedules: List<FetchedSchedule> = listOf(),
     isSelectedEffect: Boolean,
@@ -357,6 +373,7 @@ fun WeekRow(
                     isToday,
                     dayOfMonth,
                     yearMonth,
+                    clickedDate,
                     mySchedules,
                     isSelectedEffect ,
                     onDateSelected
@@ -375,6 +392,7 @@ fun DateBox(
     isToday: Boolean,
     dayOfMonth: Int,
     yearMonth: YearMonth,
+    clickedDate: LocalDate?,
     mySchedules: List<FetchedSchedule> = listOf(),
     isSelectedEffect: Boolean = false,
     onDateSelected: (LocalDate) -> Unit
@@ -384,12 +402,14 @@ fun DateBox(
     var dates by rememberSaveable { mutableStateOf(listOf<String>()) }
 
     val mySchedules = mySchedules.filter { it.schedule.date == date.toString() }
+
     Box(
         modifier = Modifier
             .padding(8.dp)
             .size(35.dp)
             .background(
-                if (dates.any { it == date.toString() } && isSelectedEffect )
+                if ((clickedDate?.isEqual(date) == true) // default : 날짜 단일 선택 이벤트
+                    || dates.any { it == date.toString() } && isSelectedEffect ) // isSelectedEffect : 날짜 다중 선택 이벤트
                     Blue.copy(alpha = 0.7f)
                 else Color.Transparent, shape = CircleShape)
             .border(
@@ -440,7 +460,6 @@ fun DateBox(
         }
     }
 }
-
 
 @Composable
 fun EmptyBox() {
