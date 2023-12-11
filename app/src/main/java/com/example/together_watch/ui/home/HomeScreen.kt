@@ -92,6 +92,12 @@ fun HomeScreen(
         forceRefresh = !forceRefresh
     }
 
+    fun getClickedSchedules(): List<FetchedSchedule> {
+        return viewModel.mySchedules.filter {
+            it.schedule.date == clickedDate.toString()
+        }
+    }
+
     LaunchedEffect(Unit, forceRefresh) {
         viewModel.fetchSchedulesData() // 화면이 처음 그려질 때 API 호출
     }
@@ -106,14 +112,14 @@ fun HomeScreen(
                     selectedDate = date
                     clickedDate = date
                     Log.e("date", date.toString())
-                    events = viewModel.mySchedules.filter {
-                        it.schedule.date == date.toString()
-                    }
+                    events = getClickedSchedules()
                 })
 
                 Spacer(modifier = Modifier.height(20.dp))
                 Divider(color = Gray, modifier = Modifier.fillMaxWidth().height(2.dp))
                 Spacer(modifier = Modifier.height(20.dp))
+
+                events = getClickedSchedules() // 선택된 날짜에 일정이 있을 시 불러오기
 
                 if(events.isEmpty()){
                     Text(
@@ -123,7 +129,6 @@ fun HomeScreen(
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
                     )
-
                 }
                 else{
                     LazyColumn {
@@ -300,6 +305,11 @@ fun CalendarGrid(
     ) {
         // 요일 헤더
         WeekDaysHeader()
+
+        LaunchedEffect(selectedDate) {
+            onDateSelected(selectedDate)
+        }
+
         LazyColumn {
             items((0 until 6).toList()) { week ->
                 WeekRow(
@@ -389,9 +399,6 @@ fun DateBox(
     var dates by rememberSaveable { mutableStateOf(listOf<String>()) }
 
     val mySchedules = mySchedules.filter { it.schedule.date == date.toString() }
-
-    Log.d("clickedDate", clickedDate.toString())
-    Log.d("date", date.toString())
 
     Box(
         modifier = Modifier
