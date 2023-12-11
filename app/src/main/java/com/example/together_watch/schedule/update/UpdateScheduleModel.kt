@@ -7,7 +7,8 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 
 class UpdateScheduleModel(
-    private val forceRefresh: () -> Unit
+    private val forceRefresh: () -> Unit,
+    private val getClickedSchedule: () -> Unit
 ) : UpdateScheduleContract.Model {
     override fun updateSchedule(selectedSchedule: FetchedSchedule) {
         val scheduleId = selectedSchedule.id
@@ -23,6 +24,7 @@ class UpdateScheduleModel(
                 Log.d("schedule", "스케줄 업데이트 성공 : ${scheduleId}" )
                 isUpdated = true
                 forceRefresh() // HomeScreen 함수 내의 triggerForceRefresh 호출
+                getClickedSchedule()
             }
             .addOnFailureListener{
                 Log.e("schedule", "스케줄 업데이트 실패" )

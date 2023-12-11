@@ -92,8 +92,8 @@ fun HomeScreen(
         forceRefresh = !forceRefresh
     }
 
-    fun getClickedSchedules(): List<FetchedSchedule> {
-        return viewModel.mySchedules.filter {
+    fun getClickedSchedules() {
+        events = viewModel.mySchedules.filter {
             it.schedule.date == clickedDate.toString()
         }
     }
@@ -112,14 +112,14 @@ fun HomeScreen(
                     selectedDate = date
                     clickedDate = date
                     Log.e("date", date.toString())
-                    events = getClickedSchedules()
+                    getClickedSchedules()
                 })
 
                 Spacer(modifier = Modifier.height(20.dp))
                 Divider(color = Gray, modifier = Modifier.fillMaxWidth().height(2.dp))
                 Spacer(modifier = Modifier.height(20.dp))
 
-                events = getClickedSchedules() // 선택된 날짜에 일정이 있을 시 불러오기
+                getClickedSchedules() // 오늘 날짜에 일정이 있을 시 불러오기
 
                 if(events.isEmpty()){
                     Text(
@@ -143,7 +143,7 @@ fun HomeScreen(
                         }
                         items(
                             items = events,
-                            itemContent = { EventsList(it, navController, ::triggerForceRefresh) }
+                            itemContent = { EventsList(it, navController, ::triggerForceRefresh, ::getClickedSchedules) }
                         )
                     }
 
@@ -184,6 +184,7 @@ fun HomeScreen(
                             CreateSchedulePresenter(CreateScheduleModel(::triggerForceRefresh))
                         )
                         createScheduleDialog.showBottomSheet()
+                        getClickedSchedules()
                     })
                 }
             }
@@ -239,12 +240,13 @@ fun CalendarHeader(selectedDate: LocalDate, onDateChanged: (LocalDate) -> Unit) 
 fun EventsList(
     fetchedSchedule: FetchedSchedule,
     navController: NavController,
-    triggerForceRefresh: () -> Unit
+    triggerForceRefresh: () -> Unit,
+    getClickedSchedule: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(horizontal = 20.dp, vertical = 8.dp)
     ) {
         Card(
             modifier = Modifier
@@ -253,11 +255,12 @@ fun EventsList(
                 .clickable {
                     val context = navController.context
                     val updateAndDeleteModel =
-                        UpdateAndDeleteModel(fetchedSchedule, triggerForceRefresh)
+                        UpdateAndDeleteModel(fetchedSchedule, triggerForceRefresh, getClickedSchedule)
                     val updateAndDeleteDialog = UpdateAndDeleteScheduleDialog(
                         context,
                         UpdateAndDeleteSchedulePresenter(updateAndDeleteModel),
-                        triggerForceRefresh
+                        triggerForceRefresh,
+                        getClickedSchedule
                     )
                     updateAndDeleteDialog.show()
                 }, // 직접적으로 backgroundColor를 지정
