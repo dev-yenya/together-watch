@@ -16,7 +16,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 class UpdateAndDeleteScheduleDialog(
     context: Context,
     private val presenter: UpdateAndDeleteScheduleContract.Presenter,
-    private val forceRefresh: () -> Unit
+    private val forceRefresh: () -> Unit,
+    private val getClickedSchedule: () -> Unit
 ) : BottomSheetDialog(context, R.style.DialogStyle), UpdateAndDeleteScheduleContract.View  {
     private val binding = DialogBottomSheetUpdateAndDeleteBinding.inflate(LayoutInflater.from(context))
     init {
@@ -31,7 +32,7 @@ class UpdateAndDeleteScheduleDialog(
             btnUpdate.setOnClickListener {
                 hide()
                 val selectedSchedule = presenter.loadFetchedScheduleData()
-                val updateSchedulePresenter = UpdateSchedulePresenter(UpdateScheduleModel(forceRefresh))
+                val updateSchedulePresenter = UpdateSchedulePresenter(UpdateScheduleModel(forceRefresh, getClickedSchedule))
                 UpdateScheduleDialog(context, selectedSchedule, updateSchedulePresenter).show()
             }
             btnDelete.setOnClickListener {

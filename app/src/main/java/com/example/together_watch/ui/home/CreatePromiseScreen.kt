@@ -300,8 +300,9 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
             val firstDayOfMonth = yearMonth.atDay(1)
             val daysOffset = firstDayOfMonth.dayOfWeek.value % 7
             var isSelectedEffect by remember { mutableStateOf(false) }
+            var clickedDate by remember { mutableStateOf<LocalDate?>(null) }
 
-            WeekRow(week, daysOffset, totalDays, selectedDates, yearMonth, isSelectedEffect = isSelectedEffect) { date ->
+            WeekRow(week, daysOffset, totalDays, selectedDates, clickedDate, yearMonth, isSelectedEffect=isSelectedEffect) { date ->
                 selectedDate = date
                 val isDateSelectable = date.isAfter(LocalDate.now()) || date.isEqual(LocalDate.now())
                 if (isDateSelectable) {
