@@ -44,6 +44,7 @@ import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
+import com.kakao.sdk.common.util.Utility
 import androidx.compose.foundation.layout.Row
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -54,6 +55,7 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        Log.e("hash", Utility.getKeyHash(this))
         setContent {
             LoginScreen()
         }

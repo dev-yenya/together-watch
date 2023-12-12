@@ -76,7 +76,7 @@ fun NavigationGraph(navController: NavHostController, viewModel: MainViewModel) 
             HomeScreen(navController, viewModel)
         }
         composable(Destinations.PersonScreen.route) {
-            PersonScreen(navController)
+            PersonScreen(navController, viewModel)
         }
         composable(Destinations.SettingScreen.route) {
             SettingScreen(navController)
@@ -91,7 +91,7 @@ fun NavigationGraph(navController: NavHostController, viewModel: MainViewModel) 
             CreatePromiseScreen(navController, viewModel)
         }
         composable(Destinations.PromiseAcceptScreen.route) {
-            PromiseAcceptScreen()
+            PromiseAcceptScreen(navController ,viewModel)
         }
     }
 }
@@ -121,7 +121,7 @@ fun BottomBar(
                 onClick = {
                     navController.navigate(screen.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+                            saveState = false
                         }
                         launchSingleTop = true
                         restoreState = true

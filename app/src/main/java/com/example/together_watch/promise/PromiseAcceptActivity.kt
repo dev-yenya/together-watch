@@ -120,8 +120,8 @@ class PromiseAcceptActivity : ComponentActivity(), PromiseAcceptContract.View {
                         text = "약속시간은 모두가 괜찮은 시간대로 정해볼게요.",
                         style = MaterialTheme.typography.bodySmall
                     )
-                    Text(text = promise.name, style = MaterialTheme.typography.headlineMedium)
-                    Text(text = promise.place, style = MaterialTheme.typography.bodyMedium)
+                    Text(text = promise.name ?: "", style = MaterialTheme.typography.headlineMedium)
+                    Text(text = promise.place ?: "", style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }

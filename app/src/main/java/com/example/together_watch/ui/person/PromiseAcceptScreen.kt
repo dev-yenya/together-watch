@@ -1,8 +1,11 @@
 package com.example.together_watch.ui.person
 
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,23 +50,45 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.example.together_watch.R
+import com.example.together_watch.data.FetchedPromise
+import com.example.together_watch.data.Status
+import com.example.together_watch.ui.Destinations
+
+import com.example.together_watch.ui.MainViewModel
+
 import com.example.together_watch.ui.theme.Black
 import com.example.together_watch.ui.theme.Blue
 import com.example.together_watch.ui.theme.DarkGray
 import com.example.together_watch.ui.theme.Gray
 
 
+
 // 약속 수락
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun PromiseAcceptScreen() {
+fun PromiseAcceptScreen(navController: NavHostController, viewModel: MainViewModel) {
+
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
-
+    val previousScreen = { currentScreen.intValue-- }
     val complete = { /* 완료 액션 구현 */ }
     var showDialog by remember { mutableStateOf(false) }
     var flag = 0
+    val backHandler = {
+        if (currentScreen.intValue > 1) {
+            previousScreen()
+        } else {
+            navController.popBackStack()
+        }
+    }
+
+    BackHandler {
+        backHandler()
+    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -95,7 +120,7 @@ fun PromiseAcceptScreen() {
                             fontWeight = FontWeight.Bold
                         )
                         IconButton(
-                            onClick = { /* 뒤로가기 기능 구현 */ },
+                            onClick = { backHandler() },
                             modifier = Modifier.align(Alignment.CenterStart)
                         ) {
                             Icon(Icons.Filled.ArrowBack, contentDescription = null)
@@ -113,7 +138,7 @@ fun PromiseAcceptScreen() {
 
                 when (currentScreen.intValue) {
                     1 -> PromiseFirstScreen()
-                    2 -> PromiseSecondScreen()
+                    2 -> PromiseSecondScreen(viewModel)
                     3 -> PromiseThirdScreen()
                     4 -> PromiseCompleteScreen()
                 }
@@ -242,13 +267,7 @@ fun PromiseFirstScreen() {
 
 
 @Composable
-fun PromiseSecondScreen() {
-
-    val profiles = listOf(
-        "Alice" to R.drawable.ic_launcher_foreground,
-        "Bob" to R.drawable.ic_launcher_foreground,
-        "Charlie" to R.drawable.ic_launcher_foreground
-    )
+fun PromiseSecondScreen(viewModel: MainViewModel) {
 
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
@@ -256,38 +275,46 @@ fun PromiseSecondScreen() {
         Text("약속을 확정해 볼까요?", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp), fontWeight = FontWeight.Bold)
         Text("모든 멤버들이 약속에 참여했나요?", modifier = Modifier.padding(bottom = 10.dp), style = TextStyle(fontSize = 15.sp))
         Spacer(modifier = Modifier.height(20.dp))
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp), // 직접적으로 backgroundColor를 지정
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White,
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 5.dp
-            )
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
+        viewModel.selectedPromise?.let { fetchedPromise ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
+
             ) {
-                Text(text = "Event Date and Time", style = MaterialTheme.typography.headlineMedium)
-                Text(text = "Event Title: ", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "Event Details", style = MaterialTheme.typography.bodySmall)
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "${fetchedPromise.promise.dates?.joinToString("\n")}",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    Text(
+                        text = "Time: ${fetchedPromise.promise.startTime} ~ ${fetchedPromise.promise.endTime}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "Event Title: ${fetchedPromise.promise.name}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
         Text("약속에 참여한 멤버들", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp), fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(10.dp))
         LazyColumn {
-            items(profiles) { (name, imageRes) ->
-                ProfileCard(name, imageRes)
+            items(viewModel.selectedPromise?.promise?.users ?: listOf()) { userId ->
+                ProfileCard(userId, viewModel)
             }
         }
     }
 }
 
 @Composable
-fun ProfileCard(name: String, imageRes: Int) {
+fun ProfileCard(userId: String, viewModel: MainViewModel) {
+    val user = viewModel.users.find { it.uid == userId }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -304,15 +331,17 @@ fun ProfileCard(name: String, imageRes: Int) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(8.dp)
         ) {
-            Image(
-                painter = painterResource(id = imageRes),
-                contentDescription = "Profile image of $name",
+            AsyncImage(
+                model = user?.photoURL ?: "",
+                contentDescription = "프로필 이미지",
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(CircleShape)
+                    .border(2.dp, Gray, shape = CircleShape)
+                    .clip(CircleShape),
             )
+
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = name, style = MaterialTheme.typography.bodyMedium)
+            Text(text = user?.displayName ?: "", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
