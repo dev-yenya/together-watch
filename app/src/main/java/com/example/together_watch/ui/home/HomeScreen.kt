@@ -147,7 +147,6 @@ fun HomeScreen(
                             itemContent = { EventsList(it, navController, ::triggerForceRefresh, ::getClickedSchedules) }
                         )
                     }
-
                 }
             }
             FloatingActionButton(
@@ -403,7 +402,7 @@ fun DateBox(
             .size(35.dp)
             .background(
                 if ((clickedDate?.isEqual(date) == true) // default : 날짜 단일 선택 이벤트
-                    || dates.any { it == date.toString() } && isSelectedEffect ) // isSelectedEffect : 날짜 다중 선택 이벤트
+                    || selectedDates.any { it == date.toString() } && isSelectedEffect ) // isSelectedEffect : 날짜 다중 선택 이벤트
                     Blue.copy(alpha = 0.7f)
                 else Color.Transparent, shape = CircleShape)
             .border(
