@@ -10,16 +10,18 @@ import com.example.together_watch.data.FetchedSchedule
 import com.example.together_watch.data.Promise
 import com.example.together_watch.data.Schedule
 import com.example.together_watch.data.Status
+import com.example.together_watch.data.User
 import com.example.together_watch.data.toMap
 import com.example.together_watch.promise.PromiseInfo
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.util.concurrent.CompletableFuture
 
 class MainViewModel : ViewModel() {
+    var myUid = Firebase.auth.currentUser?.uid.toString()
+    var selectedPromise: FetchedPromise? = null
     var mySchedules = listOf<FetchedSchedule>()
     private val _apiData = MutableLiveData<List<FetchedSchedule>>()
     val apiData: LiveData<List<FetchedSchedule>> = _apiData
@@ -28,17 +30,22 @@ class MainViewModel : ViewModel() {
     private val _apiPromiseData = MutableLiveData<List<FetchedPromise>>()
     val apiPromiseData: LiveData<List<FetchedPromise>> = _apiPromiseData
 
+    var users = listOf<User>()
+
     var promiseName: String = ""
     var promisePlace: String = ""
     var selectedDates: List<String> = emptyList()
     var startTime: String = ""
     var endTime: String = ""
 
+    init {
+        fetchUserData()
+    }
+
     fun fetchSchedulesData() {
         viewModelScope.launch {
-            val userId = Firebase.auth.currentUser?.uid.toString()
             Firebase.firestore.collection("users")
-                .document(userId)
+                .document(myUid)
                 .collection("schedules")
                 .get()
                 .addOnSuccessListener { documents ->
@@ -60,18 +67,61 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    fun fetchPromisesData() {
+        viewModelScope.launch {
+            Firebase.firestore.collection("users")
+                .document(myUid)
+                .collection("promises")
+                .get()
+                .addOnSuccessListener { documents ->
+                    myPromises = documents.map {
+                        Log.e("it.id", it.id)
+                        FetchedPromise(
+                            id = it.id,
+                            promise = Promise(
+                                name = it.get("name").toString(),
+                                ownerId = it.get("ownerId").toString(),
+                                users = it.get("users") as? List<String>,
+                                status = Status.valueOf(it.getString("status") ?: "ONPROGRESS"),
+                                dates = it.get("dates") as? List<String>,
+                                startTime = it.get("startTime").toString(),
+                                endTime = it.get("endTime").toString(),
+                                place = it.get("place").toString()
+                            )
+                        )
+                    }
+                    _apiPromiseData.value = myPromises
+                }
+        }
+    }
+
+    private fun fetchUserData() {
+        viewModelScope.launch {
+            Firebase.firestore.collection("users")
+                .get()
+                .addOnSuccessListener { documents ->
+                    users = documents.map {
+                        User(
+                            displayName = it.get("displayName").toString(),
+                            photoURL = it.get("photoURL").toString(),
+                            uid = it.get("uid").toString()
+                        )
+                    }
+                }
+        }
+    }
+
      fun savePromise(): CompletableFuture<PromiseInfo> {
-         val userId = Firebase.auth.currentUser?.uid.toString()
          val userRef = Firebase.firestore.collection("users")
          val result = CompletableFuture<PromiseInfo>()
 
-         userRef.document(userId)
+         userRef.document(myUid)
              .collection("promises")
              .add(
                  Promise(
                      name = promiseName,
-                     ownerId = userId,
-                     users = listOf(userId),
+                     ownerId = myUid,
+                     users = listOf(myUid),
                      status = Status.ONPROGRESS,
                      dates = selectedDates,
                      startTime = startTime,
@@ -80,16 +130,26 @@ class MainViewModel : ViewModel() {
                  ).toMap()
              ).addOnSuccessListener { promiseDocumentReference ->
                  Log.d("promise", "약속 업로드 성공 ${promiseDocumentReference.id}")
-                 result.complete(PromiseInfo(userId, promiseDocumentReference.id))
+                 result.complete(PromiseInfo(myUid, promiseDocumentReference.id))
              }
          return result
      }
 
+    fun deletePromise(promise: FetchedPromise?, successListener: () -> Unit) {
+        Firebase.firestore.collection("users")
+            .document(myUid)
+            .collection("promises")
+            .document(promise?.id ?: "")
+            .delete()
+            .addOnSuccessListener {
+                successListener.invoke()
+            }
+    }
+
     fun fetchOnProgressPromisesData() {
         viewModelScope.launch {
-            val userId = Firebase.auth.currentUser?.uid.toString()
             Firebase.firestore.collection("users")
-                .document(userId)
+                .document(myUid)
                 .collection("promises")
                 .get()
                 .addOnSuccessListener { documents ->

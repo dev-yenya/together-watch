@@ -1,5 +1,6 @@
 package com.example.together_watch.ui.home
 
+import android.icu.util.LocaleData
 import com.example.together_watch.schedule.create.CreateScheduleDialog
 import android.os.Build
 import android.util.Log
@@ -284,34 +285,26 @@ fun CalendarGrid(
     val firstDayOfMonth = yearMonth.atDay(1)
     val daysOffset = firstDayOfMonth.dayOfWeek.value % 7
 
-    var schedulesForDay by remember { mutableStateOf(listOf<FetchedSchedule>()) }
-//    val date = yearMonth.atDay(dayOfMonth)
-
-//    LaunchedEffect(key1 = date) {
-//        schedulesForDay = fetchDataForDate(date)
-//    }
-
-    Column(
-        modifier = Modifier.padding(horizontal = 10.dp)
-    ) {
+    Column(modifier = Modifier.padding(horizontal = 10.dp)) {
         // 요일 헤더
         WeekDaysHeader()
-//dd
+
         LazyColumn {
             items((0 until 6).toList()) { week ->
                 WeekRow(
                     week,
                     daysOffset,
                     totalDays,
-                    selectedDate,
+                    listOf(selectedDate.toString()),
                     yearMonth,
                     mySchedules,
-                    false,
+                    true,
                     onDateSelected)
             }
         }
     }
 }
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -335,7 +328,7 @@ fun WeekRow(
     week: Int,
     daysOffset: Int,
     totalDays: Int,
-    selectedDate: LocalDate,
+    selectedDates: List<String>,
     yearMonth: YearMonth,
     mySchedules: List<FetchedSchedule> = listOf(),
     isSelectedEffect: Boolean,
@@ -357,8 +350,9 @@ fun WeekRow(
                     isToday,
                     dayOfMonth,
                     yearMonth,
+                    selectedDates,
                     mySchedules,
-                    isSelectedEffect ,
+                    isSelectedEffect,
                     onDateSelected
                 )
             } else {
@@ -375,21 +369,19 @@ fun DateBox(
     isToday: Boolean,
     dayOfMonth: Int,
     yearMonth: YearMonth,
+    selectedDates: List<String> = listOf(),
     mySchedules: List<FetchedSchedule> = listOf(),
     isSelectedEffect: Boolean = false,
     onDateSelected: (LocalDate) -> Unit
 ) {
     val date = yearMonth.atDay(dayOfMonth)
-    val selectedDates = mutableListOf<String>()
-    var dates by rememberSaveable { mutableStateOf(listOf<String>()) }
-
     val mySchedules = mySchedules.filter { it.schedule.date == date.toString() }
     Box(
         modifier = Modifier
             .padding(8.dp)
             .size(35.dp)
             .background(
-                if (dates.any { it == date.toString() } && isSelectedEffect )
+                if (selectedDates.any { it == date.toString() } && isSelectedEffect )
                     Blue.copy(alpha = 0.7f)
                 else Color.Transparent, shape = CircleShape)
             .border(
@@ -401,10 +393,6 @@ fun DateBox(
                 shape = CircleShape
             )
             .clickable {
-                if (!selectedDates.contains(date.toString())) {
-                    selectedDates.add(date.toString())
-                    dates = selectedDates.toList() // 상태 업데이트
-                }
                 onDateSelected(date)
             }, // 박스 크기 지정
 

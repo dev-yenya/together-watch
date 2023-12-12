@@ -28,12 +28,14 @@ import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
+import com.kakao.sdk.common.util.Utility
 
 class LoginActivity: ComponentActivity(), LoginContract.View {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        Log.e("hash", Utility.getKeyHash(this))
         setContent {
             Together_watchTheme {
                 // A surface container using the 'background' color from the theme

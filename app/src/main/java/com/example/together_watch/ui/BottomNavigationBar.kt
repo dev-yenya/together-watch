@@ -76,7 +76,7 @@ fun NavigationGraph(navController: NavHostController, viewModel: MainViewModel) 
             HomeScreen(navController, viewModel)
         }
         composable(Destinations.PersonScreen.route) {
-            PersonScreen(navController)
+            PersonScreen(navController, viewModel)
         }
         composable(Destinations.SettingScreen.route) {
             SettingScreen(navController)

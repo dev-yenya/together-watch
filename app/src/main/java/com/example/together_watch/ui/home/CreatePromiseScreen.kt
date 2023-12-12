@@ -301,22 +301,23 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
             val daysOffset = firstDayOfMonth.dayOfWeek.value % 7
             var isSelectedEffect by remember { mutableStateOf(false) }
 
-            WeekRow(week, daysOffset, totalDays, selectedDate, yearMonth, isSelectedEffect=isSelectedEffect) { date ->
-                selectedDate = date
+            WeekRow(week, daysOffset, totalDays, selectedDates, yearMonth, isSelectedEffect = isSelectedEffect) { date ->
                 selectedDate = date
                 val isDateSelectable = date.isAfter(LocalDate.now()) || date.isEqual(LocalDate.now())
                 if (isDateSelectable) {
-                    isSelectedEffect=true
+                    isSelectedEffect = true
                     selectedDate = date
-                    if (!selectedDates.contains(date.toString())) {
+                    val selectedDate = selectedDates.find { it == date.toString() }
+                    if (selectedDate == null) {
                         selectedDates.add(date.toString())
                         dates = selectedDates.toList() // 상태 업데이트
                         onDateSelected(dates) // 선택된 날짜를 viewModel으로 전달
+                    } else {
+                        selectedDates.remove(selectedDate)
+                        dates = selectedDates.toList() // 상태 업데이트
                     }
                 }
-                else isSelectedEffect=false
-
-
+                else isSelectedEffect = false
             }
         }
 
