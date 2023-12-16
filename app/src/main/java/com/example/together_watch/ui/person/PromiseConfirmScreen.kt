@@ -158,7 +158,6 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                             viewModel,
                             TimeBoundary(viewModel.selectedBlock!!.startTime, viewModel.selectedBlock!!.endTime)
                         ) { text1, text2 ->
-                            // TODO: 유효성 검사를 위한 TimeBoundary 같이 전달
                             viewModel.confirmedStartTime = text1
                             viewModel.confirmedEndTime = text2
                         }

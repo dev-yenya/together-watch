@@ -370,15 +370,15 @@ fun MyTimePicker(context: Context,
         { _, hourOfDay, minute ->
             var roundedMinute = minute
             val selectedTime = LocalTime.of(hourOfDay, roundedMinute)
-            if (boundary == null) {
+            // boundary가 설정되어 있지 않을 경우 처음 약속 생성하는 상황
+            if (boundary == null || boundary.min <= selectedTime || boundary.max >= selectedTime) {
                 // 약속 생성시 입력값은 반드시 30분 단위이어야 함
                 roundedMinute = (minute / 30) * 30
-            } else if (boundary.min > selectedTime || boundary.max < selectedTime){
+                result(String.format("%02d:%02d", hourOfDay, roundedMinute))
+            } else {
                 Toast.makeText(context, "잘못된 입력값입니다.", Toast.LENGTH_SHORT).show()
                 return@TimePickerDialog
             }
-            // 선택된 시간을 "HH:mm" 형식으로 저장합니다.
-            result(String.format("%02d:%02d", hourOfDay, roundedMinute))
         },
         calendar.get(Calendar.HOUR_OF_DAY),
         calendar.get(Calendar.MINUTE),
@@ -424,11 +424,7 @@ fun TimePickScreen(viewModel: MainViewModel,
                                 if (it is PressInteraction.Release) {
                                     MyTimePicker(context, boundary) {
                                         text1 = it
-                                        if (isValidTimeRange(text1, text2)) {
-                                            onTimeRangeSelected(text1, text2)
-                                        } else {
-                                            Toast.makeText(context, "잘못된 입력값입니다.", Toast.LENGTH_SHORT).show()
-                                        }
+                                        onTimeRangeSelected(text1, text2)
                                     }
                                 }
                             }
@@ -462,11 +458,7 @@ fun TimePickScreen(viewModel: MainViewModel,
                                 if (it is PressInteraction.Release) {
                                     MyTimePicker(context, boundary) {
                                         text2 = it
-                                        if (isValidTimeRange(text1, text2)) {
-                                            onTimeRangeSelected(text1, text2)
-                                        } else {
-                                            Toast.makeText(context, "잘못된 입력값입니다.", Toast.LENGTH_SHORT).show()
-                                        }
+                                        onTimeRangeSelected(text1, text2)
                                     }
                                 }
                             }
