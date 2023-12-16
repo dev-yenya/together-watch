@@ -7,27 +7,54 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.functions
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.tasks.await
+import java.lang.StringBuilder
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 data class DateBlock(
     val date: LocalDate,
     val startTime: LocalTime,
     val endTime: LocalTime,
     val possibleUsers: List<String>
-)
+) {
+    override fun toString(): String {
+        val builder = StringBuilder()
+        builder.append(date.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
+            .append(" (")
+            .append(getKorDayOfWeek(date.dayOfWeek))
+            .append(") ")
+            .append(startTime.format(DateTimeFormatter.ofPattern("H:mm")))
+            .append(" ~ ")
+            .append(endTime.format(DateTimeFormatter.ofPattern("H:mm")))
+        return builder.toString()
+    }
+
+    private fun getKorDayOfWeek(day: DayOfWeek): String {
+        return when(day) {
+            DayOfWeek.MONDAY -> "월"
+            DayOfWeek.TUESDAY -> "화"
+            DayOfWeek.WEDNESDAY -> "수"
+            DayOfWeek.THURSDAY -> "목"
+            DayOfWeek.FRIDAY -> "금"
+            DayOfWeek.SATURDAY -> "토"
+            DayOfWeek.SUNDAY -> "일"
+        }
+    }
+}
 
 class PromiseCompletionModel {
 
     private lateinit var functions: FirebaseFunctions
+    private val blocks = mutableListOf<DateBlock>()
 
-    suspend fun makeSchedule(fetchedPromise: FetchedPromise): List<DateBlock> {
+    suspend fun makeSchedule(fetchedPromise: FetchedPromise): MutableList<DateBlock>{
         val currentUser = Firebase.auth.currentUser
-        val dateBlocks = mutableListOf<DateBlock>()
         if (! currentUser?.uid.equals(fetchedPromise.promise.ownerId)) {
             Log.d("promise-completion", "현재 사용자는 약속을 생성한 회원이 아닙니다.")
-            return dateBlocks
         }
 
         val data = hashMapOf(
@@ -44,7 +71,7 @@ class PromiseCompletionModel {
                     val result = task.result?.data as HashMap<*, *>
                     val resultTimes = result["times"] as List<Map<String, *>>
                     resultTimes.forEach { block ->
-                        dateBlocks.add(
+                        blocks.add(
                             DateBlock(
                                 localDateValue(block["date"]!! as String),
                                 localTimeValue(block["startTime"]!! as String),
@@ -57,31 +84,18 @@ class PromiseCompletionModel {
                 } catch (e: RuntimeExecutionException) {
                     Log.e("promise-completion", "Call Firebase Cloud functions failed.${e.message}")
                 }
+                Log.d("promise-completion", "함수 호출 결과: $blocks")
             }.await()
-        return dateBlocks
+        return blocks
     }
 
 
     // example: Sun Jan 01 2023
     private fun localDateValue(dateString: String): LocalDate {
-        val list = dateString.split(" ")
+        val list = dateString.split("-")
         val dayOfMonth = list[2].toInt()
-        val month = when (list[1]) {
-            "Jan" -> 1
-            "Feb" -> 2
-            "Mar" -> 3
-            "Apr" -> 4
-            "May" -> 5
-            "Jun" -> 6
-            "Jul" -> 7
-            "Aug" -> 8
-            "Sep" -> 9
-            "Oct" -> 10
-            "Nov" -> 11
-            "Dec" -> 12
-            else -> throw IllegalArgumentException()
-        }
-        val year = list[4].toInt()
+        val month = list[1].toInt()
+        val year = list[0].toInt()
         return LocalDate.of(year, month, dayOfMonth)
     }
 
