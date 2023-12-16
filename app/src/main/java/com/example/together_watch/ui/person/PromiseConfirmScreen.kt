@@ -1,6 +1,7 @@
 package com.example.together_watch.ui.person
 
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.border
@@ -32,6 +33,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.together_watch.promise.DateBlock
+import com.example.together_watch.promise.PromiseCompletionModel
 
 import com.example.together_watch.ui.MainViewModel
 import com.example.together_watch.ui.home.TimePickScreen
@@ -64,17 +68,30 @@ import com.example.together_watch.ui.theme.Gray
 @Composable
 fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewModel) {
 
+    val timeFunctionModel = PromiseCompletionModel()
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
     val previousScreen = { currentScreen.intValue-- }
-    val complete = { /* 완료 액션 구현 */ }
+    val complete = { /* TODO 톡캘린더 함수 연결 */}
+    val saveSchedules = { viewModel.savePromiseSchedule() }
     var showDialog by remember { mutableStateOf(false) }
+    var getTimeClicked by remember { mutableStateOf(false) }
+    var blocks by remember { mutableStateOf<List<DateBlock>>(emptyList()) }
     var flag = 0
     val backHandler = {
         if (currentScreen.intValue > 1) {
             previousScreen()
         } else {
             navController.popBackStack()
+        }
+    }
+
+    LaunchedEffect(getTimeClicked) {
+        if (getTimeClicked) {
+            viewModel.selectedPromise?.let {
+                blocks = timeFunctionModel.makeSchedule(it)
+                getTimeClicked = false
+            }
         }
     }
 
@@ -91,7 +108,10 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
 
         ) {
             Column(
-                modifier = Modifier.weight(1f, true), // Takes up all available space except for the button
+                modifier = Modifier.weight(
+                    1f,
+                    true
+                ), // Takes up all available space except for the button
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (currentScreen.intValue < 4) {
@@ -129,16 +149,30 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
 
                 when (currentScreen.intValue) {
                     1 -> ConfirmPromiseFirstScreen(viewModel)
-                    2 -> ConfirmPromiseSecondScreen()
-                    3 -> TimePickScreen(viewModel) {text1, text2 -> }
+                    2 -> ConfirmPromiseSecondScreen(viewModel, blocks)
+                    3 -> TimePickScreen(viewModel) { text1, text2 ->
+                        viewModel.confirmedStartTime = text1
+                        viewModel.confirmedEndTime = text2
+                    }
                     4 -> ConfirmPromiseCompleteScreen()
                 }
             }
             Button(
-                onClick = if (currentScreen.intValue < 4) {
-                    { nextScreen() }
-                } else {
-                    { complete() }
+                onClick = when (currentScreen.intValue) {
+                    1 -> {
+                        { getTimeClicked = true
+                            nextScreen() }
+                    }
+                    2 -> {
+                        { nextScreen() }
+                    }
+                    3 -> {
+                        { saveSchedules()
+                            nextScreen() }
+                    }
+                    else -> {
+                        { complete() }
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -162,8 +196,17 @@ fun ConfirmPromiseFirstScreen(viewModel: MainViewModel) {
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
-        Text("약속을 확정해 볼까요?", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp), fontWeight = FontWeight.Bold)
-        Text("모든 멤버들이 약속에 참여했나요?", modifier = Modifier.padding(bottom = 10.dp), style = TextStyle(fontSize = 15.sp))
+        Text(
+            "약속을 확정해 볼까요?",
+            modifier = Modifier.padding(bottom = 5.dp),
+            style = TextStyle(fontSize = 20.sp),
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            "모든 멤버들이 약속에 참여했나요?",
+            modifier = Modifier.padding(bottom = 10.dp),
+            style = TextStyle(fontSize = 15.sp)
+        )
         Spacer(modifier = Modifier.height(20.dp))
         viewModel.selectedPromise?.let { fetchedPromise ->
             Card(
@@ -183,15 +226,26 @@ fun ConfirmPromiseFirstScreen(viewModel: MainViewModel) {
                     Text(
                         text = "약속시간은 모두가 괜찮은 시간대로 정해볼게요.",
                         style = MaterialTheme.typography.bodySmall,
-                        color= DarkGray
+                        color = DarkGray
                     )
-                    Text(text = "${fetchedPromise.promise.name}", style = MaterialTheme.typography.headlineSmall)
-                    Text(text = "${fetchedPromise.promise.place}", style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        text = "${fetchedPromise.promise.name}",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    Text(
+                        text = "${fetchedPromise.promise.place}",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
                 }
             }
         }
         Spacer(modifier = Modifier.height(40.dp))
-        Text("약속에 참여한 멤버들", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp), fontWeight = FontWeight.Bold)
+        Text(
+            "약속에 참여한 멤버들",
+            modifier = Modifier.padding(bottom = 5.dp),
+            style = TextStyle(fontSize = 20.sp),
+            fontWeight = FontWeight.Bold
+        )
         Spacer(modifier = Modifier.height(10.dp))
         LazyColumn {
             items(viewModel.selectedPromise?.promise?.users ?: listOf()) { userId ->
@@ -238,23 +292,35 @@ fun ProfileCard(userId: String, viewModel: MainViewModel) {
 
 
 @Composable
-fun ConfirmPromiseSecondScreen() {
+fun ConfirmPromiseSecondScreen(viewModel: MainViewModel, blocks: List<DateBlock>) {
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
-        Text("시간을 선택해 주세요", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp), fontWeight = FontWeight.Bold)
-        Text("멤버들이 모두 가능한 시간대를 골라봤어요.", modifier = Modifier.padding(bottom = 10.dp), style = TextStyle(fontSize = 15.sp))
+        Text(
+            "시간을 선택해 주세요",
+            modifier = Modifier.padding(bottom = 5.dp),
+            style = TextStyle(fontSize = 20.sp),
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            "멤버들이 모두 가능한 시간대를 골라봤어요.",
+            modifier = Modifier.padding(bottom = 10.dp),
+            style = TextStyle(fontSize = 15.sp)
+        )
         Spacer(Modifier.height(10.dp))
 
         // 클릭된 카드의 인덱스를 추적하기 위한 상태 변수
         var selectedCardIndex by remember { mutableStateOf(-1) }
 
         // 각 카드를 만들기 위한 반복문
-        for (index in 0..1) {
+        for (index in blocks.indices) {
             ClickableCard(
-                text = "2022.11.0${index + 2} (목) 14:00 ~ 18:00",
+                text = blocks[index].toString(),
                 isSelected = index == selectedCardIndex,
-                onClick = { selectedCardIndex = index }
+                onClick = {
+                    selectedCardIndex = index
+                    viewModel.confirmedDate = blocks[selectedCardIndex].date.toString()
+                }
             )
         }
     }
