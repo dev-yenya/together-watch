@@ -1,9 +1,12 @@
 package com.example.together_watch.ui.setting
 
+import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
@@ -19,34 +22,55 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
+import androidx.navigation.NavController
+import com.example.together_watch.login.LoginActivity
+import com.example.together_watch.ui.theme.Gray
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 
 @Composable
-fun AccountManagementScreen() {
+fun AccountManagementScreen(navController: NavController) {
     var showDialog by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.padding(PaddingValues(all = 20.dp))) {
+    fun logout() {
+        Firebase.auth.signOut()
+        navController.navigate("login_screen")
+        val user = Firebase.auth.currentUser
+        Log.e("logout", user?.uid.toString())
+    }
+
+    Column(modifier = Modifier.padding(PaddingValues(all = 25.dp))) {
+        Spacer(modifier = Modifier.height(5.dp))
+
         // 계정 관리
         Text(
             text = "계정 관리",
-            fontSize = 25.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         // 로그아웃
         Text(
             text = "로그아웃",
-            fontSize = 18.sp,
+            fontSize = 15.sp,
             color = Color.Black,
-            modifier = Modifier.clickable { /* 로그아웃 처리 */ }
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { logout() }
         )
-        Spacer(modifier = Modifier.height(12.dp))
+
+        Spacer(modifier = Modifier.height(20.dp))
         // 탈퇴
         Text(
             text = "탈퇴",
-            fontSize = 18.sp,
+            fontSize = 15.sp,
             color = Color.Gray,
-            modifier = Modifier.clickable { showDialog = true }
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showDialog = true }
         )
     }
 
@@ -72,3 +96,4 @@ fun AccountManagementScreen() {
         )
     }
 }
+

@@ -1,6 +1,7 @@
 package com.example.together_watch.ui
 
 
+import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.material.icons.Icons
@@ -18,11 +19,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.together_watch.login.LoginActivity
 import com.example.together_watch.ui.home.CompleteScreen
 import com.example.together_watch.ui.home.CreatePromiseScreen
 import com.example.together_watch.ui.home.HomeScreen
@@ -71,6 +74,10 @@ sealed class Destinations(
     object ConfirmPromiseCompleteScreen : Destinations(
         route = "confirm_promise_complete_screen"
     )
+
+    object LoginScreen : Destinations(
+        route = "login_screen"
+    )
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -87,7 +94,7 @@ fun NavigationGraph(navController: NavHostController, viewModel: MainViewModel) 
             SettingScreen(navController)
         }
         composable(Destinations.AccountManagementScreen.route) {
-            AccountManagementScreen()
+            AccountManagementScreen(navController)
         }
         composable(Destinations.CompleteScreen.route) {
             CompleteScreen()
@@ -100,6 +107,11 @@ fun NavigationGraph(navController: NavHostController, viewModel: MainViewModel) 
         }
         composable(Destinations.ConfirmPromiseCompleteScreen.route) {
             ConfirmPromiseCompleteScreen()
+        }
+        composable(Destinations.LoginScreen.route) {
+            val context = LocalContext.current
+            val intent = Intent(context, LoginActivity::class.java)
+            context.startActivity(intent)
         }
     }
 }
