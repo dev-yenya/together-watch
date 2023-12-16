@@ -319,9 +319,7 @@ fun ConfirmPromiseSecondScreen(viewModel: MainViewModel, blocks: List<DateBlock>
                 isSelected = index == selectedCardIndex,
                 onClick = {
                     selectedCardIndex = index
-                    viewModel.makeTimeBoundary(blocks[selectedCardIndex])
                     viewModel.confirmedDate = blocks[selectedCardIndex].date.toString()
-                    Log.d("promise-completion", "${blocks[selectedCardIndex].date}")
                 }
             )
         }

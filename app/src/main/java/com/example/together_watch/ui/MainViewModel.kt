@@ -34,15 +34,12 @@ class MainViewModel : ViewModel() {
 
     var users = listOf<User>()
 
-    var uids = listOf<String>()
     var promiseName: String = ""
     var promisePlace: String = ""
     var selectedDates: List<String> = emptyList()
     var startTime: String = ""
     var endTime: String = ""
 
-    var startBoundary: LocalTime = LocalTime.now()
-    var endBoundary: LocalTime = LocalTime.now()
     var confirmedStartTime: String = ""
     var confirmedEndTime: String = ""
     var confirmedDate: String = ""
@@ -51,50 +48,44 @@ class MainViewModel : ViewModel() {
         fetchUserData()
     }
 
-    fun makeTimeBoundary(selectedBlock: DateBlock) {
-        startBoundary = selectedBlock.startTime
-        endBoundary = selectedBlock.endTime
-    }
-
     fun savePromiseSchedule() {
         val userRef = Firebase.firestore.collection("users")
 
-        val members = selectedPromise?.promise?.users as List<String>
-        Log.d("promise-completion", "$members")
+        val promise = selectedPromise?.promise
+        val members = promise?.users as List<String>
 
         viewModelScope.launch {
-            val promiseRef = userRef.document(myUid)
+            userRef.document(myUid)
                 .collection("promises")
-                .document(_apiPromiseData.value?.get(0)!!.id)
-
-            promiseRef
+                .document(selectedPromise!!.id)
                 .update(mapOf("status" to Status.COMPLETED))
                 .addOnSuccessListener {
                     Log.d("promise-completion", "약속 상태 변경 성공")
+                }.addOnFailureListener { exception ->
+                    Log.d("promise-completion", "error message: ${exception.message}")
                 }
-            promiseRef
-                .get()
-                .addOnSuccessListener { document ->
-                    promiseName = document.data?.get("name") as String
-                    promisePlace = document.data?.get("place") as String
-                    members.forEach { uid ->
-                        userRef.document(uid)
-                            .collection("schedules")
-                            .add(
-                                Schedule(
-                                    name = promiseName,
-                                    place = promisePlace,
-                                    date = confirmedDate,
-                                    startTime = confirmedStartTime,
-                                    endTime = confirmedEndTime,
-                                    isGroup = true
-                                )
-                            )
-                            .addOnSuccessListener { document ->
-                                Log.d("promise-completion", "개인 스케줄 추가 성공, id=${document.id}")
-                            }
+
+            promiseName = promise.name as String
+            promisePlace = promise.place as String
+            members.forEach { uid ->
+                userRef.document(uid)
+                    .collection("schedules")
+                    .add(
+                        Schedule(
+                            name = promiseName,
+                            place = promisePlace,
+                            date = confirmedDate,
+                            startTime = confirmedStartTime,
+                            endTime = confirmedEndTime,
+                            isGroup = true
+                        )
+                    )
+                    .addOnSuccessListener { document ->
+                        Log.d("promise-completion", "개인 스케줄 추가 성공, id=${document.id}")
+                    }.addOnFailureListener { exception ->
+                        Log.d("promise-completion", "error message: ${exception.message}")
                     }
-                }
+            }
         }
 
     }
