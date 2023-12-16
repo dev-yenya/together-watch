@@ -16,12 +16,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,30 +29,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.together_watch.MainActivity
 import com.example.together_watch.R
 import com.example.together_watch.ui.theme.*
-import com.example.together_watch.ui.theme.Together_watchTheme
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
-import com.kakao.sdk.common.util.Utility
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import com.google.firebase.FirebaseApp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
 class LoginActivity: ComponentActivity(), LoginContract.View {
-    val user = Firebase.auth.currentUser
+    var user = Firebase.auth.currentUser
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this)
 //        Log.e("hash", Utility.getKeyHash(this))
         setContent {
             LoginScreen()
@@ -63,13 +59,13 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
 
     public override fun onStart() {
         super.onStart()
-        FirebaseApp.initializeApp(this)
-        startMainActivity(this, user)
+        user = Firebase.auth.currentUser
+        if (user != null)
+            startMainActivity(this)
     }
 
     @Composable
     override fun LoginScreen() {
-        val context = LocalContext.current
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
@@ -84,7 +80,7 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp),
+                    .height(400.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -107,13 +103,15 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                 .height(50.dp),
             onClick = {
                 Log.d("kakao-sdk", "카카오 로그인")
+
+                // 카카오 웹 로그인
                 val callback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
                     if (error != null) {
                         Log.e("kakao-sdk", "카카오 계정으로 로그인 실패", error)
                     } else if (token != null) {
                         LoginPresenter().callKakaoLoginFunction(token.accessToken) {
                             if (it) {
-                                startMainActivity(context, user)
+                                startMainActivity(context)
                             }
                         }
                     }
@@ -139,7 +137,7 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                             Log.d("kakao-login-sdk", "로그인 성공 ${token.accessToken}")
                             LoginPresenter().callKakaoLoginFunction(token.accessToken) {
                                 if (it) {
-                                    startMainActivity(context, user)
+                                    startMainActivity(context)
                                 }
                             }
                         }
@@ -167,11 +165,14 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
         }
     }
 
-    private fun startMainActivity(context: Context, user:  FirebaseUser?) {
-        val intent = Intent(context, MainActivity::class.java).apply { /* 유저 정보 */}
-        if (user != null) {
-            Log.d("user-info", user.uid+", "+user.displayName+", "+user.photoUrl)
-            context.startActivity(intent)
-        }
+    private fun startMainActivity(context: Context) {
+        val intent = Intent(context, MainActivity::class.java)
+        context.startActivity(intent)
+        finishAffinity()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finishAffinity()
     }
 }

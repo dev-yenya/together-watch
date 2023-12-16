@@ -78,15 +78,16 @@ fun SettingScreen(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    navController.navigate(Destinations.AccountManagementScreen.route)
+                }
         ) {
             Text(
                 text = "계정 관리",
-                fontSize = 18.sp,
+                fontSize = 15.sp,
                 color = Color.Black,
-                modifier = Modifier.clickable {
-                    navController.navigate(Destinations.AccountManagementScreen.route)
-                }
             )
             Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "화살표")
         }
