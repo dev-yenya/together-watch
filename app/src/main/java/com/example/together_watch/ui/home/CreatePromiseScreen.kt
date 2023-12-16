@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
@@ -51,13 +52,10 @@ import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
 
-// 약속 생성
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CreatePromiseScreen(
     navController: NavHostController,
-
     viewModel:MainViewModel
 
 ) {
@@ -148,7 +146,7 @@ fun CreatePromiseScreen(
                     3 -> ThirdScreen(viewModel) { dates ->
                         viewModel.selectedDates = dates
                     }
-                    4 -> FourthScreen(viewModel) {text1, text2 ->
+                    4 -> TimePickScreen(viewModel) {text1, text2 ->
                         viewModel.startTime = text1
                         viewModel.endTime = text2
                     }
@@ -164,7 +162,6 @@ fun CreatePromiseScreen(
                     savePromise()
                     nextScreen()
                 } } else {
-
                     { complete() }
                 },
                 colors = ButtonDefaults.buttonColors(Blue),
@@ -200,7 +197,6 @@ fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
             style = TextStyle(fontSize = 15.sp)
         )
         OutlinedTextField(
-
             value = text, // 텍스트 필드의 값
             onValueChange = { newText ->
                 text = newText // 사용자가 입력한 새로운 텍스트로 업데이트
@@ -214,11 +210,7 @@ fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = Color.Transparent,
-            ),
-
-
-
-            )
+            ),)
         Divider()
     }
 }
@@ -285,7 +277,7 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
                 modifier = Modifier.fillMaxWidth(),
                 text = "원하시는 날짜를 전부 선택해 주세요",
                 style = TextStyle(fontSize = 20.sp),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Start
             )
             Spacer(Modifier.height(10.dp))
             CalendarHeader(selectedDate = selectedDate, onDateChanged = { newDate ->
@@ -390,7 +382,7 @@ fun MyTimePicker(context: Context, result: ((String) -> Unit)) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FourthScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String) -> Unit) {
+fun TimePickScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String) -> Unit) {
 
     var text1 by remember { mutableStateOf("") }
     var text2 by remember { mutableStateOf("") }
@@ -400,13 +392,13 @@ fun FourthScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String)
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
         Text(
-            "언제 만날까요?",
+            "언제쯤 만날까요?",
             modifier = Modifier.padding(bottom = 5.dp),
             style = TextStyle(fontSize = 20.sp),
             fontWeight = FontWeight.Bold
         )
         Text(
-            "약속 시간대를 입력해 주세요.",
+            "약속 가능한 시간대를 입력해 주세요.",
             modifier = Modifier.padding(bottom = 10.dp),
             style = TextStyle(fontSize = 15.sp)
         )
@@ -493,27 +485,31 @@ fun CompleteScreen() {
             .fillMaxWidth(), // Column을 가로로 채우도록 설정
         horizontalAlignment = Alignment.CenterHorizontally // 내용을 가로 중앙에 배치
     ) {
+        Spacer(Modifier.height(30.dp))
         Text(
             "함께할 친구들을 초대해 볼까요?",
-            modifier = Modifier.padding(bottom = 5.dp),
+            modifier = Modifier
+                .padding(bottom = 5.dp)
+                .align(Alignment.Start),
             style = TextStyle(fontSize = 20.sp),
-            textAlign = TextAlign.Start // 텍스트 중앙 정렬
+            fontWeight = FontWeight.Bold
         )
         Text(
             "초대장이 만들어졌어요",
-            modifier = Modifier.padding(bottom = 10.dp),
+            modifier = Modifier
+                .padding(bottom = 10.dp)
+                .align(Alignment.Start),
             style = TextStyle(fontSize = 15.sp),
-            textAlign = TextAlign.Center // 텍스트 중앙 정렬
+        )
+        Spacer(Modifier.height(100.dp))
+        Icon(
+            Icons.Default.Email,
+            contentDescription = null,
+            modifier = Modifier.size(150.dp) // 아이콘 크기 조정
         )
         Spacer(Modifier.height(30.dp))
-        Icon(
-            Icons.Default.Send,
-            contentDescription = null,
-            modifier = Modifier.size(200.dp) // 아이콘 크기 조정
-        )
-        Spacer(Modifier.height(20.dp))
         Text(
-            "친구들이 참여하면\n모두가 참여할 수 있는 시간을 골라드려요.",
+            "친구들이 초대를 수락하면\n모두가 만날 수 있는 시간을 골라드려요.",
             textAlign = TextAlign.Center // 텍스트 중앙 정렬
         )
     }

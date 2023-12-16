@@ -145,31 +145,4 @@ class MainViewModel : ViewModel() {
                 successListener.invoke()
             }
     }
-
-    fun fetchOnProgressPromisesData() {
-        viewModelScope.launch {
-            Firebase.firestore.collection("users")
-                .document(myUid)
-                .collection("promises")
-                .get()
-                .addOnSuccessListener { documents ->
-                    myPromises = documents.map {
-                        FetchedPromise(
-                            id = it.id,
-                            promise = Promise(
-                                name = it.get("name").toString(),
-                                ownerId = it.get("ownerId").toString(),
-                                users = it.get("users") as? List<String> ?: emptyList(),
-                                status = it.get("status") as Status,
-                                dates = it.get("dates") as? List<String> ?: emptyList(),
-                                startTime = it.get("startTime").toString(),
-                                endTime = it.get("enfTime").toString(),
-                                place = it.get("place").toString()
-                            )
-                        )
-                    }
-                    _apiPromiseData.value = myPromises
-                }
-        }
-    }
 }

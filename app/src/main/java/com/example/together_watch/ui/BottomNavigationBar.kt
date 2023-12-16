@@ -26,8 +26,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.together_watch.ui.home.CompleteScreen
 import com.example.together_watch.ui.home.CreatePromiseScreen
 import com.example.together_watch.ui.home.HomeScreen
+import com.example.together_watch.ui.person.ConfirmPromiseCompleteScreen
+import com.example.together_watch.ui.person.ConfirmPromiseScreen
 import com.example.together_watch.ui.person.PersonScreen
-import com.example.together_watch.ui.person.PromiseAcceptScreen
 import com.example.together_watch.ui.setting.AccountManagementScreen
 import com.example.together_watch.ui.setting.SettingScreen
 import com.example.together_watch.ui.theme.Black
@@ -63,8 +64,12 @@ sealed class Destinations(
     object CreatePromiseScreen : Destinations(
         route = "create_promise_screen"
     )
-    object PromiseAcceptScreen : Destinations(
-        route = "promise_accept_screen"
+    object ConfirmPromiseScreen : Destinations(
+        route = "confirm_promise_screen"
+    )
+
+    object ConfirmPromiseCompleteScreen : Destinations(
+        route = "confirm_promise_complete_screen"
     )
 }
 
@@ -90,8 +95,11 @@ fun NavigationGraph(navController: NavHostController, viewModel: MainViewModel) 
         composable(Destinations.CreatePromiseScreen.route) {
             CreatePromiseScreen(navController, viewModel)
         }
-        composable(Destinations.PromiseAcceptScreen.route) {
-            PromiseAcceptScreen(navController ,viewModel)
+        composable(Destinations.ConfirmPromiseScreen.route) {
+            ConfirmPromiseScreen(navController, viewModel)
+        }
+        composable(Destinations.ConfirmPromiseCompleteScreen.route) {
+            ConfirmPromiseCompleteScreen()
         }
     }
 }

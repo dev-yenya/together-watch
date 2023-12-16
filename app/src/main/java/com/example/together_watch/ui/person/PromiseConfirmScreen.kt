@@ -3,7 +3,6 @@ package com.example.together_watch.ui.person
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,7 +22,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -44,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,12 +49,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.example.together_watch.R
-import com.example.together_watch.data.FetchedPromise
-import com.example.together_watch.data.Status
-import com.example.together_watch.ui.Destinations
 
 import com.example.together_watch.ui.MainViewModel
+import com.example.together_watch.ui.home.TimePickScreen
 
 import com.example.together_watch.ui.theme.Black
 import com.example.together_watch.ui.theme.Blue
@@ -65,11 +59,10 @@ import com.example.together_watch.ui.theme.DarkGray
 import com.example.together_watch.ui.theme.Gray
 
 
-
 // 약속 수락
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun PromiseAcceptScreen(navController: NavHostController, viewModel: MainViewModel) {
+fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewModel) {
 
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
@@ -109,8 +102,6 @@ fun PromiseAcceptScreen(navController: NavHostController, viewModel: MainViewMod
                     ) {
                         Text(
                             text = if (currentScreen.intValue == 1) {
-                                "약속 수락"
-                            } else if (currentScreen.intValue == 2) {
                                 "약속 확정"
                             } else {
                                 "약속 시간"
@@ -128,7 +119,7 @@ fun PromiseAcceptScreen(navController: NavHostController, viewModel: MainViewMod
                     }
                 }
 
-                if (currentScreen.intValue < 4) {
+                if (currentScreen.intValue < 3) {
                     LinearProgressIndicator(
                         progress = currentScreen.intValue * 0.33f,
                         modifier = Modifier.fillMaxWidth(),
@@ -137,138 +128,37 @@ fun PromiseAcceptScreen(navController: NavHostController, viewModel: MainViewMod
                 }
 
                 when (currentScreen.intValue) {
-                    1 -> PromiseFirstScreen()
-                    2 -> PromiseSecondScreen(viewModel)
-                    3 -> PromiseThirdScreen()
-                    4 -> PromiseCompleteScreen()
+                    1 -> ConfirmPromiseFirstScreen(viewModel)
+                    2 -> ConfirmPromiseSecondScreen()
+                    3 -> TimePickScreen(viewModel) {text1, text2 -> }
+                    4 -> ConfirmPromiseCompleteScreen()
                 }
             }
-
-            if (currentScreen.intValue == 1) {
-                Row {
-                    Button(
-                        onClick = {
-                            flag = 1
-                            showDialog = true
-                        },
-                        colors = ButtonDefaults.buttonColors(Gray),
-                        modifier = Modifier
-                            .height(50.dp)
-                            .weight(1f)
-                            .fillMaxWidth(),
-                        shape = RectangleShape,
-                    ) {
-                        Text(
-                            text = "취소",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = DarkGray)
-                    }
-                    Button(
-                        onClick = {
-                            flag = 2
-                            showDialog = true
-                        },
-                        colors = ButtonDefaults.buttonColors(Blue),
-                        modifier = Modifier
-                            .height(50.dp)
-                            .weight(1f)
-                            .fillMaxWidth(),
-                        shape = RectangleShape
-                    ) {
-                        Text(
-                            text = "확인",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Black
-                            )
-                    }
-                }
-            } else {
-                Button(
-                    onClick = if (currentScreen.intValue < 4) {
-                        { nextScreen() }
-                    } else {
-                        { complete() }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
-                    colors = ButtonDefaults.buttonColors(Blue),
-                    shape = RectangleShape,
-                ) {
-                    Text(
-                        text = if (currentScreen.intValue < 4) "다음" else "캘린더에서 일정 확인하기",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Black
-                    )
-                }
-            }
-        }
-    }
-
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text(text = if (flag == 1) "" else "약속 참가 성공!") },
-            text = { Text(text = if (flag == 1) "정말 탈퇴하시겠습니까?" else "약속 일정이 확정되면 캘린더에 추가 됩니다.") },
-            confirmButton = {
-                Button(onClick = {
-                    showDialog = false
-                    if (flag != 1) {
-                        nextScreen()
-                    }
+            Button(
+                onClick = if (currentScreen.intValue < 4) {
+                    { nextScreen() }
+                } else {
+                    { complete() }
                 },
-                    colors = ButtonDefaults.buttonColors(Blue)
-                ) {
-                    Text(text = "확인", color = Black)
-                }
-            },
-            dismissButton = {
-                if (flag == 1) {
-                    Button(onClick = { showDialog = false }, colors = ButtonDefaults.buttonColors(Blue)) {
-                        Text("취소", color = DarkGray)
-                    }
-                }
-            }
-        )
-    }
-}
-
-
-@Composable
-fun PromiseFirstScreen() {
-    Column(
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
-    ) {
-        Text("새로운 약속이 도착했어요!", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp), fontWeight = FontWeight.Bold)
-        Text("약속에 참가하려면, 확인 버튼을 눌러주세요.", modifier = Modifier.padding(bottom = 10.dp), style = TextStyle(fontSize = 15.sp))
-        Spacer(modifier = Modifier.height(20.dp))
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White,
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 5.dp
-            )
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(Blue),
+                shape = RectangleShape,
             ) {
-                Text(text = "Event Date and Time", style = MaterialTheme.typography.headlineMedium)
-                Text(text = "Event Title: ", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "Event Details", style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = if (currentScreen.intValue < 4) "다음" else "캘린더에서 일정 확인하기",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Black
+                )
             }
         }
     }
 }
 
-
 @Composable
-fun PromiseSecondScreen(viewModel: MainViewModel) {
-
+fun ConfirmPromiseFirstScreen(viewModel: MainViewModel) {
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
@@ -280,27 +170,27 @@ fun PromiseSecondScreen(viewModel: MainViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
-
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White,
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 5.dp
+                )
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
                     Text(
-                        text = "${fetchedPromise.promise.dates?.joinToString("\n")}",
-                        style = MaterialTheme.typography.headlineSmall
+                        text = "약속시간은 모두가 괜찮은 시간대로 정해볼게요.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color= DarkGray
                     )
-                    Text(
-                        text = "Time: ${fetchedPromise.promise.startTime} ~ ${fetchedPromise.promise.endTime}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = "Event Title: ${fetchedPromise.promise.name}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Text(text = "${fetchedPromise.promise.name}", style = MaterialTheme.typography.headlineSmall)
+                    Text(text = "${fetchedPromise.promise.place}", style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(40.dp))
         Text("약속에 참여한 멤버들", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp), fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(10.dp))
         LazyColumn {
@@ -348,62 +238,77 @@ fun ProfileCard(userId: String, viewModel: MainViewModel) {
 
 
 @Composable
-fun PromiseThirdScreen() {
+fun ConfirmPromiseSecondScreen() {
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
-        Text("언제 만날까요?", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp), fontWeight = FontWeight.Bold)
-        Text("약속 시간대를 입력해 주세요.", modifier = Modifier.padding(bottom = 10.dp), style = TextStyle(fontSize = 15.sp))
+        Text("시간을 선택해 주세요", modifier = Modifier.padding(bottom = 5.dp), style = TextStyle(fontSize = 20.sp), fontWeight = FontWeight.Bold)
+        Text("멤버들이 모두 가능한 시간대를 골라봤어요.", modifier = Modifier.padding(bottom = 10.dp), style = TextStyle(fontSize = 15.sp))
         Spacer(Modifier.height(10.dp))
 
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 6.dp, horizontal = 10.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White,
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 5.dp
+        // 클릭된 카드의 인덱스를 추적하기 위한 상태 변수
+        var selectedCardIndex by remember { mutableStateOf(-1) }
+
+        // 각 카드를 만들기 위한 반복문
+        for (index in 0..1) {
+            ClickableCard(
+                text = "2022.11.0${index + 2} (목) 14:00 ~ 18:00",
+                isSelected = index == selectedCardIndex,
+                onClick = { selectedCardIndex = index }
             )
-        ) {
-            Text(text = "2022.11.02 (목) 14:00 ~ 18:00", Modifier.padding(horizontal = 10.dp, vertical = 5.dp))
-        }
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 6.dp, horizontal = 10.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White,
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 5.dp
-            )
-        ) {
-            Text(text = "2022.11.02 (목) 14:00 ~ 18:00", Modifier.padding(horizontal = 10.dp, vertical = 5.dp))
         }
     }
 }
 
 @Composable
-fun PromiseCompleteScreen() {
+fun ClickableCard(text: String, isSelected: Boolean, onClick: () -> Unit) {
+    val cardColors = if (isSelected) {
+        CardDefaults.cardColors(containerColor = Blue.copy(alpha = 0.7f))
+    } else {
+        CardDefaults.cardColors(containerColor = Color.White)
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp, horizontal = 10.dp)
+            .clickable {
+                onClick()
+            },
+        colors = cardColors,
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isSelected) 8.dp else 5.dp
+        )
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            color = Color.Black
+        )
+    }
+}
+
+@Composable
+fun ConfirmPromiseCompleteScreen() {
     Column(
         modifier = Modifier
             .padding(horizontal = 20.dp, vertical = 30.dp)
             .fillMaxWidth(), // Column을 가로로 채우도록 설정
         horizontalAlignment = Alignment.CenterHorizontally // 내용을 가로 중앙에 배치설정
     ) {
-        Spacer(Modifier.height(25.dp))
+        Spacer(modifier = Modifier.height(30.dp))
         Text(
             "약속 확정이 완료되었어요!",
-            modifier = Modifier.padding(bottom = 5.dp)
+            modifier = Modifier
+                .padding(bottom = 5.dp)
                 .align(Alignment.Start),
             style = TextStyle(fontSize = 20.sp),
             fontWeight = FontWeight.Bold
         )
         Text(
             "이제 모두의 캘린더에 약속이 추가되었어요",
-            modifier = Modifier.padding(bottom = 10.dp)
+            modifier = Modifier
+                .padding(bottom = 10.dp)
                 .align(Alignment.Start),
             style = TextStyle(fontSize = 15.sp),
         )
