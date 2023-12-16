@@ -33,7 +33,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             Together_watchTheme {
                 //        val isLoggedIn by loginViewModel.isLoggedIn.observeAsState(false)
-
                 if (true) { // isLoggedIn
                     MainScreen(mainViewModel) // 로그인 후 메인 화면
                 } else {

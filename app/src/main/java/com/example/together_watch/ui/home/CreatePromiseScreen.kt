@@ -151,7 +151,6 @@ fun CreatePromiseScreen(
                         viewModel.endTime = text2
                     }
                     5 -> CompleteScreen()
-
                 }
             }
 
