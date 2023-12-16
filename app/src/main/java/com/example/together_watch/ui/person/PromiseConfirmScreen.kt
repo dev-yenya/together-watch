@@ -55,12 +55,14 @@ import com.example.together_watch.promise.DateBlock
 import com.example.together_watch.promise.PromiseCompletionModel
 
 import com.example.together_watch.ui.MainViewModel
+import com.example.together_watch.ui.home.TimeBoundary
 import com.example.together_watch.ui.home.TimePickScreen
 
 import com.example.together_watch.ui.theme.Black
 import com.example.together_watch.ui.theme.Blue
 import com.example.together_watch.ui.theme.DarkGray
 import com.example.together_watch.ui.theme.Gray
+import java.time.LocalTime
 
 
 // 약속 수락
@@ -77,6 +79,7 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
     var showDialog by remember { mutableStateOf(false) }
     var getTimeClicked by remember { mutableStateOf(false) }
     var blocks by remember { mutableStateOf<List<DateBlock>>(emptyList()) }
+    var selectedBlock by remember { mutableStateOf(false) }
     var flag = 0
     val backHandler = {
         if (currentScreen.intValue > 1) {
@@ -150,9 +153,15 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                 when (currentScreen.intValue) {
                     1 -> ConfirmPromiseFirstScreen(viewModel)
                     2 -> ConfirmPromiseSecondScreen(viewModel, blocks)
-                    3 -> TimePickScreen(viewModel) { text1, text2 ->
-                        viewModel.confirmedStartTime = text1
-                        viewModel.confirmedEndTime = text2
+                    3 -> {
+                        TimePickScreen(
+                            viewModel,
+                            TimeBoundary(viewModel.selectedBlock!!.startTime, viewModel.selectedBlock!!.endTime)
+                        ) { text1, text2 ->
+                            // TODO: 유효성 검사를 위한 TimeBoundary 같이 전달
+                            viewModel.confirmedStartTime = text1
+                            viewModel.confirmedEndTime = text2
+                        }
                     }
                     4 -> ConfirmPromiseCompleteScreen()
                 }
@@ -319,7 +328,7 @@ fun ConfirmPromiseSecondScreen(viewModel: MainViewModel, blocks: List<DateBlock>
                 isSelected = index == selectedCardIndex,
                 onClick = {
                     selectedCardIndex = index
-                    viewModel.confirmedDate = blocks[selectedCardIndex].date.toString()
+                    viewModel.selectedBlock = blocks[selectedCardIndex]
                 }
             )
         }

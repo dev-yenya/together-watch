@@ -44,6 +44,8 @@ class MainViewModel : ViewModel() {
     var confirmedEndTime: String = ""
     var confirmedDate: String = ""
 
+    var selectedBlock: DateBlock? = null
+
     init {
         fetchUserData()
     }
@@ -55,16 +57,6 @@ class MainViewModel : ViewModel() {
         val members = promise?.users as List<String>
 
         viewModelScope.launch {
-            userRef.document(myUid)
-                .collection("promises")
-                .document(selectedPromise!!.id)
-                .update(mapOf("status" to Status.COMPLETED))
-                .addOnSuccessListener {
-                    Log.d("promise-completion", "약속 상태 변경 성공")
-                }.addOnFailureListener { exception ->
-                    Log.d("promise-completion", "error message: ${exception.message}")
-                }
-
             promiseName = promise.name as String
             promisePlace = promise.place as String
             members.forEach { uid ->
@@ -74,7 +66,7 @@ class MainViewModel : ViewModel() {
                         Schedule(
                             name = promiseName,
                             place = promisePlace,
-                            date = confirmedDate,
+                            date = selectedBlock?.date.toString(),
                             startTime = confirmedStartTime,
                             endTime = confirmedEndTime,
                             isGroup = true
@@ -86,6 +78,21 @@ class MainViewModel : ViewModel() {
                         Log.d("promise-completion", "error message: ${exception.message}")
                     }
             }
+
+            userRef.document(myUid)
+                .collection("promises")
+                .document(selectedPromise!!.id)
+                .update(mapOf(
+                    "status" to Status.COMPLETED,
+                    "dates" to listOf(confirmedDate),
+                    "startTime" to confirmedStartTime,
+                    "endTime" to confirmedEndTime
+                ))
+                .addOnSuccessListener {
+                    Log.d("promise-completion", "약속 상태 변경 성공")
+                }.addOnFailureListener { exception ->
+                    Log.d("promise-completion", "error message: ${exception.message}")
+                }
         }
 
     }
