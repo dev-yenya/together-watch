@@ -66,6 +66,7 @@ import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteSchedu
 import com.example.together_watch.ui.Destinations
 import com.example.together_watch.ui.MainViewModel
 import com.example.together_watch.ui.theme.Blue
+import com.example.together_watch.ui.theme.DarkGray
 import com.example.together_watch.ui.theme.Gray
 import com.example.together_watch.ui.theme.Green
 import com.example.together_watch.ui.theme.White
@@ -275,7 +276,7 @@ fun EventsList(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(text = fetchedSchedule.schedule.date + " " + fetchedSchedule.schedule.startTime + " ~ " + fetchedSchedule.schedule.endTime, style = MaterialTheme.typography.bodyMedium,
-                    color=Color.LightGray)
+                    color = DarkGray)
                 Text(text = fetchedSchedule.schedule.name, style = MaterialTheme.typography.headlineSmall)
                 Text(text = fetchedSchedule.schedule.place, style = MaterialTheme.typography.bodyLarge)
             }

@@ -118,7 +118,7 @@ fun PersonScreen(
                                 onClick = {
                                     if (selectedButton == Status.ONPROGRESS) {
                                         viewModel.selectedPromise = fetchedPromise
-                                        navController.navigate(Destinations.PromiseAcceptScreen.route)
+                                        navController.navigate(Destinations.ConfirmPromiseScreen.route)
                                     }
                                 },
                                 onLongClick = {
@@ -134,16 +134,17 @@ fun PersonScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "${fetchedPromise.promise.dates?.joinToString("\n")}",
+                                text = if (fetchedPromise.promise.status == Status.ONPROGRESS) "약속시간은 모두가 괜찮은 시간대로 정해볼게요."
+                                        else "${fetchedPromise.promise.dates?.joinToString(" ")} ${fetchedPromise.promise.startTime} ~ ${fetchedPromise.promise.endTime}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = "${fetchedPromise.promise.name}",
                                 style = MaterialTheme.typography.headlineSmall
                             )
                             Text(
-                                text = "Time: ${fetchedPromise.promise.startTime} ~ ${fetchedPromise.promise.endTime}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                text = "Event Title: ${fetchedPromise.promise.name}",
-                                style = MaterialTheme.typography.bodyMedium
+                                text = "${fetchedPromise.promise.place}",
+                                style = MaterialTheme.typography.bodyLarge
                             )
                         }
                     }
