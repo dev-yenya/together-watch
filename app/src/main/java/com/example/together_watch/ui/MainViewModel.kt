@@ -12,11 +12,13 @@ import com.example.together_watch.data.Schedule
 import com.example.together_watch.data.Status
 import com.example.together_watch.data.User
 import com.example.together_watch.data.toMap
+import com.example.together_watch.promise.DateBlock
 import com.example.together_watch.promise.PromiseInfo
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.launch
+import java.time.LocalTime
 import java.util.concurrent.CompletableFuture
 
 class MainViewModel : ViewModel() {
@@ -32,14 +34,69 @@ class MainViewModel : ViewModel() {
 
     var users = listOf<User>()
 
+    var uids = listOf<String>()
     var promiseName: String = ""
     var promisePlace: String = ""
     var selectedDates: List<String> = emptyList()
     var startTime: String = ""
     var endTime: String = ""
 
+    var startBoundary: LocalTime = LocalTime.now()
+    var endBoundary: LocalTime = LocalTime.now()
+    var confirmedStartTime: String = ""
+    var confirmedEndTime: String = ""
+    var confirmedDate: String = ""
+
     init {
         fetchUserData()
+    }
+
+    fun makeTimeBoundary(selectedBlock: DateBlock) {
+        startBoundary = selectedBlock.startTime
+        endBoundary = selectedBlock.endTime
+    }
+
+    fun savePromiseSchedule() {
+        val userRef = Firebase.firestore.collection("users")
+
+        val members = selectedPromise?.promise?.users as List<String>
+        Log.d("promise-completion", "$members")
+
+        viewModelScope.launch {
+            val promiseRef = userRef.document(myUid)
+                .collection("promises")
+                .document(_apiPromiseData.value?.get(0)!!.id)
+
+            promiseRef
+                .update(mapOf("status" to Status.COMPLETED))
+                .addOnSuccessListener {
+                    Log.d("promise-completion", "약속 상태 변경 성공")
+                }
+            promiseRef
+                .get()
+                .addOnSuccessListener { document ->
+                    promiseName = document.data?.get("name") as String
+                    promisePlace = document.data?.get("place") as String
+                    members.forEach { uid ->
+                        userRef.document(uid)
+                            .collection("schedules")
+                            .add(
+                                Schedule(
+                                    name = promiseName,
+                                    place = promisePlace,
+                                    date = confirmedDate,
+                                    startTime = confirmedStartTime,
+                                    endTime = confirmedEndTime,
+                                    isGroup = true
+                                )
+                            )
+                            .addOnSuccessListener { document ->
+                                Log.d("promise-completion", "개인 스케줄 추가 성공, id=${document.id}")
+                            }
+                    }
+                }
+        }
+
     }
 
     fun fetchSchedulesData() {
@@ -111,29 +168,29 @@ class MainViewModel : ViewModel() {
         }
     }
 
-     fun savePromise(): CompletableFuture<PromiseInfo> {
-         val userRef = Firebase.firestore.collection("users")
-         val result = CompletableFuture<PromiseInfo>()
+    fun savePromise(): CompletableFuture<PromiseInfo> {
+        val userRef = Firebase.firestore.collection("users")
+        val result = CompletableFuture<PromiseInfo>()
 
-         userRef.document(myUid)
-             .collection("promises")
-             .add(
-                 Promise(
-                     name = promiseName,
-                     ownerId = myUid,
-                     users = listOf(myUid),
-                     status = Status.ONPROGRESS,
-                     dates = selectedDates,
-                     startTime = startTime,
-                     endTime = endTime,
-                     place = promisePlace
-                 ).toMap()
-             ).addOnSuccessListener { promiseDocumentReference ->
-                 Log.d("promise", "약속 업로드 성공 ${promiseDocumentReference.id}")
-                 result.complete(PromiseInfo(myUid, promiseDocumentReference.id))
-             }
-         return result
-     }
+        userRef.document(myUid)
+            .collection("promises")
+            .add(
+                Promise(
+                    name = promiseName,
+                    ownerId = myUid,
+                    users = listOf(myUid),
+                    status = Status.ONPROGRESS,
+                    dates = selectedDates,
+                    startTime = startTime,
+                    endTime = endTime,
+                    place = promisePlace
+                ).toMap()
+            ).addOnSuccessListener { promiseDocumentReference ->
+                Log.d("promise", "약속 업로드 성공 ${promiseDocumentReference.id}")
+                result.complete(PromiseInfo(myUid, promiseDocumentReference.id))
+            }
+        return result
+    }
 
     fun deletePromise(promise: FetchedPromise?, successListener: () -> Unit) {
         Firebase.firestore.collection("users")

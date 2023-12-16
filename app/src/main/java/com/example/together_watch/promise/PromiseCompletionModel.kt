@@ -2,6 +2,7 @@ package com.example.together_watch.promise
 
 import android.util.Log
 import com.example.together_watch.data.FetchedPromise
+import com.example.together_watch.ui.MainViewModel
 import com.google.android.gms.tasks.RuntimeExecutionException
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth

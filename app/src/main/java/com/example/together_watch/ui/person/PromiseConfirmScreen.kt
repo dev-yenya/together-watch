@@ -72,7 +72,8 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
     val previousScreen = { currentScreen.intValue-- }
-    val complete = { /* 완료 액션 구현 */ }
+    val complete = { /* TODO 톡캘린더 함수 연결 */}
+    val saveSchedules = { viewModel.savePromiseSchedule() }
     var showDialog by remember { mutableStateOf(false) }
     var getTimeClicked by remember { mutableStateOf(false) }
     var blocks by remember { mutableStateOf<List<DateBlock>>(emptyList()) }
@@ -148,23 +149,30 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
 
                 when (currentScreen.intValue) {
                     1 -> ConfirmPromiseFirstScreen(viewModel)
-                    2 -> ConfirmPromiseSecondScreen(blocks)
-                    3 -> TimePickScreen(viewModel) { text1, text2 -> }
+                    2 -> ConfirmPromiseSecondScreen(viewModel, blocks)
+                    3 -> TimePickScreen(viewModel) { text1, text2 ->
+                        viewModel.confirmedStartTime = text1
+                        viewModel.confirmedEndTime = text2
+                    }
                     4 -> ConfirmPromiseCompleteScreen()
                 }
             }
             Button(
-                onClick = if (currentScreen.intValue == 1) {
-                    {
-                        getTimeClicked = true
-                        nextScreen()
+                onClick = when (currentScreen.intValue) {
+                    1 -> {
+                        { getTimeClicked = true
+                            nextScreen() }
                     }
-                } else if (currentScreen.intValue < 4) {
-                    {
-                        nextScreen()
+                    2 -> {
+                        { nextScreen() }
                     }
-                } else {
-                    { complete() }
+                    3 -> {
+                        { saveSchedules()
+                            nextScreen() }
+                    }
+                    else -> {
+                        { complete() }
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -284,7 +292,7 @@ fun ProfileCard(userId: String, viewModel: MainViewModel) {
 
 
 @Composable
-fun ConfirmPromiseSecondScreen(blocks: List<DateBlock>) {
+fun ConfirmPromiseSecondScreen(viewModel: MainViewModel, blocks: List<DateBlock>) {
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
@@ -309,7 +317,12 @@ fun ConfirmPromiseSecondScreen(blocks: List<DateBlock>) {
             ClickableCard(
                 text = blocks[index].toString(),
                 isSelected = index == selectedCardIndex,
-                onClick = { selectedCardIndex = index }
+                onClick = {
+                    selectedCardIndex = index
+                    viewModel.makeTimeBoundary(blocks[selectedCardIndex])
+                    viewModel.confirmedDate = blocks[selectedCardIndex].date.toString()
+                    Log.d("promise-completion", "${blocks[selectedCardIndex].date}")
+                }
             )
         }
     }
