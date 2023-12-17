@@ -63,6 +63,8 @@ fun CreatePromiseScreen(
             promises.add(PromiseInfo(result.ownerId, result.docId))
         }
     }
+    var showDialog by remember { mutableStateOf(false) }
+    val areValidTimes = { start: String, end: String -> viewModel.isValidTime(start, end) }
     val context = LocalContext.current
     val complete = {
         shareInvitation(context, promises[0])
@@ -153,8 +155,12 @@ fun CreatePromiseScreen(
                 onClick = if (currentScreen.intValue < 4 ) {
                     { nextScreen() }
                 } else if (currentScreen.intValue < 5) { {
-                    savePromise()
-                    nextScreen()
+                    if (areValidTimes(viewModel.confirmedStartTime, viewModel.confirmedEndTime)) {
+                        savePromise()
+                        nextScreen()
+                    } else {
+                        showDialog = true
+                    }
                 } } else {
                     { complete() }
                 },
@@ -165,6 +171,25 @@ fun CreatePromiseScreen(
                 shape = RectangleShape
             ) {
                 Text(if (currentScreen.intValue < 5) "다음" else "친구 초대하기", color = Black, fontWeight = FontWeight.Bold)
+            }
+
+            if (showDialog) {
+                AlertDialog(
+                    title = { Text("입력 시간이 유효하지 않음") },
+                    text = { Text("시작시간과 종료시간이 올바르게 입력됐는지 확인하세요.") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showDialog = false
+                            }
+                        ) {
+                            Text("확인")
+                        }
+                    },
+                    onDismissRequest = {
+                        showDialog = false
+                    }
+                )
             }
         }
     }
@@ -433,6 +458,7 @@ fun TimePickScreen(viewModel: MainViewModel,
                                 if (it is PressInteraction.Release) {
                                     MyTimePicker(context, boundary) {
                                         text1 = it
+                                        viewModel.confirmedStartTime = text1
                                         onTimeRangeSelected(text1, text2)
                                     }
                                 }
@@ -467,6 +493,7 @@ fun TimePickScreen(viewModel: MainViewModel,
                                 if (it is PressInteraction.Release) {
                                     MyTimePicker(context, boundary) {
                                         text2 = it
+                                        viewModel.confirmedEndTime = text2
                                         onTimeRangeSelected(text1, text2)
                                     }
                                 }

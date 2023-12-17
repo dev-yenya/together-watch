@@ -178,7 +178,7 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                         { nextScreen() }
                     }
                     3 -> {
-                        { Log.d("promise-completion", "들어오긴 하나요")
+                        {
                             if (areValidTimes(viewModel.confirmedStartTime, viewModel.confirmedEndTime)) {
                                 Log.d("promise-completion", "조건 만족")
                                 saveSchedules()
@@ -214,7 +214,6 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                previousScreen()
                                 showDialog = false
                             }
                         ) {
@@ -222,7 +221,6 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                         }
                     },
                     onDismissRequest = {
-                        previousScreen()
                         showDialog = false
                     }
                 )

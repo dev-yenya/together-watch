@@ -14,7 +14,6 @@ import com.example.together_watch.data.User
 import com.example.together_watch.data.toMap
 import com.example.together_watch.promise.DateBlock
 import com.example.together_watch.promise.PromiseInfo
-import com.example.together_watch.ui.home.TimeBoundary
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
@@ -113,6 +112,17 @@ class MainViewModel : ViewModel() {
             return (startBoundary.isBefore(startLocalTime) || startBoundary.equals(startLocalTime))
                     && (endBoundary.isAfter(endLocalTime) || endBoundary.equals(endLocalTime))
                     && !endLocalTime.isBefore(startLocalTime)
+        }
+        return false
+    }
+
+    fun isValidTime(start: String, end: String): Boolean {
+        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        if (start != "" && end != "") {
+            val startLocalTime = LocalTime.parse(start, formatter)
+            val endLocalTime = LocalTime.parse(end, formatter)
+            Log.d("promise-completion", "[시간] 입력 범위: ${startLocalTime}~${endLocalTime}")
+            return !endLocalTime.isBefore(startLocalTime)
         }
         return false
     }
