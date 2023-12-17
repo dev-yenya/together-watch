@@ -3,7 +3,6 @@ package com.example.together_watch.ui.home
 import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
@@ -371,37 +370,29 @@ fun MyTimePicker(context: Context,
             var roundedMinute = minute
             val selectedTime = LocalTime.of(hourOfDay, roundedMinute)
             // boundary가 설정되어 있지 않을 경우 처음 약속 생성하는 상황
-            if (boundary == null || boundary.min <= selectedTime || boundary.max >= selectedTime) {
-                // 약속 생성시 입력값은 반드시 30분 단위이어야 함
+            if (boundary == null) {
+                // boundary가 null = 약속 생성 시점 -> 입력값은 반드시 30분 단위여야 함
                 roundedMinute = (minute / 30) * 30
                 result(String.format("%02d:%02d", hourOfDay, roundedMinute))
-            } else {
+            } else if (isValidTime(selectedTime, boundary)) {
+                // boundary가 null이 아님 = 약속 확정 시점
+                result(String.format("%02d:%02d", hourOfDay, roundedMinute))
+            } else{
                 Toast.makeText(context, "잘못된 입력값입니다.", Toast.LENGTH_SHORT).show()
             }
         },
         calendar.get(Calendar.HOUR_OF_DAY),
         calendar.get(Calendar.MINUTE),
-        true // 24시간 형식 사용 여부
+        false // 24시간 형식 사용 여부
     ).show()
 }
 
-fun isValidTime(time: String, boundary: TimeBoundary?): Boolean {
-    val formatter = DateTimeFormatter.ofPattern("HH:mm")
-    if (time!="") {
-        val localTime = LocalTime.parse(time, formatter)
-        return true
+fun isValidTime(time: LocalTime, boundary: TimeBoundary?): Boolean {
+    return if (boundary != null) {
+        (boundary.min <= time) || (boundary.max >= time)
+    } else {
+        true
     }
-    return false
-}
-
-fun isValidTimeRange(start: String, end: String, boundary: TimeBoundary?): Boolean {
-    val formatter = DateTimeFormatter.ofPattern("HH:mm")
-    if (start!="" && end!="") {
-        val startLocalTime = LocalTime.parse(start, formatter)
-        val endLocalTime = LocalTime.parse(end, formatter)
-        return !endLocalTime.isBefore(startLocalTime)
-    }
-    return true
 }
 
 data class TimeBoundary(val min:LocalTime, val max: LocalTime)

@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -32,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -62,7 +65,6 @@ import com.example.together_watch.ui.theme.Black
 import com.example.together_watch.ui.theme.Blue
 import com.example.together_watch.ui.theme.DarkGray
 import com.example.together_watch.ui.theme.Gray
-import java.time.LocalTime
 
 
 // 약속 수락
@@ -71,15 +73,16 @@ import java.time.LocalTime
 fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewModel) {
 
     val timeFunctionModel = PromiseCompletionModel()
+    val context = LocalContext.current
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
     val previousScreen = { currentScreen.intValue-- }
     val complete = { /* TODO 톡캘린더 함수 연결 */}
     val saveSchedules = { viewModel.savePromiseSchedule() }
+    val areValidTimes =  { start: String, end: String -> viewModel.isValidTimeRange(start, end)}
     var showDialog by remember { mutableStateOf(false) }
     var getTimeClicked by remember { mutableStateOf(false) }
     var blocks by remember { mutableStateOf<List<DateBlock>>(emptyList()) }
-    var selectedBlock by remember { mutableStateOf(false) }
     var flag = 0
     val backHandler = {
         if (currentScreen.intValue > 1) {
@@ -175,8 +178,16 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                         { nextScreen() }
                     }
                     3 -> {
-                        { saveSchedules()
-                            nextScreen() }
+                        { Log.d("promise-completion", "들어오긴 하나요")
+                            if (areValidTimes(viewModel.confirmedStartTime, viewModel.confirmedEndTime)) {
+                                Log.d("promise-completion", "조건 만족")
+                                saveSchedules()
+                                nextScreen()
+                            } else {
+                                Log.d("promise-completion", "조건 만족하지 않음")
+                                showDialog = true
+                            }
+                        }
                     }
                     else -> {
                         { complete() }
@@ -193,6 +204,27 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = Black
+                )
+            }
+
+            if (showDialog) {
+                AlertDialog(
+                    title = { Text("입력 시간이 유효하지 않음") },
+                    text = { Text("입력한 시간이 선택한 시간대에 포함되는지, 종료시각이 시작시각이 올바르게 입력됐는지 확인하세요.") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                previousScreen()
+                                showDialog = false
+                            }
+                        ) {
+                            Text("확인")
+                        }
+                    },
+                    onDismissRequest = {
+                        previousScreen()
+                        showDialog = false
+                    }
                 )
             }
         }

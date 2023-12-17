@@ -14,11 +14,13 @@ import com.example.together_watch.data.User
 import com.example.together_watch.data.toMap
 import com.example.together_watch.promise.DateBlock
 import com.example.together_watch.promise.PromiseInfo
+import com.example.together_watch.ui.home.TimeBoundary
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.launch
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.CompletableFuture
 
 class MainViewModel : ViewModel() {
@@ -42,7 +44,6 @@ class MainViewModel : ViewModel() {
 
     var confirmedStartTime: String = ""
     var confirmedEndTime: String = ""
-    var confirmedDate: String = ""
 
     var selectedBlock: DateBlock? = null
 
@@ -82,12 +83,14 @@ class MainViewModel : ViewModel() {
             userRef.document(myUid)
                 .collection("promises")
                 .document(selectedPromise!!.id)
-                .update(mapOf(
-                    "status" to Status.COMPLETED,
-                    "dates" to listOf(selectedBlock?.date.toString()),
-                    "startTime" to confirmedStartTime,
-                    "endTime" to confirmedEndTime
-                ))
+                .update(
+                    mapOf(
+                        "status" to Status.COMPLETED,
+                        "dates" to listOf(selectedBlock?.date.toString()),
+                        "startTime" to confirmedStartTime,
+                        "endTime" to confirmedEndTime
+                    )
+                )
                 .addOnSuccessListener {
                     Log.d("promise-completion", "약속 상태 변경 성공")
                 }.addOnFailureListener { exception ->
@@ -95,6 +98,23 @@ class MainViewModel : ViewModel() {
                 }
         }
 
+    }
+
+    fun isValidTimeRange(start: String, end: String): Boolean {
+        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        val promise = selectedPromise!!.promise
+        val startBoundary = LocalTime.parse(promise.startTime, formatter)
+        val endBoundary = LocalTime.parse(promise.endTime, formatter)
+
+        if (start != "" && end != "") {
+            val startLocalTime = LocalTime.parse(start, formatter)
+            val endLocalTime = LocalTime.parse(end, formatter)
+            Log.d("promise-completion", "[시간] 지정 가능 범위: ${startBoundary}~${endBoundary}, 실제 입력 범위: ${startLocalTime}~${endLocalTime}")
+            return (startBoundary.isBefore(startLocalTime) || startBoundary.equals(startLocalTime))
+                    && (endBoundary.isAfter(endLocalTime) || endBoundary.equals(endLocalTime))
+                    && !endLocalTime.isBefore(startLocalTime)
+        }
+        return false
     }
 
     fun fetchSchedulesData() {
