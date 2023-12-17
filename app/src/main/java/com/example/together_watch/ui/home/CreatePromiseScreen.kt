@@ -1,8 +1,5 @@
 package com.example.together_watch.ui.home
 
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Build
@@ -21,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,7 +27,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.semantics.SemanticsProperties.ImeAction
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +42,7 @@ import com.example.together_watch.ui.theme.Blue
 import com.example.together_watch.ui.theme.DarkGray
 import com.example.together_watch.ui.theme.Gray
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
@@ -365,13 +361,24 @@ fun EventsList(date: String) {
     }
 }
 
-fun MyTimePicker(context: Context, result: ((String) -> Unit)) {
+fun MyTimePicker(context: Context,
+                 boundary: TimeBoundary?,
+                 result: (String) -> Unit) {
     val calendar = Calendar.getInstance()
     TimePickerDialog(
         context,
         { _, hourOfDay, minute ->
-            // 선택된 시간을 "HH:mm" 형식으로 저장합니다.
-            result(String.format("%02d:%02d", hourOfDay, minute))
+            var roundedMinute = minute
+            val selectedTime = LocalTime.of(hourOfDay, roundedMinute)
+            // boundary가 설정되어 있지 않을 경우 처음 약속 생성하는 상황
+            if (boundary == null || boundary.min <= selectedTime || boundary.max >= selectedTime) {
+                // 약속 생성시 입력값은 반드시 30분 단위이어야 함
+                roundedMinute = (minute / 30) * 30
+                result(String.format("%02d:%02d", hourOfDay, roundedMinute))
+            } else {
+                Toast.makeText(context, "잘못된 입력값입니다.", Toast.LENGTH_SHORT).show()
+                return@TimePickerDialog
+            }
         },
         calendar.get(Calendar.HOUR_OF_DAY),
         calendar.get(Calendar.MINUTE),
@@ -379,9 +386,13 @@ fun MyTimePicker(context: Context, result: ((String) -> Unit)) {
     ).show()
 }
 
+data class TimeBoundary(val min:LocalTime, val max: LocalTime)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimePickScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, String) -> Unit) {
+fun TimePickScreen(viewModel: MainViewModel,
+                   boundary: TimeBoundary? = null,
+                   onTimeRangeSelected: (String, String) -> Unit) {
 
     var text1 by remember { mutableStateOf("") }
     var text2 by remember { mutableStateOf("") }
@@ -411,7 +422,7 @@ fun TimePickScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, Strin
                         LaunchedEffect(interactionSource) {
                             interactionSource.interactions.collect {
                                 if (it is PressInteraction.Release) {
-                                    MyTimePicker(context) {
+                                    MyTimePicker(context, boundary) {
                                         text1 = it
                                         onTimeRangeSelected(text1, text2)
                                     }
@@ -435,7 +446,6 @@ fun TimePickScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, Strin
                 shape = RoundedCornerShape(5.dp),
                 label = { Text("시작 시간") },
                 readOnly = true
-
             )
 
             TextField(
@@ -446,10 +456,9 @@ fun TimePickScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, Strin
                         LaunchedEffect(interactionSource) {
                             interactionSource.interactions.collect {
                                 if (it is PressInteraction.Release) {
-                                    MyTimePicker(context) {
+                                    MyTimePicker(context, boundary) {
                                         text2 = it
                                         onTimeRangeSelected(text1, text2)
-
                                     }
                                 }
                             }
@@ -474,6 +483,16 @@ fun TimePickScreen(viewModel: MainViewModel, onTimeRangeSelected: (String, Strin
             )
         }
     }
+}
+
+fun isValidTimeRange(start: String, end: String): Boolean {
+    val formatter = DateTimeFormatter.ofPattern("HH:mm")
+    if (start!="" && end!="") {
+        val startLocalTime = LocalTime.parse(start, formatter)
+        val endLocalTime = LocalTime.parse(end, formatter)
+        return !endLocalTime.isBefore(startLocalTime)
+    }
+    return true
 }
 
 @Composable
