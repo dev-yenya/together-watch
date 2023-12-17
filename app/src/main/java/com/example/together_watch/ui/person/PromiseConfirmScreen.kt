@@ -46,7 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -73,7 +72,6 @@ import com.example.together_watch.ui.theme.Gray
 fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewModel) {
 
     val timeFunctionModel = PromiseCompletionModel()
-    val context = LocalContext.current
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
     val previousScreen = { currentScreen.intValue-- }

@@ -122,7 +122,7 @@ class MainViewModel : ViewModel() {
             val startLocalTime = LocalTime.parse(start, formatter)
             val endLocalTime = LocalTime.parse(end, formatter)
             Log.d("promise-completion", "[시간] 입력 범위: ${startLocalTime}~${endLocalTime}")
-            return !endLocalTime.isBefore(startLocalTime)
+            return endLocalTime.isAfter(startLocalTime)
         }
         return false
     }
