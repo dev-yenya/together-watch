@@ -84,7 +84,7 @@ class MainViewModel : ViewModel() {
                 .document(selectedPromise!!.id)
                 .update(mapOf(
                     "status" to Status.COMPLETED,
-                    "dates" to listOf(confirmedDate),
+                    "dates" to listOf(selectedBlock?.date.toString()),
                     "startTime" to confirmedStartTime,
                     "endTime" to confirmedEndTime
                 ))

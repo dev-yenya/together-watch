@@ -377,13 +377,31 @@ fun MyTimePicker(context: Context,
                 result(String.format("%02d:%02d", hourOfDay, roundedMinute))
             } else {
                 Toast.makeText(context, "잘못된 입력값입니다.", Toast.LENGTH_SHORT).show()
-                return@TimePickerDialog
             }
         },
         calendar.get(Calendar.HOUR_OF_DAY),
         calendar.get(Calendar.MINUTE),
         true // 24시간 형식 사용 여부
     ).show()
+}
+
+fun isValidTime(time: String, boundary: TimeBoundary?): Boolean {
+    val formatter = DateTimeFormatter.ofPattern("HH:mm")
+    if (time!="") {
+        val localTime = LocalTime.parse(time, formatter)
+        return true
+    }
+    return false
+}
+
+fun isValidTimeRange(start: String, end: String, boundary: TimeBoundary?): Boolean {
+    val formatter = DateTimeFormatter.ofPattern("HH:mm")
+    if (start!="" && end!="") {
+        val startLocalTime = LocalTime.parse(start, formatter)
+        val endLocalTime = LocalTime.parse(end, formatter)
+        return !endLocalTime.isBefore(startLocalTime)
+    }
+    return true
 }
 
 data class TimeBoundary(val min:LocalTime, val max: LocalTime)
@@ -483,16 +501,6 @@ fun TimePickScreen(viewModel: MainViewModel,
             )
         }
     }
-}
-
-fun isValidTimeRange(start: String, end: String): Boolean {
-    val formatter = DateTimeFormatter.ofPattern("HH:mm")
-    if (start!="" && end!="") {
-        val startLocalTime = LocalTime.parse(start, formatter)
-        val endLocalTime = LocalTime.parse(end, formatter)
-        return !endLocalTime.isBefore(startLocalTime)
-    }
-    return true
 }
 
 @Composable
