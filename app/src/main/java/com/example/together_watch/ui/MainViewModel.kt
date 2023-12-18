@@ -70,7 +70,7 @@ class MainViewModel : ViewModel() {
                             startTime = confirmedStartTime,
                             endTime = confirmedEndTime,
                             isGroup = true
-                        )
+                        ).toMap()
                     )
                     .addOnSuccessListener { document ->
                         Log.d("promise-completion", "개인 스케줄 추가 성공, id=${document.id}")
