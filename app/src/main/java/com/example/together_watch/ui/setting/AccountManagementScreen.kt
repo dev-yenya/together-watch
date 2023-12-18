@@ -100,6 +100,7 @@ fun AccountManagementScreen(navController: NavController) {
             confirmButton = {
                 Button(onClick = {
                     // 탈퇴 처리
+                    logout()
                     showDialog = false
                 }) {
                     Text("확인")
