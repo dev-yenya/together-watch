@@ -367,7 +367,7 @@ fun ProfileCard(userId: String, viewModel: MainViewModel) {
             modifier = Modifier.padding(8.dp)
         ) {
             AsyncImage(
-                model = user?.photoURL ?: "",
+                model = "https:" + user?.photoURL.toString().split(":")[1],
                 contentDescription = "프로필 이미지",
                 modifier = Modifier
                     .size(40.dp)

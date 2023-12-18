@@ -1,6 +1,5 @@
 package com.example.together_watch.ui.setting
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,13 +24,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.example.together_watch.R
 import com.example.together_watch.ui.Destinations
 import com.example.together_watch.ui.theme.DarkGray
 import com.example.together_watch.ui.theme.Gray
@@ -53,7 +50,7 @@ fun SettingScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
             // 프로필 이미지
             AsyncImage(
-                model = photoUrl,
+                model = "https:" + photoUrl.toString().split(":")[1],
                 contentDescription = "프로필 이미지",
                 modifier = Modifier
                     .size(50.dp)
