@@ -275,6 +275,12 @@ fun EventsList(
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
+                Box(   //약속일정일 때 blue, 개인 일정일때 black
+                    modifier = Modifier
+                        .size(6.dp)
+                        .background(if (fetchedSchedule.schedule.isGroup) Blue else Color.Black, shape = CircleShape)
+                )
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(text = fetchedSchedule.schedule.date + " " + fetchedSchedule.schedule.startTime + " ~ " + fetchedSchedule.schedule.endTime, style = MaterialTheme.typography.bodyMedium,
                     color = DarkGray)
                 Text(text = fetchedSchedule.schedule.name, style = MaterialTheme.typography.headlineSmall)
