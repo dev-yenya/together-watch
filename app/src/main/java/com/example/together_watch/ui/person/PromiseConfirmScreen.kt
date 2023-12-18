@@ -64,6 +64,9 @@ import com.example.together_watch.ui.theme.Black
 import com.example.together_watch.ui.theme.Blue
 import com.example.together_watch.ui.theme.DarkGray
 import com.example.together_watch.ui.theme.Gray
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 // 약속 수락
@@ -89,6 +92,58 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
             navController.popBackStack()
         }
     }
+
+//    fun createEvent() {
+//        val apiService = ApiClient.create(TalkCalendarService::class.java)
+//        val sharedPreferences =
+//            navController.context.getSharedPreferences("my_app_prefs", Context.MODE_PRIVATE)
+//        val accessToken = sharedPreferences.getString("access_token", null)
+//        val request = EventReq(
+//            calendar_id = "primary",
+//                event = EventDetails(
+//                    title = "일정 제목",
+//                    time = TimeDetails(
+//                        start_at = "2022-10-29T03:00:00Z",
+//                        end_at = "2022-10-29T06:00:00Z",
+//                        time_zone = "Asia/Seoul",
+//                        all_day = false,
+//                        lunar = false
+//                    ),
+//                rrlue = "FREQ=DAILY;UNTIL=20221031T000000Z",
+//                description = "일정 설명",
+//                location = LocationDetails(
+//                    name = "카카오",
+//                    location_id = 18577297,
+//                    address = "경기 성남시 분당구 판교역로 166",
+//                    latitude = 37.39570088983171,
+//                    longitude = 127.1104335101161
+//                ),
+//                reminders = listOf(15, 30),
+//                color = "ROYAL_BLUE"
+//            )
+//        )
+//        try {
+//            apiService.createEvent("Bearer $accessToken", request).enqueue(object : Callback<EventRes> {
+//                override fun onResponse(call: Call<EventRes>, response: Response<EventRes>) {
+//                    if (response.isSuccessful) {
+//                        Log.d("kakao-calendar", "Event 생성 성공 ${response.body()}")
+//                    }
+//                    else {
+//                        Log.e("kakao-calendar","Event 생성 실패 ${response}")
+//                    }
+//                }
+//
+//                override fun onFailure(call: Call<EventRes>, t: Throwable) {
+//                    Log.e("kakao-calendar", "Event 생성 실패 ${t}")
+//                    t.printStackTrace()
+//                }
+//
+//            })
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            Log.e("kakao-calendar", "Event 생성 실패 ${e}")
+//        }
+//    }
 
     LaunchedEffect(getTimeClicked) {
         if (getTimeClicked) {

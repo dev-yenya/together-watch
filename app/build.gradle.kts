@@ -34,6 +34,8 @@ android {
         }
 
         buildConfigField("String", "KAKAO_API_KEY_STRING", properties["kakaoApikeyString"] as String)
+        buildConfigField("String", "KAKAO_TALK_CALENDAR_URL", properties["kakaoTalkCalendarUrl"] as String)
+        buildConfigField("String", "KAKAO_REST_API_KEY_STRING", properties["kakaoRestApiKey"] as String)
     }
 
     buildTypes {
@@ -120,5 +122,6 @@ dependencies {
 
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.5.1")
 
-
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
 }
