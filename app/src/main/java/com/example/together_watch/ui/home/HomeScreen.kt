@@ -456,7 +456,7 @@ fun DateBox(
                     Box(   //약속일정일 때 blue, 개인 일정일때 black
                         modifier = Modifier
                             .size(4.dp)
-                            .background(if (scheduleItem.schedule.isGroup) Color.Blue else Color.Black, shape = CircleShape)
+                            .background(if (scheduleItem.schedule.isGroup) Blue else Color.Black, shape = CircleShape)
                     )
                     Spacer(modifier = Modifier.width(2.dp))
                 }
