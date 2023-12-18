@@ -55,6 +55,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.together_watch.promise.DateBlock
 import com.example.together_watch.promise.PromiseCompletionModel
+import com.example.together_watch.ui.Destinations
 
 import com.example.together_watch.ui.MainViewModel
 import com.example.together_watch.ui.home.TimeBoundary
@@ -78,7 +79,7 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
     val previousScreen = { currentScreen.intValue-- }
-    val complete = { /* TODO 톡캘린더 함수 연결 */}
+    val complete = { navController.navigate(Destinations.HomeScreen.route)}
     val saveSchedules = { viewModel.savePromiseSchedule() }
     val areValidTimes =  { start: String, end: String -> viewModel.isValidTimeRange(start, end)}
     var showDialog by remember { mutableStateOf(false) }
@@ -477,7 +478,7 @@ fun ConfirmPromiseCompleteScreen() {
         )
         Spacer(Modifier.height(30.dp))
         Text(
-            "약속 시간에 맞춰 미리\n톡캘린더로 리마인드 해드릴게요!",
+            "약속 시간에 맞춰 미리\n같이와치가 리마인드 해드릴게요!",
             textAlign = TextAlign.Center // 텍스트 중앙 정렬
         )
     }
