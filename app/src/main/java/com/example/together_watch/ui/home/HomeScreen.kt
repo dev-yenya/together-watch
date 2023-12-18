@@ -431,21 +431,31 @@ fun DateBox(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
-                if (mySchedules.any { it.schedule.isGroup }) {
+                /*if (mySchedules.any { it.schedule.isGroup }) {  //약속 일정일 때 blue
                     Box(
                         modifier = Modifier
                             .size(4.dp) // 점의 크기 지정
                             .background(Color.Blue, shape = CircleShape) // 점의 색상 및 모양 설정
                     )
                 }
-                Spacer(modifier = Modifier.width(4.dp))
-                if (mySchedules.any { !it.schedule.isGroup }) {
+                Spacer(modifier = Modifier.width(2.dp))
+                if (mySchedules.any { !it.schedule.isGroup }) {  //개인 일정일 때 black
                     Box(
                         modifier = Modifier
                             .size(4.dp) // 점의 크기 지정
                             .background(Color.Black, shape = CircleShape) // 점의 색상 및 모양 설정
                     )
+                }*/
+                mySchedules.forEach { scheduleItem ->
+                    Box(   //약속일정일 때 blue, 개인 일정일때 black
+                        modifier = Modifier
+                            .size(4.dp)
+                            .background(if (scheduleItem.schedule.isGroup) Color.Blue else Color.Black, shape = CircleShape)
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
                 }
+
+
             }
         }
     }
