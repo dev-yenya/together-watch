@@ -38,9 +38,9 @@ class CreateScheduleModel(
         }
 
         while (!endDate.isBefore(startDate)) {
-            startDate = repetitionFunction(startDate)
             val updatedSchedule = schedule.copy(date = startDate.toString())
             saveSchedule(updatedSchedule)
+            startDate = repetitionFunction(startDate)
         }
     }
 }
