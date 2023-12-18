@@ -21,4 +21,5 @@
     <string name="msg_success_create_schedule">일정이 정상적으로 추가되었어요!</string>
     <string name="msg_success_update_schedule">일정이 정상적으로 수정되었어요!</string>
     <string name="msg_success_delete_schedule">일정이 정상적으로 삭제되었어요!</string>
+    <string name="https">https:</string>
 </resources>

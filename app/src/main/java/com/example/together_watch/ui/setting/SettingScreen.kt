@@ -24,17 +24,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.together_watch.R
 import com.example.together_watch.ui.Destinations
 import com.example.together_watch.ui.theme.DarkGray
 import com.example.together_watch.ui.theme.Gray
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-
 
 @Composable
 fun SettingScreen(
@@ -43,6 +45,7 @@ fun SettingScreen(
     val user = Firebase.auth.currentUser
     val photoUrl = user?.photoUrl ?: ""
     val name = user?.displayName ?: ""
+    val context = LocalContext.current
 
     Column(modifier = Modifier.padding(25.dp)) {
         Spacer(modifier = Modifier.height(5.dp))
@@ -50,7 +53,7 @@ fun SettingScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
             // 프로필 이미지
             AsyncImage(
-                model = "https:" + photoUrl.toString().split(":")[1],
+                model = getString(context, R.string.https) + photoUrl.toString().split(":")[1],
                 contentDescription = "프로필 이미지",
                 modifier = Modifier
                     .size(50.dp)
