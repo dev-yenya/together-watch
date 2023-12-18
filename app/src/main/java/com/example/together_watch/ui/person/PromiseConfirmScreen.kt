@@ -1,7 +1,5 @@
 package com.example.together_watch.ui.person
 
-import android.content.Context
-import android.media.MediaSyncEvent.createEvent
 import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -25,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -34,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,18 +53,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.example.together_watch.ApiClient
-import com.example.together_watch.data.talkCalendar.EventDetails
-import com.example.together_watch.data.talkCalendar.EventReq
-import com.example.together_watch.data.talkCalendar.EventRes
-import com.example.together_watch.data.talkCalendar.LocationDetails
-import com.example.together_watch.data.talkCalendar.TimeDetails
 import com.example.together_watch.promise.DateBlock
 import com.example.together_watch.promise.PromiseCompletionModel
-import com.example.together_watch.service.TalkCalendarService
+
 import com.example.together_watch.ui.MainViewModel
 import com.example.together_watch.ui.home.TimeBoundary
 import com.example.together_watch.ui.home.TimePickScreen
+
 import com.example.together_watch.ui.theme.Black
 import com.example.together_watch.ui.theme.Blue
 import com.example.together_watch.ui.theme.DarkGray
@@ -83,12 +78,12 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
     val currentScreen = remember { mutableIntStateOf(1) }
     val nextScreen = { currentScreen.intValue++ }
     val previousScreen = { currentScreen.intValue-- }
+    val complete = { /* TODO 톡캘린더 함수 연결 */}
     val saveSchedules = { viewModel.savePromiseSchedule() }
-    val complete = {/* TODO : 톡캘린더 알림 구현 */}
+    val areValidTimes =  { start: String, end: String -> viewModel.isValidTimeRange(start, end)}
     var showDialog by remember { mutableStateOf(false) }
     var getTimeClicked by remember { mutableStateOf(false) }
     var blocks by remember { mutableStateOf<List<DateBlock>>(emptyList()) }
-    var selectedBlock by remember { mutableStateOf(false) }
     var flag = 0
     val backHandler = {
         if (currentScreen.intValue > 1) {
@@ -229,18 +224,23 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
             Button(
                 onClick = when (currentScreen.intValue) {
                     1 -> {
-                        {
-                            getTimeClicked = true
-                            nextScreen()
-                            complete()
-                        }
+                        { getTimeClicked = true
+                            nextScreen() }
                     }
                     2 -> {
                         { nextScreen() }
                     }
                     3 -> {
-                        { saveSchedules()
-                            nextScreen() }
+                        {
+                            if (areValidTimes(viewModel.confirmedStartTime, viewModel.confirmedEndTime)) {
+                                Log.d("promise-completion", "조건 만족")
+                                saveSchedules()
+                                nextScreen()
+                            } else {
+                                Log.d("promise-completion", "조건 만족하지 않음")
+                                showDialog = true
+                            }
+                        }
                     }
                     else -> {
                         { complete() }
@@ -257,6 +257,25 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = Black
+                )
+            }
+
+            if (showDialog) {
+                AlertDialog(
+                    title = { Text("입력 시간이 유효하지 않음") },
+                    text = { Text("입력한 시간이 선택한 시간대에 포함되는지, 종료시각이 시작시각이 올바르게 입력됐는지 확인하세요.") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showDialog = false
+                            }
+                        ) {
+                            Text("확인")
+                        }
+                    },
+                    onDismissRequest = {
+                        showDialog = false
+                    }
                 )
             }
         }
