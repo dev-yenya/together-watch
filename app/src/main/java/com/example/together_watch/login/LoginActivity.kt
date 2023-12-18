@@ -3,7 +3,9 @@ package com.example.together_watch.login
 import LoginScreen
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -47,11 +49,16 @@ import com.google.firebase.auth.FirebaseUser
 
 class LoginActivity: ComponentActivity(), LoginContract.View {
     var user = Firebase.auth.currentUser
+    lateinit var editor: SharedPreferences.Editor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
 //        Log.e("hash", Utility.getKeyHash(this))
+
+        val sharedPreferences = getSharedPreferences("my_app_prefs", Context.MODE_PRIVATE)
+        editor = sharedPreferences.edit()
+
         setContent {
             LoginScreen()
         }
@@ -109,8 +116,11 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                     if (error != null) {
                         Log.e("kakao-sdk", "카카오 계정으로 로그인 실패", error)
                     } else if (token != null) {
+                        Log.d("kakao-sdk", "로그인 성공 ${token.accessToken}")
                         LoginPresenter().callKakaoLoginFunction(token.accessToken) {
                             if (it) {
+                                editor.putString("access_token", token.accessToken)
+                                editor.apply()
                                 startMainActivity(context)
                             }
                         }
@@ -145,6 +155,16 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                 } else {
                     UserApiClient.instance.loginWithKakaoAccount(this, callback = callback)
                 }
+                UserApiClient.instance.accessTokenInfo { tokenInfo, error ->
+                    if (error != null) {
+                        Log.e("kakao-token", "토큰 정보 보기 실패", error)
+                    }
+                    else if (tokenInfo != null) {
+                        Log.i("kakao-token", "토큰 정보 보기 성공" +
+                                "\n회원번호: ${tokenInfo.id}" +
+                                "\n만료시간: ${tokenInfo.expiresIn} 초")
+                    }
+                }
             },
             colors = ButtonDefaults.buttonColors(containerColor = KakaoYellow)
         ) {
@@ -176,3 +196,4 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
         finishAffinity()
     }
 }
+
