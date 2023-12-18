@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
                 arrayOf(Manifest.permission.POST_NOTIFICATIONS)
             )
         }
-        scheduleDailyAlarm(this, hour = 17, minute = 35)
+        scheduleDailyAlarm(this, hour = 17, minute = 14)
     }
 }
 
