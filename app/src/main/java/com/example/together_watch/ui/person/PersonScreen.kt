@@ -1,6 +1,7 @@
 package com.example.together_watch.ui.person
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -43,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.LightGray
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,9 +66,21 @@ fun PersonScreen(
     val apiPromiseData by viewModel.apiPromiseData.observeAsState()
     var selectedButton by remember { mutableStateOf(Status.COMPLETED) } // 선택된 버튼 상태 관리
     var showDialog by remember { mutableStateOf(false) }
+    var deleteStatus by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.fetchPromisesData() // 화면이 처음 그려질 때 API 호출
+    }
+
+    LaunchedEffect(deleteStatus) {
+        if (deleteStatus) {
+            viewModel.deletePromise(viewModel.selectedPromise) {
+                viewModel.fetchPromisesData()
+                Toast.makeText(context, "약속이 성공적으로 삭제되었습니다", Toast.LENGTH_SHORT).show()
+            }
+            deleteStatus = false
+        }
     }
 
     apiPromiseData?.let {
@@ -158,15 +172,13 @@ fun PersonScreen(
                     showDialog = false
                 },
                 title = { Text("삭제 확인") },
-                text = { Text("이 항목을 삭제하시겠습니까?") },
+                text = { Text("이 항목을 삭제하면 모든 참여자의 캘린더에서 해당 항목이 삭제됩니다. 정말 삭제하시겠습니까?") },
                 confirmButton = {
                     TextButton(
                         onClick = {
                             showDialog = false
-                            // 삭제 처리 로직
-                            viewModel.deletePromise(viewModel.selectedPromise) {
-                                viewModel.fetchPromisesData()
-                            }
+                            // 삭제 처리 로직 호출
+                            deleteStatus = true
                         }
                     ) {
                         Text("예")
