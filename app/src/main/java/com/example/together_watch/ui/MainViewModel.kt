@@ -16,6 +16,7 @@ import com.example.together_watch.promise.DateBlock
 import com.example.together_watch.promise.PromiseInfo
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.launch
 import java.time.LocalTime
@@ -55,6 +56,7 @@ class MainViewModel : ViewModel() {
 
         val promise = selectedPromise?.promise
         val members = promise?.users as List<String>
+        val promiseId = selectedPromise!!.id
 
         viewModelScope.launch {
             promiseName = promise.name as String
@@ -73,6 +75,7 @@ class MainViewModel : ViewModel() {
                         ).toMap()
                     )
                     .addOnSuccessListener { document ->
+                        addGroupIdField(userRef, uid, promiseId)
                         Log.d("promise-completion", "개인 스케줄 추가 성공, id=${document.id}")
                     }.addOnFailureListener { exception ->
                         Log.d("promise-completion", "error message: ${exception.message}")
@@ -81,7 +84,7 @@ class MainViewModel : ViewModel() {
 
             userRef.document(myUid)
                 .collection("promises")
-                .document(selectedPromise!!.id)
+                .document(promiseId)
                 .update(
                     mapOf(
                         "status" to Status.COMPLETED,
@@ -99,6 +102,19 @@ class MainViewModel : ViewModel() {
 
     }
 
+    private fun addGroupIdField(userRef: CollectionReference, userId: String, promiseId: String) {
+        userRef.document(userId)
+            .collection("schedules")
+            .document(promiseId)
+            .update(
+                mapOf(
+                    "groupId" to promiseId,
+                )
+            ).addOnSuccessListener {
+                Log.e("promise-completion", "개인 일정에 약속id 필드 추가")
+            }
+    }
+
     fun isValidTimeRange(start: String, end: String): Boolean {
         val formatter = DateTimeFormatter.ofPattern("HH:mm")
         val promise = selectedPromise!!.promise
@@ -108,7 +124,10 @@ class MainViewModel : ViewModel() {
         if (start != "" && end != "") {
             val startLocalTime = LocalTime.parse(start, formatter)
             val endLocalTime = LocalTime.parse(end, formatter)
-            Log.d("promise-completion", "[시간] 지정 가능 범위: ${startBoundary}~${endBoundary}, 실제 입력 범위: ${startLocalTime}~${endLocalTime}")
+            Log.d(
+                "promise-completion",
+                "[시간] 지정 가능 범위: ${startBoundary}~${endBoundary}, 실제 입력 범위: ${startLocalTime}~${endLocalTime}"
+            )
             return (startBoundary.isBefore(startLocalTime) || startBoundary.equals(startLocalTime))
                     && (endBoundary.isAfter(endLocalTime) || endBoundary.equals(endLocalTime))
                     && !endLocalTime.isBefore(startLocalTime)
