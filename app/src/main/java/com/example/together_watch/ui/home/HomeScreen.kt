@@ -333,7 +333,11 @@ fun CalendarGrid(
 @Composable
 fun WeekDaysHeader() {
     LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        items(DayOfWeek.values()) { dayOfWeek ->
+        val daysOfWeek = DayOfWeek.values().toList().let {
+            it.subList(6, it.size) + it.subList(0, 6)
+        }
+
+        items(daysOfWeek) { dayOfWeek ->
             Text(
                 text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
                 modifier = Modifier
@@ -365,7 +369,7 @@ fun WeekRow(
     ) {
         // 주간 날짜를 표시하는 루프
         (0 until 7).forEach { dayOfWeek ->
-            val dayOfMonth = week * 7 + dayOfWeek - daysOffset + 1
+            val dayOfMonth = week * 7 + dayOfWeek - daysOffset +1
             if (dayOfMonth in 1..totalDays) {
                 // 유효한 날짜일 경우 날짜 표시
                 val date = yearMonth.atDay(dayOfMonth)
@@ -437,21 +441,6 @@ fun DateBox(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
-                /*if (mySchedules.any { it.schedule.isGroup }) {  //약속 일정일 때 blue
-                    Box(
-                        modifier = Modifier
-                            .size(4.dp) // 점의 크기 지정
-                            .background(Color.Blue, shape = CircleShape) // 점의 색상 및 모양 설정
-                    )
-                }
-                Spacer(modifier = Modifier.width(2.dp))
-                if (mySchedules.any { !it.schedule.isGroup }) {  //개인 일정일 때 black
-                    Box(
-                        modifier = Modifier
-                            .size(4.dp) // 점의 크기 지정
-                            .background(Color.Black, shape = CircleShape) // 점의 색상 및 모양 설정
-                    )
-                }*/
                 mySchedules.forEach { scheduleItem ->
                     Box(   //약속일정일 때 blue, 개인 일정일때 black
                         modifier = Modifier
