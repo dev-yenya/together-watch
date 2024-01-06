@@ -109,7 +109,6 @@ fun PersonScreen(
 
             LazyColumn {
                 items(items = filteredPromises) { fetchedPromise ->
-                    // 여기에 각 약속에 대한 UI를 구성합니다.
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()

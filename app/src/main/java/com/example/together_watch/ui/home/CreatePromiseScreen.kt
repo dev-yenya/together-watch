@@ -3,10 +3,12 @@ package com.example.together_watch.ui.home
 import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.border
+//import androidx.compose.foundation.gestures.ModifierLocalScrollableContainerProvider.value
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
@@ -31,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.together_watch.promise.PromiseInfo
@@ -46,7 +49,6 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CreatePromiseScreen(
@@ -63,7 +65,12 @@ fun CreatePromiseScreen(
             promises.add(PromiseInfo(result.ownerId, result.docId))
         }
     }
-    var showDialog by remember { mutableStateOf(false) }
+
+    //var showDialog by remember { mutableStateOf(false) }
+    var promiseNameDialog by remember{ mutableStateOf(false) }
+    var promisePlaceDialog by remember { mutableStateOf(false) }
+    var promiseDateDialog by remember{ mutableStateOf(false) }
+    var promiseTimeDialog by remember { mutableStateOf(false) }
     val areValidTimes = { start: String, end: String -> viewModel.isValidTime(start, end) }
     val context = LocalContext.current
     val complete = {
@@ -75,6 +82,7 @@ fun CreatePromiseScreen(
             previousScreen()
         } else {
             navController.popBackStack()
+            initViewModel("","", emptyList(),"","",viewModel)
         }
     }
 
@@ -152,14 +160,39 @@ fun CreatePromiseScreen(
             }
 
             Button(
-                onClick = if (currentScreen.intValue < 4 ) {
-                    { nextScreen() }
+                onClick = if(currentScreen.intValue<2){ {
+                    if(viewModel.promiseName==""){
+                        promiseNameDialog=true
+
+                    }else{
+                        initViewModel(viewModel.promiseName,"", emptyList(),"","",viewModel)
+                        nextScreen()
+                    }
+
+                    }
+                }else if (currentScreen.intValue<3){ {
+                    if(viewModel.promisePlace==""){
+                        promisePlaceDialog=true
+                    }
+                    else{
+                        initViewModel(viewModel.promiseName,viewModel.promisePlace, emptyList(),"","",viewModel)
+                        nextScreen()}
+                    }
+                }
+                else if (currentScreen.intValue < 4 ) {{
+                    if(viewModel.selectedDates.isEmpty()){
+                        promiseDateDialog=true
+                    }
+                    else{
+                        initViewModel(viewModel.promiseName,viewModel.promisePlace,viewModel.selectedDates,"","",viewModel)
+                        nextScreen()
+                    }}
                 } else if (currentScreen.intValue < 5) { {
                     if (areValidTimes(viewModel.confirmedStartTime, viewModel.confirmedEndTime)) {
                         savePromise()
                         nextScreen()
                     } else {
-                        showDialog = true
+                        promiseTimeDialog=true
                     }
                 } } else {
                     { complete() }
@@ -173,33 +206,57 @@ fun CreatePromiseScreen(
                 Text(if (currentScreen.intValue < 5) "다음" else "친구 초대하기", color = Black, fontWeight = FontWeight.Bold)
             }
 
-            if (showDialog) {
+            @Composable
+            fun makeDialog(title:String, text: String,showDialog:Int){
                 AlertDialog(
-                    title = { Text("입력 시간이 유효하지 않음") },
-                    text = { Text("시작시간과 종료시간이 올바르게 입력됐는지 확인하세요.") },
+                    title = { Text(title) },
+                    text = { Text(text) },
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                showDialog = false
+                                when(showDialog){
+                                    1->promiseNameDialog=false
+                                    2->promisePlaceDialog=false
+                                    3->promiseDateDialog=false
+                                    4->promiseTimeDialog=false
+                                }
                             }
                         ) {
                             Text("확인")
                         }
                     },
                     onDismissRequest = {
-                        showDialog = false
+                        when(showDialog){
+                            1->promiseNameDialog=false
+                            2->promisePlaceDialog=false
+                            3->promiseDateDialog=false
+                            4->promiseTimeDialog=false
+                        }
                     }
                 )
+            }
+            if(promiseNameDialog){
+               makeDialog(title = "약속 이름이 유효하지 않음", text ="약속 이름을 올바르게 입력해주세요" , showDialog =1 )
+            }
+            if (promisePlaceDialog){
+               makeDialog(title = "약속 장소가 유효하지 않음", text = "약속 장소를 올바르게 입력해 주세요", showDialog =2 )
+            }
+            if(promiseDateDialog){
+               makeDialog(title = "약속 날짜가 유효하지 않음", text = "약속 날짜를 선택해 주세요", showDialog =3 )
+            }
+            if(promiseTimeDialog){
+                makeDialog(title = "약속 시간이 유효하지 않음", text = "올바른 약속 시간을 입력해 주세요", showDialog = 4)
             }
         }
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
     var isInputValid by remember { mutableStateOf(true) }
-    var text by remember { mutableStateOf("") } // 사용자 입력을 저장하기 위한 상태
+    var text by remember { mutableStateOf(viewModel.promiseName) } // 사용자 입력을 저장하기 위한 상태
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
@@ -238,7 +295,7 @@ fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SecondScreen(viewModel: MainViewModel, onPlaceChanged: (String) -> Unit) {
-    var text by remember { mutableStateOf("") } // 사용자 입력을 저장하기 위한 상태
+    var text by remember { mutableStateOf(viewModel.promisePlace) } // 사용자 입력을 저장하기 위한 상태
     var isInputValid by remember { mutableStateOf(true) }
     val context = LocalContext.current
     Column(
@@ -272,10 +329,10 @@ fun SecondScreen(viewModel: MainViewModel, onPlaceChanged: (String) -> Unit) {
                 focusedBorderColor = Color.Transparent,
             )
         )
-        if (!isInputValid) {
+        /*if (!isInputValid) {
             // 입력값이 비어 있을 때 토스트 메시지 표시
             Toast.makeText(context, "약속 장소를 입력해주세요", Toast.LENGTH_SHORT).show()
-        }
+        }*/
 
         Divider()
     }
@@ -285,8 +342,8 @@ fun SecondScreen(viewModel: MainViewModel, onPlaceChanged: (String) -> Unit) {
 @Composable
 fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-    val selectedDates = mutableListOf<String>()
-    var dates by remember { mutableStateOf(listOf<String>()) }
+    var selectedDates by remember { mutableStateOf(viewModel.selectedDates.toMutableList()) }
+    var dates by remember { mutableStateOf(viewModel.selectedDates) }
 
 
     LazyColumn(modifier = Modifier.padding(10.dp)) {
@@ -310,7 +367,7 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
             val totalDays = yearMonth.lengthOfMonth()
             val firstDayOfMonth = yearMonth.atDay(1)
             val daysOffset = firstDayOfMonth.dayOfWeek.value % 7
-            var isSelectedEffect by remember { mutableStateOf(false) }
+            var isSelectedEffect by remember { mutableStateOf(true) }
             var clickedDate by remember { mutableStateOf<LocalDate?>(null) }
 
             WeekRow(week, daysOffset, totalDays, selectedDates, clickedDate, yearMonth, isSelectedEffect=isSelectedEffect) { date ->
@@ -327,9 +384,12 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
                     } else {
                         selectedDates.remove(selectedDate)
                         dates = selectedDates.toList() // 상태 업데이트
+                        onDateSelected(dates)
                     }
                 }
-                else isSelectedEffect = false
+                else {
+                    isSelectedEffect = false
+                }
             }
         }
 
@@ -343,6 +403,18 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
             itemContent = { EventsList(it) }
         )
     }
+}
+
+
+
+fun initViewModel(promiseName: String, promisePlace:String, selectedDates:List<String> ,
+                  endTime:String,startTime:String,viewModel: MainViewModel){
+    viewModel.promiseName=promiseName
+    viewModel.promisePlace=promisePlace
+    viewModel.selectedDates= selectedDates
+    viewModel.endTime=endTime
+    viewModel.startTime=startTime
+
 }
 
 @Composable
@@ -428,8 +500,8 @@ fun TimePickScreen(viewModel: MainViewModel,
                    boundary: TimeBoundary? = null,
                    onTimeRangeSelected: (String, String) -> Unit) {
 
-    var text1 by remember { mutableStateOf("") }
-    var text2 by remember { mutableStateOf("") }
+    var text1 by remember { mutableStateOf(viewModel.startTime) }
+    var text2 by remember { mutableStateOf(viewModel.endTime) }
     val context = LocalContext.current
 
     Column(

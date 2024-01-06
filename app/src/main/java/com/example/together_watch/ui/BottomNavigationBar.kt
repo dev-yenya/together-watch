@@ -85,6 +85,7 @@ sealed class Destinations(
 fun NavigationGraph(navController: NavHostController, viewModel: MainViewModel) {
     NavHost(navController, startDestination = Destinations.HomeScreen.route) {
         composable(Destinations.HomeScreen.route) {
+            viewModel.promiseName=""
             HomeScreen(navController, viewModel)
         }
         composable(Destinations.PersonScreen.route) {
