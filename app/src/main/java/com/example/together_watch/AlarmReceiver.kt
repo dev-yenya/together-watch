@@ -53,7 +53,7 @@ class AlarmReceiver : BroadcastReceiver() {
                         schedule = Schedule(
                             name = it.get("name").toString(),
                             place = it.get("place").toString(),
-                            date = it.get("date").toString(),
+                             date = it.get("date").toString(),
                             startTime = it.get("startTime").toString(),
                             endTime = it.get("endTime").toString(),
                             isGroup = it.get("isGroup").toString() == "true",
@@ -128,7 +128,7 @@ fun makeAlarmNotification(context: Context, messageTitle: String, messageBody: S
         .setContentTitle(messageTitle)
         .setContentText(messageBody)
         .setStyle(NotificationCompat.BigTextStyle().bigText(messageBody))
-        .setAutoCancel(false)   // 전체 삭제해도 안되게하기
+        .setAutoCancel(true)   // 알람 클릭 시 삭림제
         .setSound(null)
         .setContentIntent(pendingIntent)
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
