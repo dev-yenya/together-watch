@@ -61,7 +61,7 @@ class AlarmReceiver : BroadcastReceiver() {
                     )
                 }
                 if (mySchedules.isEmpty()) {
-                    message = "아직 오늘의 일정이 없어요. 새로운 일정을 만들어볼까요?"
+                    message = "일정이 없어요.\n새로운 일정을 만들어 볼까요?"
                 } else {
                     val scheduleMessages = mySchedules.map {
                         "${it.schedule.name} ${it.schedule.startTime} ~ ${it.schedule.endTime}"
