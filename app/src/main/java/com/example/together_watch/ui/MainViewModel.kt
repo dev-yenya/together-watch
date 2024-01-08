@@ -17,7 +17,9 @@ import com.example.together_watch.promise.PromiseInfo
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.CompletableFuture
@@ -55,6 +57,7 @@ class MainViewModel : ViewModel() {
 
         val promise = selectedPromise?.promise
         val members = promise?.users as List<String>
+        val promiseId = selectedPromise!!.id
 
         viewModelScope.launch {
             promiseName = promise.name as String
@@ -71,17 +74,17 @@ class MainViewModel : ViewModel() {
                             endTime = confirmedEndTime,
                             isGroup = true
                         ).toMap()
-                    )
-                    .addOnSuccessListener { document ->
-                        Log.d("promise-completion", "개인 스케줄 추가 성공, id=${document.id}")
-                    }.addOnFailureListener { exception ->
-                        Log.d("promise-completion", "error message: ${exception.message}")
+                    ).addOnSuccessListener { documentRef ->
+                        documentRef.update(
+                            mapOf("groupId" to promiseId)
+                        )
+                        Log.d("promise-completion", "개인 일정에 약속 id 필드 추가")
                     }
             }
 
             userRef.document(myUid)
                 .collection("promises")
-                .document(selectedPromise!!.id)
+                .document(promiseId)
                 .update(
                     mapOf(
                         "status" to Status.COMPLETED,
@@ -108,7 +111,10 @@ class MainViewModel : ViewModel() {
         if (start != "" && end != "") {
             val startLocalTime = LocalTime.parse(start, formatter)
             val endLocalTime = LocalTime.parse(end, formatter)
-            Log.d("promise-completion", "[시간] 지정 가능 범위: ${startBoundary}~${endBoundary}, 실제 입력 범위: ${startLocalTime}~${endLocalTime}")
+            Log.d(
+                "promise-completion",
+                "[시간] 지정 가능 범위: ${startBoundary}~${endBoundary}, 실제 입력 범위: ${startLocalTime}~${endLocalTime}"
+            )
             return (startBoundary.isBefore(startLocalTime) || startBoundary.equals(startLocalTime))
                     && (endBoundary.isAfter(endLocalTime) || endBoundary.equals(endLocalTime))
                     && !endLocalTime.isBefore(startLocalTime)
@@ -220,14 +226,35 @@ class MainViewModel : ViewModel() {
         return result
     }
 
-    fun deletePromise(promise: FetchedPromise?, successListener: () -> Unit) {
-        Firebase.firestore.collection("users")
-            .document(myUid)
-            .collection("promises")
-            .document(promise?.id ?: "")
-            .delete()
-            .addOnSuccessListener {
-                successListener.invoke()
+    suspend fun deletePromise(promise: FetchedPromise?, successListener: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val members = promise?.promise?.users as List<String>
+
+            members.forEach { userId ->
+                Log.d("promise-deletion", "참여자 id: $userId")
+                Firebase.firestore.collection("users")
+                    .document(userId)
+                    .collection("schedules")
+                    .whereEqualTo("groupId", promise.id)
+                    .get().await()
+                    .documents.forEach { snapshot ->
+                        snapshot.reference.delete()
+                            .addOnSuccessListener {
+                                successListener.invoke()
+                                Log.d("promise-deletion", "약속 참여자의 개인 일정 삭제, 참여자 수 만큼 로그 출력")
+                            }
+                    }
             }
+
+            Firebase.firestore.collection("users")
+                .document(myUid)
+                .collection("promises")
+                .document(promise.id)
+                .delete()
+                .addOnSuccessListener {
+                    successListener.invoke()
+                }
+
+        }
     }
 }
