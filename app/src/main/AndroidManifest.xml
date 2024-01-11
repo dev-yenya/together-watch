@@ -73,7 +73,7 @@
             </intent-filter>
         </activity>
         <receiver
-            android:name=".AlarmReceiver"
+            android:name=".notification.AlarmReceiver"
             android:directBootAware="true"
             android:enabled="true"
             android:exported="false">
@@ -82,5 +82,12 @@
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        <service
+            android:name=".notification.PushNotificationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"></action>
+            </intent-filter>
+        </service>
     </application>
 </manifest>

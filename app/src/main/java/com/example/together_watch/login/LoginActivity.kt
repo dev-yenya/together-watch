@@ -44,6 +44,7 @@ import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import com.example.together_watch.notification.PushNotificationService
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseUser
 
@@ -118,6 +119,7 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                     } else if (token != null) {
                         Log.d("kakao-sdk", "로그인 성공 ${token.accessToken}")
                         LoginPresenter().callKakaoLoginFunction(token.accessToken) {
+                            PushNotificationService().updateFcmTokenAfterLogin()
                             if (it) {
                                 editor.putString("access_token", token.accessToken)
                                 editor.apply()
@@ -146,6 +148,7 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                         else if (token != null) {
                             Log.d("kakao-login-sdk", "로그인 성공 ${token.accessToken}")
                             LoginPresenter().callKakaoLoginFunction(token.accessToken) {
+                                PushNotificationService().updateFcmTokenAfterLogin()
                                 if (it) {
                                     startMainActivity(context)
                                 }

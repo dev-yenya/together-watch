@@ -141,7 +141,7 @@ open class CreateScheduleDialog(
         return binding.switchRepeat.isChecked
     }
 
-    private fun getStartTime(): LocalTime {
+    private fun getStartTime(): LocalTime { //TODO : startTime, endTime 이외의 나머지 요소 다 작성하고 확인 누르면 앱 종료
         return LocalTime.parse(binding.etStartTime.text.toString(), timeFormat)
     }
 
