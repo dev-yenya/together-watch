@@ -1,26 +1,19 @@
-package com.example.together_watch
+package com.example.together_watch.notification
 
 import android.app.AlarmManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
-import androidx.constraintlayout.widget.Constraints
-import androidx.core.app.NotificationCompat
-import com.example.together_watch.data.FetchedPromise
 import com.example.together_watch.data.FetchedSchedule
-import com.example.together_watch.data.Promise
 import com.example.together_watch.data.Schedule
-import com.example.together_watch.data.Status
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import java.text.SimpleDateFormat
+import com.example.together_watch.notification.Notification
 
 // Add these imports at the beginning of your file
 import java.util.Calendar
@@ -53,7 +46,7 @@ class AlarmReceiver : BroadcastReceiver() {
                         schedule = Schedule(
                             name = it.get("name").toString(),
                             place = it.get("place").toString(),
-                            date = it.get("date").toString(),
+                             date = it.get("date").toString(),
                             startTime = it.get("startTime").toString(),
                             endTime = it.get("endTime").toString(),
                             isGroup = it.get("isGroup").toString() == "true",
@@ -61,7 +54,7 @@ class AlarmReceiver : BroadcastReceiver() {
                     )
                 }
                 if (mySchedules.isEmpty()) {
-                    message = "아직 오늘의 일정이 없어요. 새로운 일정을 만들어볼까요?"
+                    message = "일정이 없어요.\n새로운 일정을 만들어 볼까요?"
                 } else {
                     val scheduleMessages = mySchedules.map {
                         "${it.schedule.name} ${it.schedule.startTime} ~ ${it.schedule.endTime}"
@@ -110,44 +103,9 @@ fun scheduleDailyAlarm(context: Context, hour: Int, minute: Int) {
 }
 
 fun makeAlarmNotification(context: Context, messageTitle: String, messageBody: String) {
-    // notification 클릭 시 MainActivity 실행
-    val intent = Intent(context, MainActivity::class.java)
-    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-    val pendingIntent = PendingIntent.getActivity(
-        context, 0, intent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    Notification().showNotification(
+        context,
+        messageTitle,
+        messageBody
     )
-
-    // notification의 channel id를 정의
-    val channelId = "channel1"
-    val channelName = "channel name"
-
-    // notification를 정의
-    val notificationBuilder = NotificationCompat.Builder(context, channelId)
-        .setSmallIcon(R.drawable.icon_notification)
-        .setContentTitle(messageTitle)
-        .setContentText(messageBody)
-        .setStyle(NotificationCompat.BigTextStyle().bigText(messageBody))
-        .setAutoCancel(false)   // 전체 삭제해도 안되게하기
-        .setSound(null)
-        .setContentIntent(pendingIntent)
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setOngoing(true)   // 알람이 계속 뜬 상태로 있게
-
-    // 정의한 내용과 channel을 사용하여 notification을 생성
-    val notificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-    // Android SDK 26 이상에서는 notification을 만들 때 channel을 지정
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val channel = NotificationChannel(
-            channelId,
-            channelName,
-            NotificationManager.IMPORTANCE_DEFAULT
-        )
-        notificationManager.createNotificationChannel(channel)
-    }
-
-    // notification 띄우기
-    notificationManager.notify(100, notificationBuilder.build())
 }
