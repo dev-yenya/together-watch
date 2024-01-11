@@ -52,7 +52,7 @@ open class CreateScheduleDialog(
         val schedule = getScheduleFromInput()
         val isRepeat = isRepeat()
 
-        if(isScheduleComplete(schedule, isRepeat)) {
+        if(isScheduleComplete(isRepeat)) {
             if (getStartTime().isAfter(getEndTime())) {
                 showToast(R.string.msg_time_order)
             }
@@ -126,22 +126,20 @@ open class CreateScheduleDialog(
         return (minute / 10) * 10
     }
 
-    private fun isScheduleComplete(schedule: Schedule, isRepeat: Boolean): Boolean {
-        with(schedule) {
-            return !name.isNullOrEmpty()
-                    && !place.isNullOrEmpty()
-                    && !date.isNullOrEmpty()
-                    && !startTime.isNullOrEmpty()
-                    && !endTime.isNullOrEmpty()
-                    && (!isRepeat || !binding.etEndDate.text.isNullOrEmpty())
-        }
+    private fun isScheduleComplete(isRepeat: Boolean): Boolean {
+        return !binding.etScheduleName.text.isNullOrEmpty()
+                && !binding.etScheduleLocation.text.isNullOrEmpty()
+                && !binding.etDate.text.isNullOrEmpty()
+                && !binding.etStartTime.text.isNullOrEmpty()
+                && !binding.etEndTime.text.isNullOrEmpty()
+                && (!isRepeat || !binding.etEndDate.text.isNullOrEmpty())
     }
 
     private fun isRepeat(): Boolean {
         return binding.switchRepeat.isChecked
     }
 
-    private fun getStartTime(): LocalTime { //TODO : startTime, endTime 이외의 나머지 요소 다 작성하고 확인 누르면 앱 종료
+    private fun getStartTime(): LocalTime {
         return LocalTime.parse(binding.etStartTime.text.toString(), timeFormat)
     }
 
