@@ -9,6 +9,8 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.example.together_watch.MainActivity
 import com.example.together_watch.R
+import java.security.MessageDigest
+import java.util.UUID
 
 class Notification {
     // notification의 channel id를 정의
@@ -37,7 +39,7 @@ class Notification {
             .setOngoing(true)   // 알람이 계속 뜬 상태로 있게
 
         // 고유한 알림 ID 생성
-        val notificationId = System.currentTimeMillis().toInt()
+        val notificationId = randomUuidInt()
 
         // 정의한 내용과 channel을 사용하여 notification을 생성
         val notificationManager =
@@ -55,5 +57,21 @@ class Notification {
 
         // notification 띄우기
         notificationManager.notify(notificationId, notificationBuilder.build())
+    }
+
+    fun randomUuidInt(): Int {
+        // UUID 생성
+        val uuid = UUID.randomUUID()
+
+        // UUID를 MD5 해시로 변환
+        val md5Hash = MessageDigest.getInstance("MD5").digest(uuid.toString().toByteArray())
+
+        // MD5 해시를 int로 변환
+        var result = 0
+        for (i in 0 until 4) {
+            result = result shl 8 or (md5Hash[i].toInt() and 0xFF)
+        }
+
+        return result
     }
 }
