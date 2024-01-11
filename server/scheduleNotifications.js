@@ -89,7 +89,7 @@ function getStartTime(date, time) {
 }
 
 // 크롬 식을 통해 10분마다 리마인드할 일정이 있는지 확인함
-exports.scheduleNotifications = functions.pubsub.schedule("*/10 * * * *").timeZone("Asia/Seoul").onRun(async (context) => {
+exports.scheduleNotifications = functions.pubsub.schedule("*/5 * * * *").timeZone("Asia/Seoul").onRun(async (context) => {
   console.log("sendTimeNotifications function started");
   try {
     const usersSnapshot = await db.collection("users").get();
