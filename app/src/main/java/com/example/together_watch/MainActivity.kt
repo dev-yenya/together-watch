@@ -22,6 +22,7 @@ import com.example.together_watch.ui.theme.Together_watchTheme
 import android.Manifest
 import android.os.Build
 import android.widget.Toast
+import com.example.together_watch.notification.scheduleDailyAlarm
 
 
 class MainActivity : ComponentActivity() {
@@ -68,7 +69,7 @@ class MainActivity : ComponentActivity() {
                 arrayOf(Manifest.permission.POST_NOTIFICATIONS)
             )
         }
-        scheduleDailyAlarm(this, hour = 5, minute = 28)
+        scheduleDailyAlarm(this, hour = 18, minute = 0)
     }
 }
 
