@@ -71,6 +71,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.lifecycle.lifecycleScope
+import com.example.together_watch.notification.PushNotificationService
+
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.delay
@@ -141,15 +143,14 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
     @Composable
     override fun LoginButton() {
         val context = LocalContext.current
-            Button(
-                modifier = Modifier
-                    .padding(bottom = 70.dp, start = 20.dp, end = 20.dp)
-                    .fillMaxWidth()
-                    .height(50.dp),
-                onClick = {
-                    Log.d("kakao-sdk", "카카오 로그인")
-
-                    // 카카오 웹 로그인
+        Button(
+            modifier = Modifier
+                .padding(bottom = 70.dp, start = 20.dp, end = 20.dp)
+                .fillMaxWidth()
+                .height(50.dp),
+            onClick = {
+                Log.d("kakao-sdk", "카카오 로그인")
+                  // 카카오 웹 로그인
                     val callback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
                         if (error != null) {
                             Log.e("kakao-sdk", "카카오 계정으로 로그인 실패", error)
@@ -157,6 +158,7 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                             isLoading=true
                             Log.d("kakao-sdk", "로그인 성공 ${token.accessToken}")
                             LoginPresenter().callKakaoLoginFunction(token.accessToken) {
+                                PushNotificationService().updateFcmTokenAfterLogin()
                                 if (it) {
                                     editor.putString("access_token", token.accessToken)
                                     editor.apply()

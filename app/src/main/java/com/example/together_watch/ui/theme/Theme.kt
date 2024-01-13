@@ -1,6 +1,7 @@
 package com.example.together_watch.ui.theme
 
 import android.app.Activity
+import android.graphics.Color
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -57,8 +58,8 @@ fun Together_watchTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            window.statusBarColor = Color.WHITE // statusBarColor : 흰색
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true // 상태바 아이콘 : 검정
         }
     }
 
