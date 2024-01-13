@@ -234,9 +234,8 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
         setContent {
 
             Column {
-                repeat(7) {
-                    LoadingShimmerEffect()
-                }
+                LoadingShimmerEffect()
+
             }
         }
         /*Button(
