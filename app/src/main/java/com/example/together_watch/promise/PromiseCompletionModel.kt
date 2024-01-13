@@ -21,6 +21,7 @@ data class DateBlock(
     val startTime: LocalTime,
     val endTime: LocalTime,
     val possibleUsers: List<String>
+
 ) {
     override fun toString(): String {
         val builder = StringBuilder()
@@ -62,7 +63,6 @@ class PromiseCompletionModel {
             "ownerId" to fetchedPromise.promise.ownerId,
             "groupId" to fetchedPromise.id
         )
-
         functions = Firebase.functions("asia-northeast3")
         functions.getHttpsCallable("getBestSchedule")
             .call(data)

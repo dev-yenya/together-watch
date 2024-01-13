@@ -4,6 +4,7 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +29,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -38,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -68,6 +71,8 @@ import com.example.together_watch.ui.theme.Black
 import com.example.together_watch.ui.theme.Blue
 import com.example.together_watch.ui.theme.DarkGray
 import com.example.together_watch.ui.theme.Gray
+import com.example.together_watch.ui.theme.KakaoYellow
+import kotlinx.coroutines.delay
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -85,16 +90,19 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
     val complete = { navController.navigate(Destinations.HomeScreen.route)}
     val saveSchedules = { viewModel.savePromiseSchedule() }
     val areValidTimes =  { start: String, end: String -> viewModel.isValidTimeRange(start, end)}
-    var showDialog by remember { mutableStateOf(false) }
+    var promiseTimeDialog by remember { mutableStateOf(false) }
+    var promiseTimeSelectDialog by remember{ mutableStateOf(false) }
     var getTimeClicked by remember { mutableStateOf(false) }
     var blocks by remember { mutableStateOf<List<DateBlock>>(emptyList()) }
-    var flag = 0
+    var elapsedTimeMillis by remember{ mutableLongStateOf(0) }
+    var isTimeSelected by remember{ mutableStateOf(false) }
     val backHandler = {
         if (currentScreen.intValue > 1) {
             previousScreen()
         } else {
             navController.popBackStack()
         }
+        viewModel.selectedBlock=null
     }
 
 //    fun createEvent() {
@@ -151,10 +159,15 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
 
     LaunchedEffect(getTimeClicked) {
         if (getTimeClicked) {
+            // 시간 측정 시작
+            val startTime = System.currentTimeMillis()
             viewModel.selectedPromise?.let {
                 blocks = timeFunctionModel.makeSchedule(it)
                 getTimeClicked = false
             }
+            // 시간 측정 종료 및 결과
+            val endTime = System.currentTimeMillis()
+            elapsedTimeMillis = endTime - startTime
         }
     }
 
@@ -212,7 +225,7 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
 
                 when (currentScreen.intValue) {
                     1 -> ConfirmPromiseFirstScreen(viewModel)
-                    2 -> ConfirmPromiseSecondScreen(viewModel, blocks)
+                    2 -> isTimeSelected=ConfirmPromiseSecondScreen(viewModel, blocks,elapsedTimeMillis)
                     3 -> {
                         TimePickScreen(
                             viewModel,
@@ -232,7 +245,14 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                             nextScreen() }
                     }
                     2 -> {
-                        { nextScreen() }
+                        {
+                            if(viewModel.selectedBlock==null) promiseTimeSelectDialog=true
+                            /*if(!isTimeSelected){
+                                promiseTimeSelectDialog=true
+                            }*/
+                            else nextScreen()
+                            Log.d("chaeae","star time: ${viewModel.selectedBlock?.startTime.toString()}")
+                        }
                     }
                     3 -> {
                         {
@@ -242,7 +262,7 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                                 nextScreen()
                             } else {
                                 Log.d("promise-completion", "조건 만족하지 않음")
-                                showDialog = true
+                                promiseTimeDialog = true
                             }
                         }
                     }
@@ -263,24 +283,39 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                     color = Black
                 )
             }
-
-            if (showDialog) {
+            @Composable
+            fun makeDialog(title:String, text: String,showDialog:Int){
                 AlertDialog(
-                    title = { Text("입력 시간이 유효하지 않음") },
-                    text = { Text("입력한 시간이 선택한 시간대에 포함되는지, 종료시각이 시작시각이 올바르게 입력됐는지 확인하세요.") },
+                    title = { Text(title) },
+                    text = { Text(text) },
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                showDialog = false
+                                when(showDialog){
+                                    1->promiseTimeSelectDialog=false
+                                    2->promiseTimeDialog=false
+                                }
                             }
                         ) {
                             Text("확인")
                         }
                     },
                     onDismissRequest = {
-                        showDialog = false
+                        when(showDialog){
+                            1->promiseTimeSelectDialog=false
+                            2->promiseTimeDialog=false
+                        }
                     }
                 )
+            }
+
+            if (promiseTimeDialog) {
+                makeDialog(title = "입력 시간이 유효하지 않음",
+                    text = "입력한 시간이 선택한 시간대에 포함되는지, 종료시각이 시작시각이 올바르게 입력됐는지 확인하세요.",
+                    showDialog = 2 )
+            }
+            if(promiseTimeSelectDialog){
+                makeDialog(title ="약속 시간이 선택되지 않음" , text = "멤버들이 만날 시간을 선택해 주세요", showDialog =1 )
             }
         }
     }
@@ -386,9 +421,8 @@ fun ProfileCard(userId: String, viewModel: MainViewModel) {
     }
 }
 
-
 @Composable
-fun ConfirmPromiseSecondScreen(viewModel: MainViewModel, blocks: List<DateBlock>) {
+fun ConfirmPromiseSecondScreen(viewModel: MainViewModel, blocks: List<DateBlock>,elapsedTimeMillis:Long) :Boolean  {
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
@@ -408,19 +442,55 @@ fun ConfirmPromiseSecondScreen(viewModel: MainViewModel, blocks: List<DateBlock>
         // 클릭된 카드의 인덱스를 추적하기 위한 상태 변수
         var selectedCardIndex by remember { mutableStateOf(-1) }
 
-        // 각 카드를 만들기 위한 반복문
-        for (index in blocks.indices) {
-            ClickableCard(
-                text = blocks[index].toString(),
-                isSelected = index == selectedCardIndex,
-                onClick = {
-                    selectedCardIndex = index
-                    viewModel.selectedBlock = blocks[selectedCardIndex]
-                }
-            )
+
+        // 로딩 상태를 나타내는 변수
+        var isLoading by remember { mutableStateOf(true) }
+
+        // LaunchedEffect를 사용하여 로딩 스피너를 표시
+        LaunchedEffect(isLoading) {
+            // 로딩이 완료되면 isLoading 값을 false로 변경
+            Log.d("chaeae","LaunchedEffect(isLoading : $elapsedTimeMillis")
+            delay(elapsedTimeMillis+100)
+            isLoading = false
+
+        }
+
+        // 로딩 중이면 로딩 스피너를 표시
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .padding(16.dp),
+                    color = Blue
+                )
+            }
+        } else {
+            // 로딩이 완료되면 각 카드를 만들기 위한 반복문 실행
+            for (index in blocks.indices) {
+                ClickableCard(
+                    text = blocks[index].toString(),
+                    isSelected = index == selectedCardIndex,
+                    onClick = {
+                        selectedCardIndex = index
+                        viewModel.selectedBlock = blocks[selectedCardIndex]
+                    }
+                )
+            }
         }
     }
+    return true
 }
+
+
+
+
 
 @Composable
 fun ClickableCard(text: String, isSelected: Boolean, onClick: () -> Unit) {
