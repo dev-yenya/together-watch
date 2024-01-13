@@ -28,7 +28,7 @@ class PromiseAcceptModel : PromiseAcceptContract.Model {
 
     override suspend fun getGroupPromise(ownerId: String, groupId: String): Promise =
         coroutineScope {
-
+            promiseRef = db.collection("users").document(ownerId)
             promiseRef = db.collection("users").document(ownerId)
                 .collection("promises").document(groupId)
             Log.d("invitation", "그룹 정보 조회 쿼리 사용")
