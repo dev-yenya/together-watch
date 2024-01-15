@@ -13,6 +13,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +28,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import com.example.together_watch.R
+import com.example.together_watch.account.callQuitFunction
 import com.example.together_watch.login.LoginActivity
 import com.example.together_watch.ui.theme.Gray
 import com.google.firebase.Firebase
@@ -37,6 +39,15 @@ import com.kakao.sdk.user.UserApiClient
 @Composable
 fun AccountManagementScreen(navController: NavController) {
     var showDialog by remember { mutableStateOf(false) }
+    var quit by remember { mutableStateOf(false) }
+
+    LaunchedEffect(quit) {
+        if (quit) {
+            callQuitFunction()
+            quit = false
+            Log.d("quit", "로그인화면으로 이동해야")
+        }
+    }
 
     fun logout() {
         // 카카오 로그아웃
@@ -96,12 +107,13 @@ fun AccountManagementScreen(navController: NavController) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
             title = { Text(text = "탈퇴 확인") },
-            text = { Text(text = "정말 탈퇴하시겠습니까?") },
+            text = { Text(text = "탈퇴하면 내가 저장한 일정들이 모두 삭제되고, 내가 참여한 모든 약속들의 참여자 목록에서 제외됩니다.정말 탈퇴하시겠습니까?") },
             confirmButton = {
                 Button(onClick = {
                     // 탈퇴 처리
-                    logout()
+                    quit = true
                     showDialog = false
+                    logout()    // 탈퇴 후 자동 로그아웃
                 }) {
                     Text("확인")
                 }
