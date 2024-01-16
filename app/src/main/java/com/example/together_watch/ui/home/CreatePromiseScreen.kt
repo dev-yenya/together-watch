@@ -30,12 +30,10 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.together_watch.promise.PromiseInfo
@@ -44,7 +42,6 @@ import com.example.together_watch.ui.MainViewModel
 import com.example.together_watch.ui.theme.Black
 import com.example.together_watch.ui.theme.Blue
 import com.example.together_watch.ui.theme.DarkGray
-import com.example.together_watch.ui.theme.Gray
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -157,7 +154,7 @@ fun CreatePromiseScreen(
                         viewModel.selectedDates = dates
                     }
 
-                    4 -> TimePickScreen(viewModel) { text1, text2 ->
+                    4 -> CreateTimePickScreen(viewModel) { text1, text2 ->
                         viewModel.startTime = text1
                         viewModel.endTime = text2
                     }
@@ -540,18 +537,11 @@ fun isValidTime(time: LocalTime, boundary: TimeBoundary?): Boolean {
 
 data class TimeBoundary(val min: LocalTime, val max: LocalTime)
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimePickScreen(
+fun CreateTimePickScreen(
     viewModel: MainViewModel,
-    boundary: TimeBoundary? = null,
     onTimeRangeSelected: (String, String) -> Unit
 ) {
-
-    var text1 by remember { mutableStateOf(viewModel.startTime) }
-    var text2 by remember { mutableStateOf(viewModel.endTime) }
-    val context = LocalContext.current
-
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
@@ -561,87 +551,92 @@ fun TimePickScreen(
             style = TextStyle(fontSize = 20.sp),
             fontWeight = FontWeight.Bold
         )
-        if (boundary != null) {
-            SelectedTimeScreen(viewModel = viewModel)
-        } else {
-            Text(
-                "약속 가능한 시간대를 입력해 주세요.",
-                modifier = Modifier.padding(bottom = 10.dp),
-                style = TextStyle(fontSize = 15.sp)
-            )
-        }
+        Text(
+            "약속 가능한 시간대를 입력해 주세요.",
+            modifier = Modifier.padding(bottom = 10.dp),
+            style = TextStyle(fontSize = 15.sp)
+        )
         Spacer(Modifier.height(10.dp))
-        Row {
-            TextField(
-                value = text1,
-                onValueChange = { text1 = it },
-                interactionSource = remember { MutableInteractionSource() }
-                    .also { interactionSource ->
-                        LaunchedEffect(interactionSource) {
-                            interactionSource.interactions.collect {
-                                if (it is PressInteraction.Release) {
-                                    MyTimePicker(context, boundary) {
-                                        text1 = it
-                                        viewModel.confirmedStartTime = text1
-                                        onTimeRangeSelected(text1, text2)
-                                    }
-                                }
-                            }
-                        }
-                    },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 4.dp)
-                    .border(1.dp, Color.Gray, RoundedCornerShape(5.dp)),
-                textStyle = TextStyle(textAlign = TextAlign.Start),
-                trailingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White,
-                    textColor = Color.Gray,
-                    cursorColor = Color.Gray,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Gray
-                ),
-                shape = RoundedCornerShape(5.dp),
-                label = { Text("시작 시간") },
-                readOnly = true
-            )
+        TimePickerScreen(viewModel, null, onTimeRangeSelected)
+    }
+}
 
-            TextField(
-                value = text2,
-                onValueChange = { text2 = it },
-                interactionSource = remember { MutableInteractionSource() }
-                    .also { interactionSource ->
-                        LaunchedEffect(interactionSource) {
-                            interactionSource.interactions.collect {
-                                if (it is PressInteraction.Release) {
-                                    MyTimePicker(context, boundary) {
-                                        text2 = it
-                                        viewModel.confirmedEndTime = text2
-                                        onTimeRangeSelected(text1, text2)
-                                    }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimePickerScreen(viewModel: MainViewModel, boundary: TimeBoundary?, onTimeRangeSelected: (String, String) -> Unit) {
+    var text1 by remember { mutableStateOf(viewModel.startTime) }
+    var text2 by remember { mutableStateOf(viewModel.endTime) }
+    val context = LocalContext.current
+    Row {
+        TextField(
+            value = text1,
+            onValueChange = { text1 = it },
+            interactionSource = remember { MutableInteractionSource() }
+                .also { interactionSource ->
+                    LaunchedEffect(interactionSource) {
+                        interactionSource.interactions.collect {
+                            if (it is PressInteraction.Release) {
+                                MyTimePicker(context, boundary) {
+                                    text1 = it
+                                    viewModel.confirmedStartTime = text1
+                                    onTimeRangeSelected(text1, text2)
                                 }
                             }
                         }
-                    },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 4.dp)
-                    .border(1.dp, Color.Gray, RoundedCornerShape(5.dp)),
-                textStyle = TextStyle(textAlign = TextAlign.Start),
-                trailingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White,
-                    textColor = Color.Gray,
-                    cursorColor = Color.Gray,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Gray
-                ),
-                shape = RoundedCornerShape(5.dp),
-                label = { Text("종료 시간") },
-                readOnly = true
-            )
-        }
+                    }
+                },
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 4.dp)
+                .border(1.dp, Color.Gray, RoundedCornerShape(5.dp)),
+            textStyle = TextStyle(textAlign = TextAlign.Start),
+            trailingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color.White,
+                textColor = Color.Gray,
+                cursorColor = Color.Gray,
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedIndicatorColor = Color.Gray
+            ),
+            shape = RoundedCornerShape(5.dp),
+            label = { Text("시작 시간") },
+            readOnly = true
+        )
+
+        TextField(
+            value = text2,
+            onValueChange = { text2 = it },
+            interactionSource = remember { MutableInteractionSource() }
+                .also { interactionSource ->
+                    LaunchedEffect(interactionSource) {
+                        interactionSource.interactions.collect {
+                            if (it is PressInteraction.Release) {
+                                MyTimePicker(context, null) {
+                                    text2 = it
+                                    viewModel.confirmedEndTime = text2
+                                    onTimeRangeSelected(text1, text2)
+                                }
+                            }
+                        }
+                    }
+                },
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 4.dp)
+                .border(1.dp, Color.Gray, RoundedCornerShape(5.dp)),
+            textStyle = TextStyle(textAlign = TextAlign.Start),
+            trailingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color.White,
+                textColor = Color.Gray,
+                cursorColor = Color.Gray,
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedIndicatorColor = Color.Gray
+            ),
+            shape = RoundedCornerShape(5.dp),
+            label = { Text("종료 시간") },
+            readOnly = true
+        )
     }
 }
 
