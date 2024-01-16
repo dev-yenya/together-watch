@@ -513,11 +513,15 @@ fun TimePickScreen(viewModel: MainViewModel,
             style = TextStyle(fontSize = 20.sp),
             fontWeight = FontWeight.Bold
         )
-        Text(
-            "약속 가능한 시간대를 입력해 주세요.",
-            modifier = Modifier.padding(bottom = 10.dp),
-            style = TextStyle(fontSize = 15.sp)
-        )
+        if (boundary != null) {
+            SelectedTimeScreen(viewModel = viewModel)
+        } else {
+            Text(
+                "약속 가능한 시간대를 입력해 주세요.",
+                modifier = Modifier.padding(bottom = 10.dp),
+                style = TextStyle(fontSize = 15.sp)
+            )
+        }
         Spacer(Modifier.height(10.dp))
         Row {
             TextField(
@@ -589,6 +593,32 @@ fun TimePickScreen(viewModel: MainViewModel,
                 label = { Text("종료 시간") },
                 readOnly = true
             )
+        }
+    }
+}
+
+@Composable
+fun SelectedTimeScreen(viewModel: MainViewModel) {
+    Column{
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+        ) {
+            Text(
+                text = "아까 선택한 시간대 안에서 입력해주세요.",
+                modifier = Modifier.padding(bottom=5.dp),
+                fontSize = 15.sp
+            ) }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+        ) {
+            Text(
+                text = viewModel.selectedBlock.toString(),
+                modifier = Modifier.padding(bottom=5.dp),
+                fontSize = 15.sp)
         }
     }
 }
