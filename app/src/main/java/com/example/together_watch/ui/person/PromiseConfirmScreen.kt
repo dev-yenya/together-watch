@@ -538,13 +538,14 @@ fun ConfirmTimePickScreen(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
         Text(
-            "약속시간을 확정해볼까요?",
+            "약속 시간을 확정해볼까요?",
             modifier = Modifier.padding(bottom = 5.dp),
             style = TextStyle(fontSize = 20.sp),
             fontWeight = FontWeight.Bold
         )
         SelectedTimeScreen(viewModel = viewModel)
         Spacer(Modifier.height(10.dp))
+        Log.d("chaeae","min:${boundary.min} max: ${boundary.max}")
         TimePickerScreen(viewModel, boundary, onTimeRangeSelected)
     }
 }
