@@ -7,6 +7,8 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,9 +23,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -36,6 +40,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,11 +67,14 @@ import coil.compose.AsyncImage
 import com.example.together_watch.R
 import com.example.together_watch.promise.DateBlock
 import com.example.together_watch.promise.PromiseCompletionModel
+import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteModel
+import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteScheduleDialog
+import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteSchedulePresenter
 import com.example.together_watch.ui.Destinations
 
 import com.example.together_watch.ui.MainViewModel
 import com.example.together_watch.ui.home.TimeBoundary
-import com.example.together_watch.ui.home.TimePickScreen
+import com.example.together_watch.ui.home.TimePickerScreen
 
 import com.example.together_watch.ui.theme.Black
 import com.example.together_watch.ui.theme.Blue
@@ -76,7 +85,7 @@ import kotlinx.coroutines.delay
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-
+import java.time.LocalTime
 
 // 약속 수락
 @RequiresApi(Build.VERSION_CODES.O)
@@ -228,9 +237,7 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                     1 -> ConfirmPromiseFirstScreen(viewModel)
                     2 -> isTimeSelected=ConfirmPromiseSecondScreen(viewModel, blocks,elapsedTimeMillis)
                     3 -> {
-                        viewModel.startTime=""
-                        viewModel.endTime=""
-                        TimePickScreen(
+                        ConfirmTimePickScreen(
                             viewModel,
                             TimeBoundary(viewModel.selectedBlock!!.startTime, viewModel.selectedBlock!!.endTime)
                         ) { text1, text2 ->
@@ -489,6 +496,7 @@ fun ConfirmPromiseSecondScreen(viewModel: MainViewModel, blocks: List<DateBlock>
     }
     return true
 }
+
 @Composable
 fun ClickableCard(text: String, isSelected: Boolean, onClick: () -> Unit) {
     val cardColors = if (isSelected) {
@@ -514,6 +522,61 @@ fun ClickableCard(text: String, isSelected: Boolean, onClick: () -> Unit) {
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
             color = Color.Black
         )
+    }
+}
+
+@Composable
+fun ConfirmTimePickScreen(
+    viewModel: MainViewModel,
+    boundary: TimeBoundary,
+    onTimeRangeSelected: (String, String) -> Unit
+) {
+
+    Column(
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
+    ) {
+        Text(
+            "약속시간을 확정해볼까요?",
+            modifier = Modifier.padding(bottom = 5.dp),
+            style = TextStyle(fontSize = 20.sp),
+            fontWeight = FontWeight.Bold
+        )
+        SelectedTimeScreen(viewModel = viewModel)
+        Spacer(Modifier.height(10.dp))
+        TimePickerScreen(viewModel, boundary, onTimeRangeSelected)
+    }
+}
+
+@Composable
+fun SelectedTimeScreen(viewModel: MainViewModel) {
+    Column {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+        ) {
+            Text(
+                text = "아까 선택한 시간대 안에서 입력해주세요.",
+                modifier = Modifier.padding(bottom = 5.dp),
+                fontSize = 15.sp
+            )
+        }
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .size(width = 240.dp, height = 50.dp)
+                .padding(vertical = 4.dp)
+        ) {
+            Text(
+                text = viewModel.selectedBlock.toString(),
+                modifier = Modifier.padding(start = 10.dp, top = 10.dp, bottom = 10.dp),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 

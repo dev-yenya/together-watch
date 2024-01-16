@@ -98,7 +98,7 @@ fun NavigationGraph(navController: NavHostController, viewModel: MainViewModel) 
             AccountManagementScreen(navController)
         }
         composable(Destinations.CompleteScreen.route) {
-            CompleteScreen()
+            CompleteScreen(viewModel)
         }
         composable(Destinations.CreatePromiseScreen.route) {
             CreatePromiseScreen(navController, viewModel)

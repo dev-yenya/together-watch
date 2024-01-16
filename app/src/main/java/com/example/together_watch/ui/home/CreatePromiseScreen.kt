@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 //import androidx.compose.foundation.gestures.ModifierLocalScrollableContainerProvider.value
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -33,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.together_watch.promise.PromiseInfo
@@ -42,18 +42,18 @@ import com.example.together_watch.ui.MainViewModel
 import com.example.together_watch.ui.theme.Black
 import com.example.together_watch.ui.theme.Blue
 import com.example.together_watch.ui.theme.DarkGray
-import com.example.together_watch.ui.theme.Gray
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CreatePromiseScreen(
     navController: NavHostController,
-    viewModel:MainViewModel
+    viewModel: MainViewModel
 
 ) {
     val currentScreen = remember { mutableIntStateOf(1) }
@@ -67,9 +67,9 @@ fun CreatePromiseScreen(
     }
 
     //var showDialog by remember { mutableStateOf(false) }
-    var promiseNameDialog by remember{ mutableStateOf(false) }
+    var promiseNameDialog by remember { mutableStateOf(false) }
     var promisePlaceDialog by remember { mutableStateOf(false) }
-    var promiseDateDialog by remember{ mutableStateOf(false) }
+    var promiseDateDialog by remember { mutableStateOf(false) }
     var promiseTimeDialog by remember { mutableStateOf(false) }
     val areValidTimes = { start: String, end: String -> viewModel.isValidTime(start, end) }
     val context = LocalContext.current
@@ -82,7 +82,7 @@ fun CreatePromiseScreen(
             previousScreen()
         } else {
             navController.popBackStack()
-            initViewModel("","", emptyList(),"","",viewModel)
+            initViewModel("", "", emptyList(), "", "", viewModel)
         }
     }
 
@@ -145,56 +145,82 @@ fun CreatePromiseScreen(
                     1 -> FirstScreen(viewModel) { text ->
                         viewModel.promiseName = text
                     }
+
                     2 -> SecondScreen(viewModel) { text ->
                         viewModel.promisePlace = text
                     }
+
                     3 -> ThirdScreen(viewModel) { dates ->
                         viewModel.selectedDates = dates
                     }
-                    4 -> TimePickScreen(viewModel) {text1, text2 ->
+
+                    4 -> CreateTimePickScreen(viewModel) { text1, text2 ->
                         viewModel.startTime = text1
                         viewModel.endTime = text2
                     }
-                    5 -> CompleteScreen()
+
+                    5 -> CompleteScreen(viewModel)
                 }
             }
 
             Button(
-                onClick = if(currentScreen.intValue<2){ {
-                    if(viewModel.promiseName==""){
-                        promiseNameDialog=true
+                onClick = if (currentScreen.intValue < 2) {
+                    {
+                        if (viewModel.promiseName == "") {
+                            promiseNameDialog = true
 
-                    }else{
-                        initViewModel(viewModel.promiseName,"", emptyList(),"","",viewModel)
-                        nextScreen()
-                    }
+                        } else {
+                            initViewModel(viewModel.promiseName, "", emptyList(), "", "", viewModel)
+                            nextScreen()
+                        }
 
                     }
-                }else if (currentScreen.intValue<3){ {
-                    if(viewModel.promisePlace==""){
-                        promisePlaceDialog=true
+                } else if (currentScreen.intValue < 3) {
+                    {
+                        if (viewModel.promisePlace == "") {
+                            promisePlaceDialog = true
+                        } else {
+                            initViewModel(
+                                viewModel.promiseName,
+                                viewModel.promisePlace,
+                                emptyList(),
+                                "",
+                                "",
+                                viewModel
+                            )
+                            nextScreen()
+                        }
                     }
-                    else{
-                        initViewModel(viewModel.promiseName,viewModel.promisePlace, emptyList(),"","",viewModel)
-                        nextScreen()}
+                } else if (currentScreen.intValue < 4) {
+                    {
+                        if (viewModel.selectedDates.isEmpty()) {
+                            promiseDateDialog = true
+                        } else {
+                            initViewModel(
+                                viewModel.promiseName,
+                                viewModel.promisePlace,
+                                viewModel.selectedDates,
+                                "",
+                                "",
+                                viewModel
+                            )
+                            nextScreen()
+                        }
                     }
-                }
-                else if (currentScreen.intValue < 4 ) {{
-                    if(viewModel.selectedDates.isEmpty()){
-                        promiseDateDialog=true
+                } else if (currentScreen.intValue < 5) {
+                    {
+                        if (areValidTimes(
+                                viewModel.confirmedStartTime,
+                                viewModel.confirmedEndTime
+                            )
+                        ) {
+                            savePromise()
+                            nextScreen()
+                        } else {
+                            promiseTimeDialog = true
+                        }
                     }
-                    else{
-                        initViewModel(viewModel.promiseName,viewModel.promisePlace,viewModel.selectedDates,"","",viewModel)
-                        nextScreen()
-                    }}
-                } else if (currentScreen.intValue < 5) { {
-                    if (areValidTimes(viewModel.confirmedStartTime, viewModel.confirmedEndTime)) {
-                        savePromise()
-                        nextScreen()
-                    } else {
-                        promiseTimeDialog=true
-                    }
-                } } else {
+                } else {
                     { complete() }
                 },
                 colors = ButtonDefaults.buttonColors(Blue),
@@ -203,22 +229,26 @@ fun CreatePromiseScreen(
                     .height(50.dp),
                 shape = RectangleShape
             ) {
-                Text(if (currentScreen.intValue < 5) "다음" else "친구 초대하기", color = Black, fontWeight = FontWeight.Bold)
+                Text(
+                    if (currentScreen.intValue < 5) "다음" else "친구 초대하기",
+                    color = Black,
+                    fontWeight = FontWeight.Bold
+                )
             }
 
             @Composable
-            fun makeDialog(title:String, text: String,showDialog:Int){
+            fun makeDialog(title: String, text: String, showDialog: Int) {
                 AlertDialog(
                     title = { Text(title) },
                     text = { Text(text) },
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                when(showDialog){
-                                    1->promiseNameDialog=false
-                                    2->promisePlaceDialog=false
-                                    3->promiseDateDialog=false
-                                    4->promiseTimeDialog=false
+                                when (showDialog) {
+                                    1 -> promiseNameDialog = false
+                                    2 -> promisePlaceDialog = false
+                                    3 -> promiseDateDialog = false
+                                    4 -> promiseTimeDialog = false
                                 }
                             }
                         ) {
@@ -226,25 +256,25 @@ fun CreatePromiseScreen(
                         }
                     },
                     onDismissRequest = {
-                        when(showDialog){
-                            1->promiseNameDialog=false
-                            2->promisePlaceDialog=false
-                            3->promiseDateDialog=false
-                            4->promiseTimeDialog=false
+                        when (showDialog) {
+                            1 -> promiseNameDialog = false
+                            2 -> promisePlaceDialog = false
+                            3 -> promiseDateDialog = false
+                            4 -> promiseTimeDialog = false
                         }
                     }
                 )
             }
-            if(promiseNameDialog){
-               makeDialog(title = "약속 이름이 유효하지 않음", text ="약속 이름을 올바르게 입력해주세요" , showDialog =1 )
+            if (promiseNameDialog) {
+                makeDialog(title = "약속 이름이 유효하지 않음", text = "약속 이름을 올바르게 입력해주세요", showDialog = 1)
             }
-            if (promisePlaceDialog){
-               makeDialog(title = "약속 장소가 유효하지 않음", text = "약속 장소를 올바르게 입력해 주세요", showDialog =2 )
+            if (promisePlaceDialog) {
+                makeDialog(title = "약속 장소가 유효하지 않음", text = "약속 장소를 올바르게 입력해 주세요", showDialog = 2)
             }
-            if(promiseDateDialog){
-               makeDialog(title = "약속 날짜가 유효하지 않음", text = "약속 날짜를 선택해 주세요", showDialog =3 )
+            if (promiseDateDialog) {
+                makeDialog(title = "약속 날짜가 유효하지 않음", text = "약속 날짜를 선택해 주세요", showDialog = 3)
             }
-            if(promiseTimeDialog){
+            if (promiseTimeDialog) {
                 makeDialog(title = "약속 시간이 유효하지 않음", text = "올바른 약속 시간을 입력해 주세요", showDialog = 4)
             }
         }
@@ -276,7 +306,7 @@ fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
             value = text, // 텍스트 필드의 값
             onValueChange = { newText ->
                 text = newText // 사용자가 입력한 새로운 텍스트로 업데이트
-                isInputValid=newText.isNotBlank()
+                isInputValid = newText.isNotBlank()
                 onNameChanged(newText) // viewModel에 값 저장
 
             },
@@ -286,7 +316,8 @@ fun FirstScreen(viewModel: MainViewModel, onNameChanged: (String) -> Unit) {
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = Color.Transparent,
-            ),)
+            ),
+        )
         Divider()
     }
 }
@@ -318,7 +349,7 @@ fun SecondScreen(viewModel: MainViewModel, onPlaceChanged: (String) -> Unit) {
             value = text, // 텍스트 필드의 값
             onValueChange = { newText ->
                 text = newText // 사용자가 입력한 새로운 텍스트로 업데이트
-                isInputValid=newText.isNotBlank()
+                isInputValid = newText.isNotBlank()
                 onPlaceChanged(newText)
 
             },
@@ -370,9 +401,18 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
             var isSelectedEffect by remember { mutableStateOf(true) }
             var clickedDate by remember { mutableStateOf<LocalDate?>(null) }
 
-            WeekRow(week, daysOffset, totalDays, selectedDates, clickedDate, yearMonth, isSelectedEffect=isSelectedEffect) { date ->
+            WeekRow(
+                week,
+                daysOffset,
+                totalDays,
+                selectedDates,
+                clickedDate,
+                yearMonth,
+                isSelectedEffect = isSelectedEffect
+            ) { date ->
                 selectedDate = date
-                val isDateSelectable = date.isAfter(LocalDate.now()) || date.isEqual(LocalDate.now())
+                val isDateSelectable =
+                    date.isAfter(LocalDate.now()) || date.isEqual(LocalDate.now())
                 if (isDateSelectable) {
                     isSelectedEffect = true
                     selectedDate = date
@@ -386,8 +426,7 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
                         dates = selectedDates.toList() // 상태 업데이트
                         onDateSelected(dates)
                     }
-                }
-                else {
+                } else {
                     isSelectedEffect = false
                 }
             }
@@ -406,14 +445,15 @@ fun ThirdScreen(viewModel: MainViewModel, onDateSelected: (List<String>) -> Unit
 }
 
 
-
-fun initViewModel(promiseName: String, promisePlace:String, selectedDates:List<String> ,
-                  endTime:String,startTime:String,viewModel: MainViewModel){
-    viewModel.promiseName=promiseName
-    viewModel.promisePlace=promisePlace
-    viewModel.selectedDates= selectedDates
-    viewModel.endTime=endTime
-    viewModel.startTime=startTime
+fun initViewModel(
+    promiseName: String, promisePlace: String, selectedDates: List<String>,
+    endTime: String, startTime: String, viewModel: MainViewModel
+) {
+    viewModel.promiseName = promiseName
+    viewModel.promisePlace = promisePlace
+    viewModel.selectedDates = selectedDates
+    viewModel.endTime = endTime
+    viewModel.startTime = startTime
 
 }
 
@@ -448,7 +488,8 @@ fun EventsList(date: String) {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                Text(text = formattedDate,
+                Text(
+                    text = formattedDate,
                     style = MaterialTheme.typography.bodyMedium,
                     color = DarkGray
                 )
@@ -457,9 +498,11 @@ fun EventsList(date: String) {
     }
 }
 
-fun MyTimePicker(context: Context,
-                 boundary: TimeBoundary?,
-                 result: (String) -> Unit) {
+fun MyTimePicker(
+    context: Context,
+    boundary: TimeBoundary?,
+    result: (String) -> Unit
+) {
     val calendar = Calendar.getInstance()
     TimePickerDialog(
         context,
@@ -474,7 +517,7 @@ fun MyTimePicker(context: Context,
             } else if (isValidTime(selectedTime, boundary)) {
                 // boundary가 null이 아님 = 약속 확정 시점
                 result(String.format("%02d:%02d", hourOfDay, roundedMinute))
-            } else{
+            } else {
                 Toast.makeText(context, "잘못된 입력값입니다.", Toast.LENGTH_SHORT).show()
             }
         },
@@ -492,18 +535,13 @@ fun isValidTime(time: LocalTime, boundary: TimeBoundary?): Boolean {
     }
 }
 
-data class TimeBoundary(val min:LocalTime, val max: LocalTime)
+data class TimeBoundary(val min: LocalTime, val max: LocalTime)
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimePickScreen(viewModel: MainViewModel,
-                   boundary: TimeBoundary? = null,
-                   onTimeRangeSelected: (String, String) -> Unit) {
-
-    var text1 by remember { mutableStateOf(viewModel.startTime) }
-    var text2 by remember { mutableStateOf(viewModel.endTime) }
-    val context = LocalContext.current
-
+fun CreateTimePickScreen(
+    viewModel: MainViewModel,
+    onTimeRangeSelected: (String, String) -> Unit
+) {
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
@@ -519,82 +557,92 @@ fun TimePickScreen(viewModel: MainViewModel,
             style = TextStyle(fontSize = 15.sp)
         )
         Spacer(Modifier.height(10.dp))
-        Row {
-            TextField(
-                value = text1,
-                onValueChange = { text1 = it },
-                interactionSource = remember { MutableInteractionSource() }
-                    .also { interactionSource ->
-                        LaunchedEffect(interactionSource) {
-                            interactionSource.interactions.collect {
-                                if (it is PressInteraction.Release) {
-                                    MyTimePicker(context, boundary) {
-                                        text1 = it
-                                        viewModel.confirmedStartTime = text1
-                                        onTimeRangeSelected(text1, text2)
-                                    }
-                                }
-                            }
-                        }
-                    },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 4.dp)
-                    .border(1.dp, Color.Gray, RoundedCornerShape(5.dp)),
-                textStyle = TextStyle(textAlign = TextAlign.Start),
-                trailingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White,
-                    textColor = Color.Gray,
-                    cursorColor = Color.Gray,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Gray
-                ),
-                shape = RoundedCornerShape(5.dp),
-                label = { Text("시작 시간") },
-                readOnly = true
-            )
-
-            TextField(
-                value = text2,
-                onValueChange = { text2 = it },
-                interactionSource = remember { MutableInteractionSource() }
-                    .also { interactionSource ->
-                        LaunchedEffect(interactionSource) {
-                            interactionSource.interactions.collect {
-                                if (it is PressInteraction.Release) {
-                                    MyTimePicker(context, boundary) {
-                                        text2 = it
-                                        viewModel.confirmedEndTime = text2
-                                        onTimeRangeSelected(text1, text2)
-                                    }
-                                }
-                            }
-                        }
-                    },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 4.dp)
-                    .border(1.dp, Color.Gray, RoundedCornerShape(5.dp)),
-                textStyle = TextStyle(textAlign = TextAlign.Start),
-                trailingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White,
-                    textColor = Color.Gray,
-                    cursorColor = Color.Gray,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Gray
-                ),
-                shape = RoundedCornerShape(5.dp),
-                label = { Text("종료 시간") },
-                readOnly = true
-            )
-        }
+        TimePickerScreen(viewModel, null, onTimeRangeSelected)
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CompleteScreen() {
+fun TimePickerScreen(viewModel: MainViewModel, boundary: TimeBoundary?, onTimeRangeSelected: (String, String) -> Unit) {
+    var text1 by remember { mutableStateOf(viewModel.startTime) }
+    var text2 by remember { mutableStateOf(viewModel.endTime) }
+    val context = LocalContext.current
+    Row {
+        TextField(
+            value = text1,
+            onValueChange = { text1 = it },
+            interactionSource = remember { MutableInteractionSource() }
+                .also { interactionSource ->
+                    LaunchedEffect(interactionSource) {
+                        interactionSource.interactions.collect {
+                            if (it is PressInteraction.Release) {
+                                MyTimePicker(context, boundary) {
+                                    text1 = it
+                                    viewModel.confirmedStartTime = text1
+                                    onTimeRangeSelected(text1, text2)
+                                }
+                            }
+                        }
+                    }
+                },
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 4.dp)
+                .border(1.dp, Color.Gray, RoundedCornerShape(5.dp)),
+            textStyle = TextStyle(textAlign = TextAlign.Start),
+            trailingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color.White,
+                textColor = Color.Gray,
+                cursorColor = Color.Gray,
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedIndicatorColor = Color.Gray
+            ),
+            shape = RoundedCornerShape(5.dp),
+            label = { Text("시작 시간") },
+            readOnly = true
+        )
+
+        TextField(
+            value = text2,
+            onValueChange = { text2 = it },
+            interactionSource = remember { MutableInteractionSource() }
+                .also { interactionSource ->
+                    LaunchedEffect(interactionSource) {
+                        interactionSource.interactions.collect {
+                            if (it is PressInteraction.Release) {
+                                MyTimePicker(context, null) {
+                                    text2 = it
+                                    viewModel.confirmedEndTime = text2
+                                    onTimeRangeSelected(text1, text2)
+                                }
+                            }
+                        }
+                    }
+                },
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 4.dp)
+                .border(1.dp, Color.Gray, RoundedCornerShape(5.dp)),
+            textStyle = TextStyle(textAlign = TextAlign.Start),
+            trailingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color.White,
+                textColor = Color.Gray,
+                cursorColor = Color.Gray,
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedIndicatorColor = Color.Gray
+            ),
+            shape = RoundedCornerShape(5.dp),
+            label = { Text("종료 시간") },
+            readOnly = true
+        )
+    }
+}
+
+
+@Composable
+fun CompleteScreen(viewModel: MainViewModel) {
     Column(
         modifier = Modifier
             .padding(horizontal = 20.dp, vertical = 30.dp)
@@ -610,12 +658,20 @@ fun CompleteScreen() {
             style = TextStyle(fontSize = 20.sp),
             fontWeight = FontWeight.Bold
         )
+//        Text(
+//            "초대장이 만들어졌어요",
+//            modifier = Modifier
+//                .padding(bottom = 10.dp)
+//                .align(Alignment.Start),
+//            style = TextStyle(fontSize = 15.sp),
+//        )
         Text(
-            "초대장이 만들어졌어요",
+            "친구들이 초대를 수락하면\n모두가 만날 수 있는 시간을 골라드려요.",
             modifier = Modifier
                 .padding(bottom = 10.dp)
                 .align(Alignment.Start),
             style = TextStyle(fontSize = 15.sp),
+            textAlign = TextAlign.Start
         )
         Spacer(Modifier.height(100.dp))
         Icon(
@@ -624,9 +680,26 @@ fun CompleteScreen() {
             modifier = Modifier.size(150.dp) // 아이콘 크기 조정
         )
         Spacer(Modifier.height(30.dp))
-        Text(
-            "친구들이 초대를 수락하면\n모두가 만날 수 있는 시간을 골라드려요.",
-            textAlign = TextAlign.Center // 텍스트 중앙 정렬
-        )
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFFE5E5E5),
+            ),
+            modifier = Modifier
+                .size(width = 240.dp, height = 80.dp)
+                .padding(vertical = 4.dp)
+        ) {
+            Text(
+                text = promiseCreationInfo(viewModel.promiseName, viewModel.promisePlace),
+                modifier = Modifier.padding(start = 10.dp, top = 10.dp, bottom = 10.dp),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                softWrap = true
+            )
+        }
     }
+}
+
+fun promiseCreationInfo(name: String, place: String): String {
+    return StringBuilder().append("이름: ").append(name).append("\n")
+        .append("장소: ").append(place).toString()
 }
