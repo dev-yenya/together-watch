@@ -65,7 +65,6 @@ fun CreatePromiseScreen(
             promises.add(PromiseInfo(result.ownerId, result.docId))
         }
     }
-
     //var showDialog by remember { mutableStateOf(false) }
     var promiseNameDialog by remember { mutableStateOf(false) }
     var promisePlaceDialog by remember { mutableStateOf(false) }
@@ -78,7 +77,7 @@ fun CreatePromiseScreen(
     }
 
     val backHandler = {
-        if (currentScreen.intValue > 1) {
+        if (currentScreen.intValue in 2..4) {
             previousScreen()
         } else {
             navController.popBackStack()
@@ -611,7 +610,7 @@ fun TimePickerScreen(viewModel: MainViewModel, boundary: TimeBoundary?, onTimeRa
                     LaunchedEffect(interactionSource) {
                         interactionSource.interactions.collect {
                             if (it is PressInteraction.Release) {
-                                MyTimePicker(context, null) {
+                                MyTimePicker(context, boundary) {
                                     text2 = it
                                     viewModel.confirmedEndTime = text2
                                     onTimeRangeSelected(text1, text2)
