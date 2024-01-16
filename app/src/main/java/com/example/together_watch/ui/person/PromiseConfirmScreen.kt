@@ -73,7 +73,6 @@ import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteSchedu
 import com.example.together_watch.ui.Destinations
 
 import com.example.together_watch.ui.MainViewModel
-import com.example.together_watch.ui.home.SelectedTimeScreen
 import com.example.together_watch.ui.home.TimeBoundary
 import com.example.together_watch.ui.home.TimePickerScreen
 
@@ -87,7 +86,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.time.LocalTime
-
 
 // 약속 수락
 @RequiresApi(Build.VERSION_CODES.O)
@@ -545,6 +543,39 @@ fun ConfirmTimePickScreen(
         SelectedTimeScreen(viewModel = viewModel)
         Spacer(Modifier.height(10.dp))
         TimePickerScreen(viewModel, boundary, onTimeRangeSelected)
+    }
+}
+
+@Composable
+fun SelectedTimeScreen(viewModel: MainViewModel) {
+    Column {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+        ) {
+            Text(
+                text = "아까 선택한 시간대 안에서 입력해주세요.",
+                modifier = Modifier.padding(bottom = 5.dp),
+                fontSize = 15.sp
+            )
+        }
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .size(width = 240.dp, height = 50.dp)
+                .padding(vertical = 4.dp)
+        ) {
+            Text(
+                text = viewModel.selectedBlock.toString(),
+                modifier = Modifier.padding(start = 10.dp, top = 10.dp, bottom = 10.dp),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 

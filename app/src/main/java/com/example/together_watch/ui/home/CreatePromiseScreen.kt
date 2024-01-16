@@ -159,7 +159,7 @@ fun CreatePromiseScreen(
                         viewModel.endTime = text2
                     }
 
-                    5 -> CompleteScreen()
+                    5 -> CompleteScreen(viewModel)
                 }
             }
 
@@ -640,41 +640,9 @@ fun TimePickerScreen(viewModel: MainViewModel, boundary: TimeBoundary?, onTimeRa
     }
 }
 
-@Composable
-fun SelectedTimeScreen(viewModel: MainViewModel) {
-    Column {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-        ) {
-            Text(
-                text = "아까 선택한 시간대 안에서 입력해주세요.",
-                modifier = Modifier.padding(bottom = 5.dp),
-                fontSize = 15.sp
-            )
-        }
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .size(width = 240.dp, height = 50.dp)
-                .padding(vertical = 4.dp)
-        ) {
-            Text(
-                text = viewModel.selectedBlock.toString(),
-                modifier = Modifier.padding(start = 10.dp, top = 10.dp, bottom = 10.dp),
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
 
 @Composable
-fun CompleteScreen() {
+fun CompleteScreen(viewModel: MainViewModel) {
     Column(
         modifier = Modifier
             .padding(horizontal = 20.dp, vertical = 30.dp)
@@ -690,12 +658,20 @@ fun CompleteScreen() {
             style = TextStyle(fontSize = 20.sp),
             fontWeight = FontWeight.Bold
         )
+//        Text(
+//            "초대장이 만들어졌어요",
+//            modifier = Modifier
+//                .padding(bottom = 10.dp)
+//                .align(Alignment.Start),
+//            style = TextStyle(fontSize = 15.sp),
+//        )
         Text(
-            "초대장이 만들어졌어요",
+            "친구들이 초대를 수락하면\n모두가 만날 수 있는 시간을 골라드려요.",
             modifier = Modifier
                 .padding(bottom = 10.dp)
                 .align(Alignment.Start),
             style = TextStyle(fontSize = 15.sp),
+            textAlign = TextAlign.Start
         )
         Spacer(Modifier.height(100.dp))
         Icon(
@@ -704,9 +680,26 @@ fun CompleteScreen() {
             modifier = Modifier.size(150.dp) // 아이콘 크기 조정
         )
         Spacer(Modifier.height(30.dp))
-        Text(
-            "친구들이 초대를 수락하면\n모두가 만날 수 있는 시간을 골라드려요.",
-            textAlign = TextAlign.Center // 텍스트 중앙 정렬
-        )
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFFE5E5E5),
+            ),
+            modifier = Modifier
+                .size(width = 240.dp, height = 80.dp)
+                .padding(vertical = 4.dp)
+        ) {
+            Text(
+                text = promiseCreationInfo(viewModel.promiseName, viewModel.promisePlace),
+                modifier = Modifier.padding(start = 10.dp, top = 10.dp, bottom = 10.dp),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                softWrap = true
+            )
+        }
     }
+}
+
+fun promiseCreationInfo(name: String, place: String): String {
+    return StringBuilder().append("이름: ").append(name).append("\n")
+        .append("장소: ").append(place).toString()
 }
