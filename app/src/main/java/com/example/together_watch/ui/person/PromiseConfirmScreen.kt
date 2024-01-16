@@ -97,6 +97,7 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
     var elapsedTimeMillis by remember{ mutableLongStateOf(0) }
     var isTimeSelected by remember{ mutableStateOf(false) }
     val backHandler = {
+        if(currentScreen.intValue==4) currentScreen.intValue=1
         if (currentScreen.intValue > 1) {
             previousScreen()
         } else {
@@ -227,6 +228,8 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                     1 -> ConfirmPromiseFirstScreen(viewModel)
                     2 -> isTimeSelected=ConfirmPromiseSecondScreen(viewModel, blocks,elapsedTimeMillis)
                     3 -> {
+                        viewModel.startTime=""
+                        viewModel.endTime=""
                         TimePickScreen(
                             viewModel,
                             TimeBoundary(viewModel.selectedBlock!!.startTime, viewModel.selectedBlock!!.endTime)
@@ -454,7 +457,6 @@ fun ConfirmPromiseSecondScreen(viewModel: MainViewModel, blocks: List<DateBlock>
             isLoading = false
 
         }
-
         // 로딩 중이면 로딩 스피너를 표시
         if (isLoading) {
             Box(
@@ -487,11 +489,6 @@ fun ConfirmPromiseSecondScreen(viewModel: MainViewModel, blocks: List<DateBlock>
     }
     return true
 }
-
-
-
-
-
 @Composable
 fun ClickableCard(text: String, isSelected: Boolean, onClick: () -> Unit) {
     val cardColors = if (isSelected) {

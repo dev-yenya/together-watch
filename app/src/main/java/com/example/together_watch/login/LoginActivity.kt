@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -129,15 +130,19 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                 )
             }
             LoginButton()
+            fun showToast(context: Context, message: String) {
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            }
             if(isLoading){
+                showToast(LocalContext.current, "사용자 정보를 불러 오는 중 입니다.\n잠시만 기다려 주세요") // 로딩 중일 때 토스트 메시지 표시
                 setContent {
                     Column {
-
-                            LoadingShimmerEffect()
-
+                        LoadingShimmerEffect()
                     }
                 }
             }
+
+
         }
     }
     @Composable
@@ -176,7 +181,6 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
                                 Log.e("kakao-login-sdk", "로그인 실패 $error")
                                 // 사용자가 취소
                                 if (error is ClientError && error.reason == ClientErrorCause.Cancelled ) {
-
                                     return@loginWithKakaoTalk
                                 }
                                 // 다른 오류
@@ -234,10 +238,8 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
     @Composable
     fun LoadingScreen() {
         setContent {
-
             Column {
                     LoadingShimmerEffect()
-
             }
         }
         /*Button(
@@ -274,10 +276,6 @@ class LoginActivity: ComponentActivity(), LoginContract.View {
 
         }*/
     }
-
-
-
-
     private fun startMainActivity(context: Context) {
         val intent = Intent(context, MainActivity::class.java)
         context.startActivity(intent)
@@ -322,9 +320,6 @@ fun LoadingShimmerEffect() {
 }
 @Composable
 fun ShimmerGridItem(brush: Brush) {
-
-
-
     Box(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
@@ -378,9 +373,5 @@ fun ShimmerGridItem(brush: Brush) {
                 .background(brush)
             )
         }
-
-
-
     }
-
 }
