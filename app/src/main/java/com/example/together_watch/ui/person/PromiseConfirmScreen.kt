@@ -106,6 +106,7 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
     var elapsedTimeMillis by remember{ mutableLongStateOf(0) }
     var isTimeSelected by remember{ mutableStateOf(false) }
     val backHandler = {
+        if(currentScreen.intValue==4) currentScreen.intValue=1
         if (currentScreen.intValue > 1) {
             previousScreen()
         } else {
@@ -463,7 +464,6 @@ fun ConfirmPromiseSecondScreen(viewModel: MainViewModel, blocks: List<DateBlock>
             isLoading = false
 
         }
-
         // 로딩 중이면 로딩 스피너를 표시
         if (isLoading) {
             Box(
@@ -531,6 +531,7 @@ fun ConfirmTimePickScreen(
     boundary: TimeBoundary,
     onTimeRangeSelected: (String, String) -> Unit
 ) {
+
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 30.dp)
     ) {
