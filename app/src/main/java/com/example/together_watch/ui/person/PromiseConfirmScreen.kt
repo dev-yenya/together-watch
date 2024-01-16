@@ -237,6 +237,8 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                     1 -> ConfirmPromiseFirstScreen(viewModel)
                     2 -> isTimeSelected=ConfirmPromiseSecondScreen(viewModel, blocks,elapsedTimeMillis)
                     3 -> {
+                        viewModel.startTime=""
+                        viewModel.endTime=""
                         ConfirmTimePickScreen(
                             viewModel,
                             TimeBoundary(viewModel.selectedBlock!!.startTime, viewModel.selectedBlock!!.endTime)
