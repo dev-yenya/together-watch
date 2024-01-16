@@ -61,6 +61,9 @@ import coil.compose.AsyncImage
 import com.example.together_watch.R
 import com.example.together_watch.promise.DateBlock
 import com.example.together_watch.promise.PromiseCompletionModel
+import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteModel
+import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteScheduleDialog
+import com.example.together_watch.schedule.updateAndDelete.UpdateAndDeleteSchedulePresenter
 import com.example.together_watch.ui.Destinations
 
 import com.example.together_watch.ui.MainViewModel
@@ -233,6 +236,37 @@ fun ConfirmPromiseScreen(navController: NavHostController, viewModel: MainViewMo
                         ) { text1, text2 ->
                             viewModel.confirmedStartTime = text1
                             viewModel.confirmedEndTime = text2
+                        }
+                        Column{
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+//                                colors = CardDefaults.cardColors(
+//                                    containerColor = Color.White,
+//                                )
+                            ) {
+                                Text(
+                                    text = "내가 선택한 시간대 안에서 입력해주세요.",
+                                    modifier = Modifier.padding(
+                                        start=20.dp,top=10.dp,bottom=5.dp,end=10.dp),
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                ) }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+//                                colors = CardDefaults.cardColors(
+//                                    containerColor = Color.White,
+//                                )
+                            ) {
+                                Text(
+                                    text = viewModel.selectedBlock.toString(),
+                                    modifier = Modifier.padding(
+                                        start=20.dp,top=10.dp,bottom=5.dp,end=10.dp),
+                                    fontSize = 18.sp)
+                            }
                         }
                     }
                     4 -> ConfirmPromiseCompleteScreen()
@@ -487,10 +521,6 @@ fun ConfirmPromiseSecondScreen(viewModel: MainViewModel, blocks: List<DateBlock>
     }
     return true
 }
-
-
-
-
 
 @Composable
 fun ClickableCard(text: String, isSelected: Boolean, onClick: () -> Unit) {
