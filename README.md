@@ -25,7 +25,8 @@
 * AndroidStudio
 * Kotlin
 * Jetpack Compose
-* **Database**: Firebase 
+* Cloud Functions for Firebases
+* **Database**: Firebase Firestore
 * **API** : 카카오 로그인 API, 카카오 공유 API
 
 ## 🛠 어플 설치 방법
