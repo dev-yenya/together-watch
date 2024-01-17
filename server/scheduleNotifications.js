@@ -5,7 +5,7 @@ const admin = require("firebase-admin");
 const serviceAccount = require("./admin.json");
 const {getFirestore} = require("firebase-admin/firestore");
 
-const NOTIFICATION_OFFSET = 15;
+const NOTIFICATION_OFFSET = 60;
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -34,9 +34,9 @@ function getDateInSeoulTimeZone() {
   return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
 }
 
-function isWithin15Minutes(time1, time2) {
+function isWithin1Hour(time1, time2) {
   const differenceInMinutes = (time1 - time2) / (1000 * 60);
-  return differenceInMinutes <= 15;
+  return differenceInMinutes <= 60;
 }
 
 async function processUser(userDoc) {
@@ -50,37 +50,43 @@ async function processUser(userDoc) {
     console.log(`Processing FCM: User ${userDoc.id} has fcmToken`);
     const now = getDateInSeoulTimeZone();
     const nowDateOnly = now.toISOString().split("T")[0];
-    const nextDay = new Date(now);
-    nextDay.setDate(nextDay.getDate() + 1);
-    const nextDateOnly = nextDay.toISOString().split("T")[0];
 
-    const schedulesSnapshot = await userDoc.ref.collection("schedules").where("date", "in", [nowDateOnly, nextDateOnly]).get();
-    await processSchedules(schedulesSnapshot, now, fcmToken, userDoc);
+    // 필요한 필드만 선택하여 Firestore에서 스케줄 가져오기
+    const schedulesSnapshot = await userDoc.ref
+        .collection("schedules")
+        .where("date", "==", nowDateOnly)
+        .select("date", "startTime", "notified", "name", "place", "endTime")
+        .get();
+
+    // Promise.all을 사용하여 병렬로 각 일정 처리
+    await Promise.all(schedulesSnapshot.docs.map((scheduleDoc) =>
+      processSchedules(scheduleDoc, now, fcmToken, userDoc.ref.collection("schedules"), userDoc.id),
+    ));
   }
 }
 
-async function processSchedules(schedulesSnapshot, now, fcmToken, userDoc) {
-  for (const scheduleDoc of schedulesSnapshot.docs) {
-    console.log(`Processing schedule: ${scheduleDoc.id}`);
-    const scheduleData = scheduleDoc.data();
-    const startTime = getStartTime(scheduleData.date, scheduleData.startTime);
-    const notificationTime = new Date(startTime);
-    notificationTime.setMinutes(notificationTime.getMinutes() - NOTIFICATION_OFFSET);
-    console.log(`[now] ${now}`);
-    console.log(`[notification time] ${notificationTime}`);
+async function processSchedules(scheduleDoc, now, fcmToken, schedulesCollection, userId) {
+  console.log(`Processing schedule: ${scheduleDoc.id}`);
+  const scheduleData = scheduleDoc.data();
+  const startTime = getStartTime(scheduleData.date, scheduleData.startTime);
+  const notificationTime = new Date(startTime);
+  notificationTime.setMinutes(notificationTime.getMinutes() - NOTIFICATION_OFFSET);
+  console.log(`[now] ${now}`);
+  console.log(`[notification time] ${notificationTime}`);
 
-    if (isWithin15Minutes(now, notificationTime) && !scheduleData.notified) {
-      const title = `${scheduleData.name} (${scheduleData.place})`;
-      const body = `${scheduleData.startTime} ~ ${scheduleData.endTime}`;
-      console.log(`Sending notifications for user: ${userDoc.id}`);
-      console.log(`Schedule details - Name: ${scheduleData.name}, Place: ${scheduleData.place}, StartTime: ${scheduleData.startTime}, EndTime: ${scheduleData.endTime}`);
-      await sendPushNotification(fcmToken, title, body);
+  if (isWithin1Hour(now, notificationTime) && !scheduleData.notified) {
+    const title = `${scheduleData.name} (${scheduleData.place})`;
+    const body = `${scheduleData.startTime} ~ ${scheduleData.endTime}`;
+    console.log(`Sending notifications for user: ${userId}`);
+    console.log(`Schedule details - Name: ${scheduleData.name}, Place: ${scheduleData.place}, StartTime: ${scheduleData.startTime}, EndTime: ${scheduleData.endTime}`);
 
-      // 일정에 대한 알림을 보냈으므로 Firestore에서 상태를 업데이트
-      await scheduleDoc.ref.update({notified: true});
-    } else {
-      console.log("Notification skipped for past or current event");
-    }
+    const batch = db.batch();
+    batch.update(scheduleDoc.ref, {notified: true});
+
+    await batch.commit();
+    await sendPushNotification(fcmToken, title, body);
+  } else {
+    console.log("Notification skipped for past or current event");
   }
 }
 
@@ -88,15 +94,19 @@ function getStartTime(date, time) {
   return new Date(new Date(date).setHours(parseInt(time.split(":")[0], 10), parseInt(time.split(":")[1], 10)));
 }
 
-// 크롬 식을 통해 10분마다 리마인드할 일정이 있는지 확인함
-exports.scheduleNotifications = functions.pubsub.schedule("*/5 * * * *").timeZone("Asia/Seoul").onRun(async (context) => {
+// 실행 시간 측정 시작
+console.time("scheduleNotification");
+exports.scheduleNotifications = functions.pubsub.schedule("0 * * * *").timeZone("Asia/Seoul").onRun(async (context) => {
   console.log("sendTimeNotifications function started");
+
   try {
     const usersSnapshot = await db.collection("users").get();
-    for (const userDoc of usersSnapshot.docs) {
-      await processUser(userDoc);
-    }
+    await Promise.all(usersSnapshot.docs.map((userDoc) =>
+      processUser(userDoc),
+    ));
   } catch (error) {
     console.error("Error getting users from Firestore:", error);
   }
+  // scheduleNotifications 함수의 실행 시간 측정 종료
+  console.timeEnd("scheduleNotification");
 });
