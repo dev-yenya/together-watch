@@ -25,7 +25,7 @@
 * AndroidStudio
 * Kotlin
 * Jetpack Compose
-* Cloud Functions for Firebases
+* Cloud Functions for Firebase
 * **Database**: Firebase Firestore
 * **API** : 카카오 로그인 API, 카카오 공유 API
 
@@ -40,7 +40,8 @@
 1. 로그인
 2. 개인 일정 관리
 3. 약속 일정 관리
-![promiseFlow](https://github.com/dev-yenya/together-watch/assets/81628521/ba898a7d-1e51-4e52-b4fb-22c7b4f1e8f8)
+
+   ![promiseFlow](https://github.com/dev-yenya/together-watch/assets/81628521/ba898a7d-1e51-4e52-b4fb-22c7b4f1e8f8)
 
 4. 알림으로 일정 리마인드
 
@@ -48,6 +49,9 @@
 2023.10 ~ 2024.01.17
 
 ## 👨‍👩‍👧‍👧 멤버 구성
+|<img width=300 src="https://avatars.githubusercontent.com/u/81628521?v=4"/>|<img width=300 src="https://avatars.githubusercontent.com/u/87467801?v=4"/>|<img width=300 src="https://avatars.githubusercontent.com/u/76472415?v=4"/>|
+|:---:|:---:|:---:|
+|[김채연](https://github.com/hyunvely8)|[남지현](https://github.com/NamJihyun99)|[박예나](https://github.com/dev-yenya)|
 
 ## 🗓 버전(업데이트 소식)
 
