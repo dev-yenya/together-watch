@@ -3,6 +3,17 @@
 
 <img width="1162" alt="KakaoTalk_Photo_2024-01-18-23-28-22" src="https://github.com/dev-yenya/together-watch/assets/76472415/52ba4d1d-c968-4590-88ab-975eb5a77999">
 
+<br>
+
+## 📱 Screenshots
+
+| | | | |
+|-|-|-|-|
+|![001](https://github.com/dev-yenya/together-watch/assets/76472415/c0737476-7176-41a9-9fa1-85aee83054c8) |![002](https://github.com/dev-yenya/together-watch/assets/76472415/e385c4e8-7a1f-4a71-9840-dac055b25601)|![003](https://github.com/dev-yenya/together-watch/assets/76472415/317fa36b-3c05-4ec4-aa87-b3bda49e8716)|![004](https://github.com/dev-yenya/together-watch/assets/76472415/43410d2a-408c-442e-b1aa-26e22dda0f97)|
+|![005](https://github.com/dev-yenya/together-watch/assets/76472415/290d9aee-0cfe-4431-9324-3e264ab392ec)|![006](https://github.com/dev-yenya/together-watch/assets/76472415/60ed2f85-28e5-4c20-ac1f-0face761e57f)|![007](https://github.com/dev-yenya/together-watch/assets/76472415/c7eb02c1-1432-4562-8805-ebc0daa95e8f)|![008](https://github.com/dev-yenya/together-watch/assets/76472415/1233526a-2e45-40af-86b6-a9bd9572c57b)|
+
+<br>
+
 ## 🖥 프로젝트 소개 
 ##### 개인 스케줄 관리와 모두의 일정을 고려하여 약속시간을 잡아주는 어플 입니다.
 
