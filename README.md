@@ -32,9 +32,8 @@
 ## 🛠 어플 설치 방법
 
 ## 🗂 프로젝트 구조
-* `회색 배경`: BottomNavigationView를 구성하는 메뉴
-* `흰색 배경`: 약속 주선자와 참여자가 모두 사용할 수 있는 메뉴
-![system](https://github.com/dev-yenya/together-watch/assets/81628521/ce08056b-bdc3-4b82-806a-19948ef4a314)
+
+![menu_tree](https://github.com/dev-yenya/together-watch/assets/87467801/867887d7-49e9-42b2-a35c-adc842a23b18)
 
 ## 📌 주요기능
 1. 로그인
