@@ -33,7 +33,7 @@
 
 ## 🗂 프로젝트 구조
 
-![menu_tree](https://github.com/dev-yenya/together-watch/assets/87467801/867887d7-49e9-42b2-a35c-adc842a23b18)
+![menu_tree](https://github.com/dev-yenya/together-watch/assets/87467801/74e6ce2e-472e-489b-9725-1d77188dd10f)
 
 ## 📌 주요기능
 1. 로그인
