@@ -4,6 +4,7 @@
 <img width="1162" alt="KakaoTalk_Photo_2024-01-18-23-28-22" src="https://github.com/dev-yenya/together-watch/assets/76472415/52ba4d1d-c968-4590-88ab-975eb5a77999">
 
 <br>
+<br>
 
 ## 📱 Screenshots
 
