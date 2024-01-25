@@ -14,15 +14,15 @@ val properties = Properties().apply {
 }
 
 android {
-    namespace = "com.example.together_watch"
+    namespace = "com.together_watch.together_watch"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.together_watch"
+        applicationId = "com.together_watch.together_watch"
         minSdk = 26
         targetSdk = 33
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 5
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -43,7 +43,7 @@ android {
             manifestPlaceholders["KAKAO_API_KEY"] = properties["kakaoApikey"] as String
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             manifestPlaceholders["KAKAO_API_KEY"] = properties["kakaoApikey"] as String
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -130,4 +130,6 @@ dependencies {
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+
+    implementation("com.google.android.recaptcha:recaptcha:18.4.0")
 }
